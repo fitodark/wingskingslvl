@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
+
+class AppServiceProvider extends ServiceProvider
+{
+
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+
+        Blade::directive('money', function ($amount) {
+            return "<?php echo '$ ' . number_format($amount, 2); ?>";
+        });
+
+        Blade::directive('arrayPrint', function ($amount) {
+            return "<?php print_r($amount); ?>";
+        });
+
+        Blade::directive('ventaType', function ($amount) {
+            return "<?php
+              switch ($amount) {
+                  case 1:
+                      echo 'Local';
+                      break;
+                  case 2:
+                      echo '<b>Domicilio</b>';
+                      break;
+                  default:
+                      echo 'No asignado';
+                      break;
+              } ?>";
+        });
+
+        Blade::directive('ventaEstatus', function ($amount) {
+            return "<?php
+                switch ($amount) {
+                    case 1:
+                        echo 'Abierto';
+                        break;
+                    case 2:
+                        echo 'Finalizado';
+                        break;
+                    case 3:
+                        echo 'Cancelado';
+                        break;
+                    default:
+                        echo 'No asignado';
+                        break;
+                }
+             ?>";
+        });
+
+    }
+}
+
+
+// return "<?php echo
+// ($amount == 1)? 'Abierto':(
+//     ($amount == 2)? 'Finalizado':(
+//         ($amount == 3)? 'Cancelado':'No asignado'
+//     )
+// );

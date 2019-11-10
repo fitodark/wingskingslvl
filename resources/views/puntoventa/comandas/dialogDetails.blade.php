@@ -1,0 +1,32 @@
+<div class="modal" id="dialogDetails" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document" style="z-index: 999999999;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Agregar</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="formQuantity" method="POST" action="{{ route('addProductVenta') }}">
+          @csrf
+          <div class="modal-body">
+              <input type="text" hidden name="idProduct" id="idProduct">
+              <input type="text" hidden name="ventaId" id="ventaId">
+              <input type="text" hidden name="tab" id="tab">
+              <input type="text" hidden name="price" id="price">
+
+              <div class="form-group">
+                  <label for="quantity" class="col-form-label">Cantidad:</label>
+                  <input name="cantidad" type="text" class="form-control" id="quantity">
+              </div>
+
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Agregar</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
