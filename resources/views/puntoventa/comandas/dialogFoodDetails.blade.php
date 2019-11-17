@@ -1,5 +1,5 @@
 <div class="modal fade bd-example-modal-lg" id="dialogFoodDetails" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document" style="z-index: 999999999;">
+  <div class="modal-dialog modal-lg" role="document" style="z-index: 999999999;">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Agregar</h5>
@@ -17,15 +17,17 @@
               <input type="text" hidden name="description" id="description">
               <input type="text" hidden name="cantidad" id="cantidad" value="1">
 
-              {{-- <div class="form-group">
-                <label for="description" class="col-form-label">Descripcion:</label>
-                <input name="description" type="text" class="form-control" id="description">
-              </div> --}}
               <div class="container">
               <div class="row">
+                  <div class="col-md-12">
+                      <h5 class="modal-title">
+                          <label id='foodName'></label>
+                      </h5>
+                  </div>
+              </div>
+              <div class="row">
                   <div class="col-md-6">
-                  {{-- <div class="col-5"> --}}
-                      <select class="custom-select" multiple name="piecesnumber">
+                      <select class="custom-select" size="8" name="piecesnumber" id="pieces">
                           <option value="1">5 Piezas</option>
                           <option value="2">10 Piezas</option>
                           <option value="3">15 Piezas</option>
@@ -34,9 +36,8 @@
                           <option value="6">30 Piezas</option>
                       </select>
                   </div>
-                  {{-- <div class="col col-lg-2"></div> --}}
                   <div class="col-md-6">
-                      <select class="custom-select" multiple name="flavors">
+                      <select class="custom-select" size="8" name="flavors" id="flavors">
                           <option value="1">A la Diabla</option>
                           <option value="2">Habanero</option>
                           <option value="3">Bufalo</option>

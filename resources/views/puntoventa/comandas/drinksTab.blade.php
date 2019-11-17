@@ -26,16 +26,18 @@
                                             <td>
                                                 <button type="button" class="btn btn-success" data-toggle="modal"
                                                   data-tab="drinks"
+                                                  data-productname="{{ $drink->name }} - {{ $drink->detail }}"
                                                   data-ventaid="{{ $venta['ventaId'] }}"
                                                   data-productid="{{ $drink->id }}"
                                                   data-price="{{ $drink->price }}"
                                                   data-target="#dialogDetails">
-                                                    Agregar
+                                                  Agregar
                                                 </button>
                                             </td>
                                         </tr>
                                         @endforeach
                                     </table>
+                                    {!! $drinkProducts->links() !!}
 
                                 </div>
                                 <div class="col col-lg-1">
@@ -50,7 +52,11 @@
                                             <th>Acción</th>
                                         </tr>
                                         @forelse ( $arrayBebidas as $record)
-                                        <tr>
+                                        @if ($venta->order == $record->order)
+                                            <tr class="table-success">
+                                        @else
+                                            <tr>
+                                        @endif
                                             <td>{{ $record['product']->name }} - {{ $record['product']->detail }}</td>
                                             <td>{{ $record['cantidad'] }}</td>
                                             <td>@money($record['montoVenta'])</td>

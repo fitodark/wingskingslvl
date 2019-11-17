@@ -27,7 +27,7 @@ class VentasProductosController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
+         // dd($request->all());
         $venta = Venta::find($request->get('ventaId'));
         $product = VentasProductos::where('IdProducto', $request->get('idProduct'))
             ->where('IdVenta', $request->get('ventaId'))->first();
@@ -36,17 +36,25 @@ class VentasProductosController extends Controller
             $venta->ventasProductos()->create([
                 'IdProducto' => $request->get('idProduct'),
                 'cantidad' => $request->get('cantidad'),
-                'montoVenta' => $request->get('price'),
-                'descripcion' => $request->get('description')
+                'montoVenta' => floatval($request->get('cantidad')) * floatval($request->get('price')),
+                'descripcion' => $request->get('description'),
+                'order' => $venta->order
             ]);
         } else {
-            $product->cantidad += $request->get('cantidad');
-            $product->montoVenta += $request->get('price');
-            $product->save();
+            // $product->cantidad += $request->get('cantidad');
+            // $product->montoVenta += $request->get('price');
+            // $product->save();
+
+            $venta->ventasProductos()->create([
+                'IdProducto' => $request->get('idProduct'),
+                'cantidad' => $request->get('cantidad'),
+                'montoVenta' => floatval($request->get('cantidad')) * floatval($request->get('price')),
+                'order' => $venta->order
+            ]);
         }
 
         $venta->cantidadProductos += $request->get('cantidad');
-        $venta->montoTotal += $request->get('price');
+        $venta->montoTotal += floatval($request->get('cantidad')) * floatval($request->get('price'));
         $venta->save();
 
         $ventaProductos = VentasProductos::where('IdVenta', $request->get('ventaId'))->get();

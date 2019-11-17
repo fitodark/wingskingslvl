@@ -20,6 +20,8 @@ class Venta extends Model
      */
     protected $primaryKey = 'ventaId';
 
+    // protected $productosTemp = [];
+
     protected $fillable = [
       'IdUsuario',
       'branchofficeterminal_id',
@@ -32,7 +34,8 @@ class Venta extends Model
       'cantidadProductos',
       'type',
       'estatus',
-      'activo'
+      'activo',
+      'order'
     ];
 
     public function ventasProductos()

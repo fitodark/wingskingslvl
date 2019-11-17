@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'America/Mexico_City',
 
     /*
     |--------------------------------------------------------------------------
@@ -80,7 +80,7 @@ return [
     |
     */
 
-    'locale' => 'es',
+    'locale' => 'es-MX',
 
     /*
     |--------------------------------------------------------------------------
@@ -175,6 +175,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\SaleDataServiceProvider::class,
+        App\Providers\SalesSummaryServiceProvider::class,
 
     ],
 

@@ -16,15 +16,18 @@
                                         <table class="table table-striped">
                                             <tr>
                                                 <th>Nombre</th>
+                                                <th>Precio</th>
                                                 <th>Acción</th>
                                             </tr>
                                             @foreach ($foodProducts as $food)
                                             <tr>
                                                 <td>{{ $food->name }} - {{ $food->detail }}</td>
+                                                <td>@money($food->price)</td>
                                                 @if ($food->type === 2)
                                                   <td>
                                                       <button type="button" class="btn btn-success" data-toggle="modal"
                                                           data-tab="food"
+                                                          data-foodname="{{ $food->name }} - {{ $food->detail }}"
                                                           data-ventaid="{{ $venta['ventaId'] }}"
                                                           data-productid="{{ $food->id }}"
                                                           data-price="{{ $food->price }}"
@@ -36,6 +39,7 @@
                                                   <td>
                                                       <button type="button" class="btn btn-success" data-toggle="modal"
                                                           data-tab="food"
+                                                          data-productname="{{ $food->name }} - {{ $food->detail }}"
                                                           data-ventaid="{{ $venta['ventaId'] }}"
                                                           data-productid="{{ $food->id }}"
                                                           data-price="{{ $food->price }}"
@@ -47,6 +51,7 @@
                                             </tr>
                                             @endforeach
                                         </table>
+                                        {!! $foodProducts->links() !!}
 
                                     </div>
                                     <div class="col col-lg-1">
@@ -61,8 +66,19 @@
                                                 <th>Acción</th>
                                             </tr>
                                             @forelse ( $arrayComidas as $record)
-                                            <tr>
-                                                <td>{{ $record['product']->name }} - {{ $record['product']->detail }}</td>
+                                            @if ($venta->order == $record->order)
+                                                <tr class="table-success">
+                                            @else
+                                                <tr>
+                                            @endif
+                                                <td>{{ $record['product']->name }} - {{ $record['product']->detail }}
+                                                    @if ($record->product->type == 2)
+                                                        <br>
+                                                        @foreach (json_decode($record['descripcion'], TRUE) as $key => $value)
+                                                                {{ $value[0]['value'] }} - {{ $value[1]['value']}} <br>
+                                                        @endforeach
+                                                    @endif
+                                                </td>
                                                 <td>{{ $record['cantidad'] }}</td>
                                                 <td>@money($record['montoVenta'])</td>
                                                 <td>
@@ -82,7 +98,7 @@
                                         </table>
                                     </div>
                                 </div>
-                            
+
 
                         </li>
                     </ul>

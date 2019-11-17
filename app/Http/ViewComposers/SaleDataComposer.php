@@ -13,11 +13,13 @@ class SaleDataComposer
     public function compose(View $view)
     {
         $dinerstable = Dinerstable::all();
-        $drinkProducts = Product::where('type', 1)->get();
-        $foodProducts = Product::where('type', 2)->orWhere('type', 3)->get();
+        $drinkProducts = Product::where('type', 1)->paginate(10);
+        $foodProducts = Product::where('type', 2)->orWhere('type', 3)->paginate(10);
 
         $view->with('dinerstable', $dinerstable);
-        $view->with('drinkProducts', $drinkProducts);
-        $view->with('foodProducts', $foodProducts);
+        $view->with('drinkProducts', $drinkProducts)
+            ->with('i', (request()->input('page', 1) - 1) * 10);
+        $view->with('foodProducts', $foodProducts)
+            ->with('i', (request()->input('page', 1) - 1) * 10);
     }
 }

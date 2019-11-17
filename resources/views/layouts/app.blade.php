@@ -18,6 +18,13 @@
     {{-- <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}" media="screen"> --}}
     {{-- <link rel="stylesheet" href="../_assets/css/custom.min.css"> --}}
 
+    <!-- Datepicker Files -->
+   <link rel="stylesheet" href="{{asset('js/datePicker/css/bootstrap-datepicker3.css')}}">
+   <link rel="stylesheet" href="{{asset('js/datePicker/css/bootstrap-datepicker3.standalone.css')}}">
+   <script src="{{asset('js/datePicker/js/bootstrap-datepicker.js')}}"></script>
+   <!-- Languaje -->
+   <script src="{{asset('js/datePicker/locales/bootstrap-datepicker.es.min.js')}}"></script>
+
 </head>
 <body>
     <div id="app">
@@ -43,9 +50,11 @@
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="{{ url('/comandas') }}">Comandas</a>
                     <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{{ route('summary.index') }}">Resumen de Ventas</a>
+                    <!-- <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="{{ url('/catalogos') }}">Catalogos</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{{ url('/usuarios') }}">Usuarios</a>
+                    <a class="dropdown-item" href="{{ url('/usuarios') }}">Usuarios</a> -->
                   </div>
                 </li>
               </ul>
@@ -77,9 +86,9 @@
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                     <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                        {{ __('Logout') }}
+                                        onclick="event.preventDefault();
                                         document.getElementById('logout-form').submit();">
+                                        {{ __('Logout') }}
                                     </a>
 
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -127,10 +136,10 @@
         var venta = button.data('ventaid');
         var tab = button.data('tab');
         var price = button.data('price');
+        var productName = button.data('productname');
 
         var modal = $(this)
-        //modal.find('.modal-title').text('New message to ' + recipient)
-        // modal.find('.modal-body #productname').val(productname);
+        $('#productName').html(productName);
         modal.find('.modal-body #idProduct').val(id);
         modal.find('.modal-body #ventaId').val(venta);
         modal.find('.modal-body #tab').val(tab);
@@ -143,8 +152,12 @@
         var venta = button.data('ventaid');
         var tab = button.data('tab');
         var price = button.data('price');
+        var foodname = button.data('foodname');
 
         var modal = $(this)
+        $('#flavors').val('');
+        $('#pieces').val('');
+        $('#foodName').html(foodname);
         modal.find('.modal-body #idProduct').val(id);
         modal.find('.modal-body #ventaId').val(venta);
         modal.find('.modal-body #tab').val(tab);
@@ -278,10 +291,16 @@
                 } else {
                     $('.alert-danger').hide();
                     $('#finalizarVentaModal').modal('hide');
+                    window.location = data.url
                 }
             }
         });
 
+    });
+    $('#sandbox-container .input-group.date').datepicker({
+        format: "dd/mm/yyyy",
+        language: "es",
+        autoclose: true
     });
     </script>
 

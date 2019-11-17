@@ -13,6 +13,13 @@ use Illuminate\Database\Eloquent\Builder;
 class NavVentasController extends Controller
 {
 
+    public function addMoreProducts(Request $request, Venta $venta) {
+        $venta->order += 1;
+        $venta->save();
+
+        return redirect()->route('drinksTab', [$venta]);
+    }
+
     /**
      * Show drinks view
      *
@@ -74,11 +81,6 @@ class NavVentasController extends Controller
     }
 
     public function cancelarVenta(Request $request, Venta $venta = null) {
-        // if ($venta != null) {
-        //     $venta->activo = 0;
-        //     $venta->save();
-        // }
-
         return redirect()->route('comandas');
     }
 }

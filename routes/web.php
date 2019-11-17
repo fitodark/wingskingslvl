@@ -17,6 +17,7 @@ Route::get('/', function () {
 // Route::view('/', 'welcome');
 
 Auth::routes([ 'register' => false ]);
+// Auth::routes([ 'register' => true ]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 
@@ -29,13 +30,14 @@ Route::resources([
   'products' => 'ProductController',
   'catalogos' => 'Puntoventa\CatalogController',
   'usuarios' => 'Users\UsersController',
-  'ventas' => 'Puntoventa\VentasController'
+  'ventas' => 'Puntoventa\VentasController',
+  'summary' => 'Puntoventa\SalesSummaryController'
 ]);
 Route::get('/create/{venta?}', 'Puntoventa\VentasController@create')->name('create');
 Route::get('/ventastore', 'Puntoventa\VentasController@store')->name('ventastore');
 Route::post('/cerrarVenta', 'Puntoventa\VentasController@cerrarVenta')->name('cerrarVenta');
 
-// Route::get('/tablesTab/{venta}', 'Puntoventa\NavVentasController@tablesTab')->name('tablesTab');
+Route::get('/addMoreProducts/{venta}', 'Puntoventa\NavVentasController@addMoreProducts')->name('addMoreProducts');
 Route::get('/drinksTab/{venta}', 'Puntoventa\NavVentasController@drinksTab')->name('drinksTab');
 Route::get('/foodsTab/{venta}', 'Puntoventa\NavVentasController@foodsTab')->name('foodsTab');
 Route::get('/resumeTab/{venta}', 'Puntoventa\NavVentasController@resumeTab')->name('resumeTab');
@@ -49,3 +51,6 @@ Route::get('/ticket/print', 'PrinterController@print')->name('printticket');
 
 Route::get('/getQueryClient/{query?}', 'Puntoventa\ClientController@getQueryClient')->name('getQueryClient');
 Route::post('/addClient', 'Puntoventa\ClientController@addClient')->name('addClient');
+
+Route::get('/venta/print/{venta?}', 'Puntoventa\VentasController@print')->name('ventaprint');
+Route::get('/printProductsOrder/{venta?}', 'Puntoventa\VentasController@printProductsOrder')->name('printProductsOrder');

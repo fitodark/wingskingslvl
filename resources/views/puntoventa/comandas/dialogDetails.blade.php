@@ -14,10 +14,22 @@
               <input type="text" hidden name="ventaId" id="ventaId">
               <input type="text" hidden name="tab" id="tab">
               <input type="text" hidden name="price" id="price">
-
-              <div class="form-group">
-                  <label for="quantity" class="col-form-label">Cantidad:</label>
-                  <input name="cantidad" type="text" class="form-control" id="quantity">
+              <div class="container">
+              <div class="row">
+                  <div class="col-md-12">
+                      <h5 class="modal-title">
+                          <label id='productName'></label>
+                      </h5>
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="col-md-12">
+                      <div class="form-group">
+                          <label for="quantity" class="col-form-label">Cantidad:</label>
+                          <input name="cantidad" type="text" class="form-control" id="quantity">
+                      </div>
+                  </div>
+              </div>
               </div>
 
           </div>

@@ -49,7 +49,11 @@
                                           <th>Total</th>
                                       </tr>
                                       @forelse ( $arrayComidas as $record)
-                                      <tr>
+                                        @if ($venta->order == $record->order)
+                                            <tr class="table-success">
+                                        @else
+                                            <tr>
+                                        @endif
                                           <td>{{ $record['product']->name }} - {{ $record['product']->detail }}
                                             @if ($record->product->type == 2)
                                                 <br>
@@ -85,7 +89,11 @@
                                             <th>Total</th>
                                         </tr>
                                         @forelse ( $arrayBebidas as $record)
-                                        <tr>
+                                            @if ($venta->order == $record->order)
+                                                <tr class="table-success">
+                                            @else
+                                                <tr>
+                                            @endif
                                             <td>{{ $record['product']->name }} - {{ $record['product']->detail }}</td>
                                             <td>{{ $record['descripcion'] }}</td>
                                             <td>{{ $record['cantidad'] }}</td>
@@ -118,7 +126,8 @@
                             </li>
                             <li class="page-item">
                               {{-- <a class="btn btn-primary" href="#" role="button" href="#">Finalizar</a> --}}
-                                <a class="btn btn-primary" href="{{ route('finalizarVenta', $venta['ventaId']) }}" role="button">Finalizar</a>
+                              {{-- <a class="btn btn-primary" href="{{ route('finalizarVenta', $venta['ventaId']) }}" role="button">Finalizar</a> --}}
+                              <a class="btn btn-primary" href="{{ route('printProductsOrder', $venta['ventaId']) }}" role="button">Finalizar</a>
                             </li>
                           </ul>
                         </nav>

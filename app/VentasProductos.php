@@ -25,7 +25,8 @@ class VentasProductos extends Model
         'IdVenta',
         'cantidad',
         'montoVenta',
-        'descripcion'
+        'descripcion',
+        'order'
     ];
 
     public function product()
