@@ -208,7 +208,7 @@ class VentasController extends Controller
     public function printFinalizarVenta(Venta $venta) {
         try {
             //$connector = new WindowsPrintConnector("\\wind7\usb\epson");
-            $connector = new WindowsPrintConnector("POS-80C2");
+            $connector = new WindowsPrintConnector("POS-80C");
             $printer = new Printer($connector);
 
             # Vamos a alinear al centro lo próximo que imprimamos
@@ -275,7 +275,7 @@ class VentasController extends Controller
 
         try {
             //$connector = new WindowsPrintConnector("\\wind7\usb\epson");
-            $connector = new WindowsPrintConnector("POS-80C2");
+            $connector = new WindowsPrintConnector("POS-80C");
             $printer = new Printer($connector);
 
             # Vamos a alinear al centro lo próximo que imprimamos
@@ -354,7 +354,7 @@ class VentasController extends Controller
         // IMPRIMIR ORDE DE COMIDA
         if (!$arrayComidas->isEmpty()) {
             try {
-                $connector = new WindowsPrintConnector("POS-80C2");
+                $connector = new WindowsPrintConnector("POS-80C");
                 $printer = new Printer($connector);
 
                 # Vamos a alinear al centro lo próximo que imprimamos
@@ -413,7 +413,7 @@ class VentasController extends Controller
         // IMPRIMIR ORDE DE BEBIDAS
         if (!$arrayBebidas->isEmpty()) {
             try {
-                $connector = new WindowsPrintConnector("POS-80C2");
+                $connector = new WindowsPrintConnector("POS-80C");
                 $printer = new Printer($connector);
 
                 # Vamos a alinear al centro lo próximo que imprimamos
