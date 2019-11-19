@@ -99,6 +99,11 @@ class VentasProductosController extends Controller
     {
       // return $producto;
         $venta = Venta::find($producto->IdVenta);
+
+        $venta->cantidadProductos -= $producto->cantidad;
+        $venta->montoTotal -= $producto->montoVenta;
+        $venta->save();
+
         $producto->delete();
 
         if ($request->get('tab') == 'drinks') {
