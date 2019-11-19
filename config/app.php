@@ -176,6 +176,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\SaleDataServiceProvider::class,
         App\Providers\SalesSummaryServiceProvider::class,
+        App\Providers\SalesServiceProvider::class,
 
     ],
 

@@ -58,7 +58,7 @@ class NavVentasController extends Controller
      * @param  \App\Venta  $venta
      * @return \Illuminate\Http\Response
      */
-    public function resumeTab(Venta $venta)
+    public function resumeTab(Venta $venta, $enableFooter = TRUE)
     {
         $arrayBebidas = VentasProductos::where('IdVenta', $venta->ventaId)
             ->whereHas('product', function (Builder $query) {
@@ -70,7 +70,7 @@ class NavVentasController extends Controller
                 $query->where('type', '=', 2)->orWhere('type', '=', 3);
             })->get();
 
-        return view('puntoventa.comandas.resume', compact('venta', 'arrayBebidas', 'arrayComidas'));
+        return view('puntoventa.comandas.resume', compact('venta', 'arrayBebidas', 'arrayComidas', 'enableFooter'));
     }
 
     public function finalizarVenta(Request $request, Venta $venta) {

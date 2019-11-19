@@ -8,7 +8,7 @@
                 <th>Estatus</th>
                 <th>Total</th>
                 @if (Route::currentRouteName() == 'comandas')
-                  <th width="340px">Action</th>
+                  <th width="440px">Accion</th>
                 @endif
             </tr>
             @foreach ($ventas as $venta)
@@ -50,6 +50,8 @@
                         @else
                             <button type="button" class="btn btn-outline-success">Finalizar</button>
                         @endif
+
+                        <a class="btn btn-secondary" href="{{ route('resumeTab', [$venta->ventaId, 0]) }}">Detalles</a>
                     </form>
                 </td>
                 @endif

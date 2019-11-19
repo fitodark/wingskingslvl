@@ -18,3 +18,11 @@ mix.browserSync({
     proxy: 'http://localhost',
     open: false
 });
+
+mix.webpackConfig({
+    resolve: {
+        alias: {
+            jquery: "jquery/src/jquery"
+        }
+    }
+});

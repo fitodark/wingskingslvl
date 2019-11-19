@@ -32,12 +32,13 @@ class VentasController extends Controller
      */
     public function index()
     {
-        $ventas = Venta::orderBy('ventaId', 'desc')
-            ->where('activo', 1)
-            ->paginate(10);
+        // $ventas = Venta::orderBy('ventaId', 'desc')
+        //     ->where('activo', 1)
+        //     ->paginate(10);
 
-        return view('puntoventa.comandas.index',compact('ventas'))
-            ->with('i', (request()->input('page', 1) - 1) * 10);
+        // return view('puntoventa.comandas.index',compact('ventas'))
+        //     ->with('i', (request()->input('page', 1) - 1) * 10);
+        return view('puntoventa.comandas.index');
     }
 
     /**
@@ -216,7 +217,7 @@ class VentasController extends Controller
 
             /* Intentaremos cargar e imprimir el logo */
             try{
-                $logo = EscposImage::load(public_path() ."\wingsgrey.jpg", false);
+                $logo = EscposImage::load(public_path() ."\wingtwo.jpeg", false);
                 $printer->bitImage($logo);
             }catch(Exception $e){/*No hacemos nada si hay error*/}
 
@@ -283,7 +284,7 @@ class VentasController extends Controller
 
             /* Intentaremos cargar e imprimir el logo */
             try{
-                $logo = EscposImage::load(public_path() ."\wingsgrey.jpg", false);
+                $logo = EscposImage::load(public_path() ."\wingtwo.jpeg", false);
                 $printer->bitImage($logo);
             }catch(Exception $e){/*No hacemos nada si hay error*/}
 
