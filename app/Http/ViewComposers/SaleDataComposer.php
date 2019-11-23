@@ -14,7 +14,7 @@ class SaleDataComposer
     {
         $dinerstable = Dinerstable::all();
         $drinkProducts = Product::where('type', 1)->paginate(10);
-        $foodProducts = Product::where('type', 2)->orWhere('type', 3)->paginate(10);
+        $foodProducts = Product::orderBy('id', 'desc')->where('type', 2)->orWhere('type', 3)->paginate(10);
 
         $view->with('dinerstable', $dinerstable);
         $view->with('drinkProducts', $drinkProducts)

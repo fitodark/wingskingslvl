@@ -217,7 +217,7 @@ class VentasController extends Controller
 
             /* Intentaremos cargar e imprimir el logo */
             try{
-                $logo = EscposImage::load(public_path() ."\wingtwo.jpeg", false);
+                $logo = EscposImage::load(public_path() ."\wingtwo.jpg", false);
                 $printer->bitImage($logo);
             }catch(Exception $e){/*No hacemos nada si hay error*/}
 
@@ -284,7 +284,7 @@ class VentasController extends Controller
 
             /* Intentaremos cargar e imprimir el logo */
             try{
-                $logo = EscposImage::load(public_path() ."\wingtwo.jpeg", false);
+                $logo = EscposImage::load(public_path() ."\wingtwo.jpg", false);
                 $printer->bitImage($logo);
             }catch(Exception $e){/*No hacemos nada si hay error*/}
 
