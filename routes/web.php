@@ -16,7 +16,7 @@ Route::get('/', function () {
 });
 // Route::view('/', 'welcome');
 
-Auth::routes([ 'register' => true ]);
+Auth::routes([ 'register' => false ]);
 // Auth::routes([ 'register' => true ]);
 
 Route::get('/home', 'HomeController@index')->name('home');
@@ -40,7 +40,7 @@ Route::post('/cerrarVenta', 'Puntoventa\VentasController@cerrarVenta')->name('ce
 Route::get('/addMoreProducts/{venta}', 'Puntoventa\NavVentasController@addMoreProducts')->name('addMoreProducts');
 Route::get('/drinksTab/{venta}', 'Puntoventa\NavVentasController@drinksTab')->name('drinksTab');
 Route::get('/foodsTab/{venta}', 'Puntoventa\NavVentasController@foodsTab')->name('foodsTab');
-Route::get('/resumeTab/{venta}', 'Puntoventa\NavVentasController@resumeTab')->name('resumeTab');
+Route::get('/resumeTab/{venta}/{enableFooter?}', 'Puntoventa\NavVentasController@resumeTab')->name('resumeTab');
 Route::post('/addProductVenta', 'Puntoventa\VentasProductosController@store')->name('addProductVenta');
 Route::get('/addCliente/{venta}', 'Puntoventa\NavVentasController@addCliente')->name('addCliente');
 Route::get('/finalizarVenta/{venta}', 'Puntoventa\NavVentasController@finalizarVenta')->name('finalizarVenta');
