@@ -32,8 +32,8 @@
                           <option value="2">10 Piezas</option>
                           <option value="3">15 Piezas</option>
                           <option value="4">20 Piezas</option>
-                          <option value="5">25 Piezas</option>
-                          <option value="6">30 Piezas</option>
+						  <option value="5">Mitad</option>
+                          <option value="7">Todas</option>
                       </select>
                   </div>
                   <div class="col-md-6">
@@ -44,8 +44,10 @@
                           <option value="4">Chipotle</option>
                           <option value="5">Mango Habanero</option>
                           <option value="6">Tamarindo</option>
-                          <option value="7">Barbecue</option>
-                          <option value="8">Parmesano</option>
+						  <option value="7">Barbecue Hot</option>
+                          <option value="8">Barbecue</option>
+                          <option value="9">Parmesano</option>
+						  <option value="10">Limon</option>
                       </select>
                   </div>
               </div>
