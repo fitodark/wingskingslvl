@@ -10,7 +10,6 @@
                 <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
                   <div class="btn-group" role="group" aria-label="First group">
                     <a href="{{ route('ventastore') }}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Agregar</a>
-                    <!-- <a href="{{ route('ventaprint') }}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Imprimir</a> -->
                   </div>
                 </div>
               </li>

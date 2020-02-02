@@ -2,11 +2,9 @@
 
 @section('content')
 <div class="container-fluid">
-{{-- <form action="{{ route('addCliente', $venta->ventaId) }}" method="POST" enctype="multipart/form-data"> --}}
 <form id="tableSelectForm" action="{{ route('ventas.update', $venta->ventaId) }}" method="POST" enctype="multipart/form-data">
 @csrf
 @method('PUT')
-{{-- @method('GET') --}}
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -20,8 +18,6 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
                             <label for="exampleFormControlSelect2">Ubicación:</label>
-                            {{-- <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">Local</button>
-                            <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">Domicilio</button> --}}
 
                             <div class="custom-control custom-radio">
                                 <input type="radio" id="customRadio1" name="customRadio" class="custom-control-input"
@@ -57,8 +53,6 @@
                                             <div class="form-row">
                                                 <div class="form-group col-md-12">
                                                     <label for="client">Buscar Cliente</label>
-                                                    {{-- <input id="client" name="client" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Nombre del cliente">
-                                                    <div id="clientList"></div> --}}
                                                     <input class="typeahead form-control" type="text" id="findClient" placeholder="Buscar Cliente...">
                                                     <br>
                                                     <div class="mx-auto" style="width: 200px;">
@@ -88,15 +82,10 @@
                                 </a>
                             </li>
                             <li class="page-item">
-                                {{-- <a class="btn btn-warning" href="#" role="button">Cancelar</a> --}}
                                 <a class="btn btn-warning" href="{{ route('cancelarVenta') }}" role="button">Cancelar</a>
                             </li>
                             <li class="page-item">
                                 <button type="submit" class="btn btn-primary" name="next">Siguiente</button>
-                                {{-- <a class="btn btn-primary" role="button"
-                                href="{{ route('drinksTab',
-                                  [$venta['ventaId'], 1, $table, $arrayClient->name, $arrayClient->phone, $arrayClient->address]) }}"
-                                >Siguiente</a> --}}
                             </li>
                           </ul>
                         </nav>

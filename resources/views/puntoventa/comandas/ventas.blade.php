@@ -11,7 +11,7 @@
                   <th width="440px">Accion</th>
                 @endif
             </tr>
-            @foreach ($ventas as $venta)
+            @forelse ($ventas as $venta)
             <tr>
                 <td>{{ $venta->ventaId }}</td>
                 <td>
@@ -56,7 +56,11 @@
                 </td>
                 @endif
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="4">Sin registros</td>
+            </tr>
+            @endforelse
         </table>
         {!! $ventas->links() !!}
 

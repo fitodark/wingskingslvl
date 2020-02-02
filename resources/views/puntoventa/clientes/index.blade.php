@@ -3,7 +3,7 @@
 @section('content')
 <div class="container-fluid">
     <div class="card">
-        <div class="card-header">Catalogo de Productos</div>
+        <div class="card-header">Catalogo de Clientes</div>
 
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
@@ -11,7 +11,7 @@
 
             <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
               <div class="btn-group" role="group" aria-label="First group">
-                <a href="{{ route('catalogos.create') }}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Agregar</a>
+                <a href="{{ route('clientes.create') }}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Agregar</a>
               </div>
             </div>
 
@@ -27,24 +27,24 @@
                 <tr>
                     <th>#</th>
                     <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Categoria</th>
+                    <th>Dirección</th>
+                    <th>Telefono</th>
+                    <th>Referencia</th>
                     <th width="280px">Acción</th>
                 </tr>
-                @foreach ($products as $product)
+                @foreach ($clients as $client)
                 <tr>
-                    <td>{{ $product->id }}</td>
-                    <td>{{ $product->name }}</td>
-                    <td>{{ $product->detail }}</td>
-                    <td>@money($product->price)</td>
-                    <td>@categoriaType($product->type)</td>
+                    <td>{{ $client->id }}</td>
+                    <td>{{ $client->name }}</td>
+                    <td>{{ $client->address }}</td>
+                    <td>{{ $client->phone }}</td>
+                    <td>{{ $client->reference }}</td>
                     <td>
-                        <form action="{{ route('catalogos.destroy',$product->id) }}" method="POST">
+                        <form action="{{ route('clientes.destroy',$client->id) }}" method="POST">
 
-                            {{-- <a class="btn btn-info" href="{{ route('catalogos.show',$product->id) }}">Detalles</a> --}}
+                            {{-- <a class="btn btn-info" href="{{ route('clientes.show',$client->id) }}">Detalles</a> --}}
 
-                            <a class="btn btn-primary" href="{{ route('catalogos.edit',$product->id) }}">Editar</a>
+                            <a class="btn btn-primary" href="{{ route('clientes.edit',$client->id) }}">Editar</a>
 
                             @csrf
                             @method('DELETE')
@@ -55,7 +55,7 @@
                 </tr>
                 @endforeach
             </table>
-            {!! $products->links() !!}
+            {!! $clients->links() !!}
             </li>
         </ul>
     </div>

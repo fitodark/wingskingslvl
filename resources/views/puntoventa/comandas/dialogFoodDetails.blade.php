@@ -28,26 +28,16 @@
               <div class="row">
                   <div class="col-md-6">
                       <select class="custom-select" size="8" name="piecesnumber" id="pieces">
-                          <option value="1">5 Piezas</option>
-                          <option value="2">10 Piezas</option>
-                          <option value="3">15 Piezas</option>
-                          <option value="4">20 Piezas</option>
-						  <option value="5">Mitad</option>
-                          <option value="7">Todas</option>
+                          @foreach ($piecesList as $key => $value)
+                          <option value="{{ $key }}">{{$value->value}}</option>
+                          @endforeach
                       </select>
                   </div>
                   <div class="col-md-6">
                       <select class="custom-select" size="8" name="flavors" id="flavors">
-                          <option value="1">A la Diabla</option>
-                          <option value="2">Habanero</option>
-                          <option value="3">Bufalo</option>
-                          <option value="4">Chipotle</option>
-                          <option value="5">Mango Habanero</option>
-                          <option value="6">Tamarindo</option>
-						  <option value="7">Barbecue Hot</option>
-                          <option value="8">Barbecue</option>
-                          <option value="9">Parmesano</option>
-						  <option value="10">Limon</option>
+                          @foreach ($flavorsList as $key => $value)
+                          <option value="{{ $key }}">{{$value->value}}</option>
+                          @endforeach
                       </select>
                   </div>
               </div>
@@ -69,7 +59,7 @@
                               <th scope="col">Acción</th>
                           </tr>
                       </thead>
-                      <tbody>
+                      <tbody id="tableBody">
 
                       </tbody>
                   </table>
@@ -78,7 +68,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Agregar</button>
+              <button type="submit" class="btn btn-primary" id="addFoodRow">Agregar</button>
           </div>
       </form>
     </div>

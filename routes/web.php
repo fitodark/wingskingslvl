@@ -16,7 +16,7 @@ Route::get('/', function () {
 });
 // Route::view('/', 'welcome');
 
-Auth::routes([ 'register' => false ]);
+Auth::routes([ 'register' => true ]);
 // Auth::routes([ 'register' => true ]);
 
 Route::get('/home', 'HomeController@index')->name('home');
@@ -31,7 +31,8 @@ Route::resources([
   'catalogos' => 'Puntoventa\CatalogController',
   'usuarios' => 'Users\UsersController',
   'ventas' => 'Puntoventa\VentasController',
-  'summary' => 'Puntoventa\SalesSummaryController'
+  'clientes' => 'Puntoventa\ClientController'
+  //'summary' => 'Puntoventa\SalesSummaryController'
 ]);
 Route::get('/create/{venta?}', 'Puntoventa\VentasController@create')->name('create');
 Route::get('/ventastore', 'Puntoventa\VentasController@store')->name('ventastore');
@@ -42,7 +43,7 @@ Route::get('/drinksTab/{venta}', 'Puntoventa\NavVentasController@drinksTab')->na
 Route::get('/foodsTab/{venta}', 'Puntoventa\NavVentasController@foodsTab')->name('foodsTab');
 Route::get('/resumeTab/{venta}/{enableFooter?}', 'Puntoventa\NavVentasController@resumeTab')->name('resumeTab');
 Route::post('/addProductVenta', 'Puntoventa\VentasProductosController@store')->name('addProductVenta');
-Route::get('/addCliente/{venta}', 'Puntoventa\NavVentasController@addCliente')->name('addCliente');
+//Route::get('/addCliente/{venta}', 'Puntoventa\NavVentasController@addCliente')->name('addCliente');
 Route::get('/finalizarVenta/{venta}', 'Puntoventa\NavVentasController@finalizarVenta')->name('finalizarVenta');
 Route::get('/cancelarVenta/{venta?}', 'Puntoventa\NavVentasController@cancelarVenta')->name('cancelarVenta');
 
@@ -51,6 +52,9 @@ Route::get('/ticket/print', 'PrinterController@print')->name('printticket');
 
 Route::get('/getQueryClient/{query?}', 'Puntoventa\ClientController@getQueryClient')->name('getQueryClient');
 Route::post('/addClient', 'Puntoventa\ClientController@addClient')->name('addClient');
+Route::get('/clientes', 'Puntoventa\ClientController@index')->name('clientes');
 
-Route::get('/venta/print/{venta?}', 'Puntoventa\VentasController@print')->name('ventaprint');
+Route::get('/venta/print/{venta?}', 'Puntoventa\VentasController@printSale')->name('ventaprint');
 Route::get('/printProductsOrder/{venta?}', 'Puntoventa\VentasController@printProductsOrder')->name('printProductsOrder');
+Route::get('/summary/{date?}', 'Puntoventa\SalesSummaryController@index')->name('summary.index');
+Route::post('/findSales', 'Puntoventa\SalesSummaryController@findSales')->name('findSales');

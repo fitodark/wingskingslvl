@@ -69,6 +69,21 @@ class AppServiceProvider extends ServiceProvider
              ?>";
         });
 
+        Blade::directive('categoriaType', function ($amount) {
+            return "<?php
+              switch ($amount) {
+                  case 1:
+                      echo 'Barra';
+                      break;
+                  case 2:
+                      echo 'Cocina (Alitas)';
+                      break;
+                  case 3:
+                      echo 'Cocina (General)';
+                      break;
+              } ?>";
+        });
+
     }
 }
 

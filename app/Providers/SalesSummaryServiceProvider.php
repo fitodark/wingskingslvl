@@ -24,7 +24,7 @@ class SalesSummaryServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        View::composer('puntoventa.salessummary.index',
-           'App\Http\ViewComposers\SalesSummaryComposer');
+        // View::composer('puntoventa.salessummary.index',
+        //    'App\Http\ViewComposers\SalesSummaryComposer');
     }
 }

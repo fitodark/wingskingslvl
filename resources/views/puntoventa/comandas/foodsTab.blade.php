@@ -109,18 +109,12 @@
                         <nav aria-label="Page navigation example">
                           <ul class="pagination">
                             <li class="page-item">
-                              {{-- <a class="page-link" href="#" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                                <span class="sr-only">Previous</span>
-                              </a> --}}
                                 <a class="btn btn-primary" href="{{ route('drinksTab', $venta['ventaId']) }}" role="button">Anterior</a>
                             </li>
                             <li class="page-item">
-                                {{-- <a class="btn btn-warning" href="#" role="button" href="#">Cancelar</a> --}}
                                 <a class="btn btn-warning" href="{{ route('cancelarVenta', $venta['ventaId']) }}" role="button">Cancelar</a>
                             </li>
                             <li class="page-item">
-                                {{-- <button type="button" class="btn btn-primary" name="next">Siguiente</button> --}}
                                 <a class="btn btn-primary" href="{{ route('resumeTab', $venta['ventaId']) }}" role="button">Siguiente</a>
                             </li>
                           </ul>
@@ -131,6 +125,6 @@
         </div>
     </div>
 </div>
-@include('puntoventa.comandas.dialogFoodDetails')
+@include('puntoventa.comandas.dialogFoodDetails', ['piecesList' => $piecesList, 'flavorsList' => $flavorsList])
 @include('puntoventa.comandas.dialogDetails')
 @endsection

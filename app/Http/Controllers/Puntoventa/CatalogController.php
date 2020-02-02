@@ -17,6 +17,7 @@ class CatalogController extends Controller
     {
         $this->middleware('auth');
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -24,10 +25,10 @@ class CatalogController extends Controller
      */
     public function index()
     {
-        $products = Product::latest()->paginate(5);
+        $products = Product::where('active', 1)->orderBy('id', 'desc')->latest()->paginate(10);
 
         return view('puntoventa.productos.index',compact('products'))
-            ->with('i', (request()->input('page', 1) - 1) * 5);
+            ->with('i', (request()->input('page', 1) - 1) * 10);
     }
 
     /**
@@ -37,7 +38,12 @@ class CatalogController extends Controller
      */
     public function create()
     {
-        return view('puntoventa.productos.create');
+        $categorias = [
+            '1' => 'Barra',
+            '2' => 'Cocina (Alitas)',
+            '3' => 'Cocina (General)'
+        ];
+        return view('puntoventa.productos.create',compact('categorias'));
     }
 
     /**
@@ -71,7 +77,7 @@ class CatalogController extends Controller
         //     // Set user profile image path in database to filePath
         //     $attributes['image'] = $filePath;
         // }
-
+        $attributes = array_merge($attributes, array("active" => 1));
         Product::create($attributes);
 
         return redirect()->route('catalogos.index')
@@ -98,9 +104,9 @@ class CatalogController extends Controller
     public function edit(Product $catalogo)
     {
         $categorias = [
-            '0' => 'Selecciona...',
-            '1' => 'Cocina',
-            '2' => 'Barra'
+            '1' => 'Barra',
+            '2' => 'Cocina (Alitas)',
+            '3' => 'Cocina (General)'
         ];
         return view('puntoventa.productos.edit',compact('catalogo', 'categorias'));
     }
@@ -150,9 +156,10 @@ class CatalogController extends Controller
      * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy(Product $catalogo)
     {
-        $product->delete();
+        $catalogo->active = 0;
+        $catalogo->save();
 
         return redirect()->route('catalogos.index')
                         ->with('success','Producto Eliminado Satisfactoriamente');

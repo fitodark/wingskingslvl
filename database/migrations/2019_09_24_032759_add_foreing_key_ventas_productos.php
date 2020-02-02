@@ -29,8 +29,8 @@ class AddForeingKeyVentasProductos extends Migration
     {
         Schema::table('ventasProductos', function (Blueprint $table) {
             //
-            $table->dropForeign('IdProducto');
-            $table->dropColumn('IdVenta');
+            $table->dropForeign('ventasproductos_idproducto_foreign');
+            $table->dropForeign('ventasproductos_idventa_foreign');
         });
     }
 }

@@ -29,13 +29,13 @@
                        <div class="row">
                           <div class="col-xs-12 col-sm-12 col-md-12">
                               <div class="form-group">
-                                  <strong>Name:</strong>
+                                  <strong>Nombre:</strong>
                                   <input type="text" name="name" value="{{ $catalogo->name }}" class="form-control" placeholder="Name">
                               </div>
                           </div>
                           <div class="col-xs-12 col-sm-12 col-md-12">
                               <div class="form-group">
-                                  <strong>Detail:</strong>
+                                  <strong>Descripción:</strong>
                                   <textarea class="form-control" style="height:100px" name="detail"
                                       placeholder="Detail">{{ $catalogo->detail }}</textarea>
                               </div>
@@ -61,17 +61,17 @@
                               </div>
                           </div>
 
-                          <div class="col-xs-12 col-sm-12 col-md-12">
+                          {{-- <div class="col-xs-12 col-sm-12 col-md-12">
                               <div class="form-group">
                                   <strong>Imagen:</strong>
                                   <input type="file" class="form-control-file" name="product_image" id="exampleInputFile" aria-describedby="fileHelp"
                                    value="{{ $catalogo->image }}">
                                   <small id="fileHelp" class="form-text text-muted">Please upload a valid image file. Size of image should not be more than 2MB.</small>
                               </div>
-                          </div>
+                          </div> --}}
 
                           <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="submit" class="btn btn-primary">Actualizar</button>
                           </div>
                       </div>
                   </form>

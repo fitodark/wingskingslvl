@@ -18,13 +18,6 @@
     {{-- <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}" media="screen"> --}}
     {{-- <link rel="stylesheet" href="../_assets/css/custom.min.css"> --}}
 
-    <!-- Datepicker Files -->
-   <link rel="stylesheet" href="{{asset('js/datePicker/css/bootstrap-datepicker3.css')}}">
-   <link rel="stylesheet" href="{{asset('js/datePicker/css/bootstrap-datepicker3.standalone.css')}}">
-   <script src="{{asset('js/datePicker/js/bootstrap-datepicker.js')}}"></script>
-   <!-- Languaje -->
-   <script src="{{asset('js/datePicker/locales/bootstrap-datepicker.es.min.js')}}"></script>
-
 </head>
 <body>
     <div id="app">
@@ -51,10 +44,10 @@
                     <a class="dropdown-item" href="{{ url('/comandas') }}">Comandas</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="{{ route('summary.index') }}">Resumen de Ventas</a>
-                    <!-- <div class="dropdown-divider"></div>
+                    <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="{{ url('/catalogos') }}">Catalogos</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{{ url('/usuarios') }}">Usuarios</a> -->
+                    <a class="dropdown-item" href="{{ route('clientes') }}">Clientes</a>
                   </div>
                 </li>
               </ul>
@@ -109,12 +102,19 @@
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/bootstrap3-typeahead.js') }}"></script>
+
+    <!-- Datepicker Files -->
+    <link rel="stylesheet" href="{{asset('js/datePicker/css/bootstrap-datepicker3.css')}}">
+    <link rel="stylesheet" href="{{asset('js/datePicker/css/bootstrap-datepicker3.standalone.css')}}">
+    <script src="{{asset('js/datePicker/js/bootstrap-datepicker.js')}}"></script>
+    <!-- Languaje -->
+    <script src="{{asset('js/datePicker/locales/bootstrap-datepicker.es.min.js')}}"></script>
+
     <script>
     var path = "{{ route('getQueryClient') }}";
     $('input.typeahead').typeahead({
         source:  function (query, process) {
             return $.get(path, { query: query }, function (data) {
-                // console.log(data);
                 return process(data);
             });
         },
@@ -124,14 +124,12 @@
         afterSelect: function (item) {
             console.log('afterSelect');
             console.log(item);
-            // $('#clientName').val(item.name);
             $('#clientId').val(item.id);
         }
     });
     $('#dialogDetails').on('show.bs.modal', function (event) {
         console.log("show modal...");
         var button = $(event.relatedTarget);
-        // var productname = button.data('productname');
         var id = button.data('productid');
         var venta = button.data('ventaid');
         var tab = button.data('tab');
@@ -162,11 +160,14 @@
         modal.find('.modal-body #ventaId').val(venta);
         modal.find('.modal-body #tab').val(tab);
         modal.find('.modal-body #price').val(price);
+
+        document.getElementById('myTable').innerHTML = "";
+
+        $('#addFoodRow').prop('disabled', true);
     })
     $('#finalizarVentaModal').on('show.bs.modal', function (event) {
         console.log("show modal finalizarVentaModal...");
         var button = $(event.relatedTarget);
-        // var productname = button.data('productname');
         var location = button.data('location');
         var total = button.data('total');
         var ventaId = button.data('ventaid');
@@ -219,34 +220,40 @@
         var labelFlavors = $("select[name='flavors'] option:selected").text();
         var valueFlavors = $("select[name='flavors'] option:selected").val();
 
-        cols += '<td id="' + valuePieces + '">' + labelPieces + '</td>';
-        cols += '<td id="' + valueFlavors + '">' + labelFlavors + '</td>';
+        if (valuePieces !== undefined && valueFlavors != undefined) {
+          cols += '<td id="' + valuePieces + '">' + labelPieces + '</td>';
+          cols += '<td id="' + valueFlavors + '">' + labelFlavors + '</td>';
 
-        cols += '<td><button type="button" class="ibtnDel btn btn-danger">Eliminar</button></td>';
-        newRow.append(cols);
-        $("table.order-list").append(newRow);
-        var $dataElements = $('#myTable').find('tr');
-        data = [];
+          cols += '<td><button type="button" class="ibtnDel btn btn-danger">Eliminar</button></td>';
+          newRow.append(cols);
+          $("table.order-list").append(newRow);
+          var $dataElements = $('#myTable').find('tr');
+          data = [];
 
-        $.each($dataElements, function(i, elem){
-            // data.push($(elem).html());
+          $.each($dataElements, function(i, elem){
             var childrens = [];
             if (i > 0) {
-                childrens = $(elem).children();
-                if (childrens) {
-                    data.push(
-                        [{'key' : childrens[0].id, 'value' : childrens[0].innerHTML},
-                        {'key' : childrens[1].id, 'value' : childrens[1].innerHTML}]
-                    );
-                }
+              childrens = $(elem).children();
+              if (childrens) {
+                data.push(
+                  [{'key' : childrens[0].id, 'value' : childrens[0].innerHTML},
+                  {'key' : childrens[1].id, 'value' : childrens[1].innerHTML}]
+                );
+              }
             }
-            // console.log(i + ' : ' + $(elem).html());
-        });
-       // console.log(JSON.stringify(data));
-       $('#description').val(JSON.stringify(data));
+          });
+          $('#addFoodRow').prop('disabled', false);
+          $('#description').val(JSON.stringify(data));
+        } else {
+          alert('Seleccionar los productos...');
+        }
     });
     $("table.order-list").on("click", ".ibtnDel", function (event) {
         $(this).closest("tr").remove();
+        var length = $('#myTable').find('tr').length;
+        if (length == 1) {
+            $('#addFoodRow').prop('disabled', true);
+        }
     });
     $("#client").keyup(function(){
         var query = $(this).val();
@@ -297,10 +304,49 @@
         });
 
     });
-    $('#sandbox-container .input-group.date').datepicker({
+    $('.datepicker').datepicker({
         format: "dd/mm/yyyy",
         language: "es",
         autoclose: true
+    });
+    $("#btnAddClient").click(function(event) {
+        event.preventDefault();
+        var ventaid = $('#ventaid').val();
+        var type = $('#type').val();
+        var clientName = $('#clientName').val();
+        var clientPhone = $('#clientPhone').val();
+        var clientAddress = $('#clientAddress').val();
+        var clientReference = $('#clientReference').val();
+
+        var _token = $('input[name="_token"]').val();
+        $.ajax({
+            url : "{{ route('clientes.store') }}",
+            method : "POST",
+            data : {
+                ventaid : ventaid,
+                type : type,
+                name : clientName,
+                phone : clientPhone,
+                address : clientAddress,
+                reference : clientReference,
+                _token : _token
+            },
+            success : function (data) {
+                console.log(data);
+                if(data.errors) {
+                    $('.alert-danger').html('');
+                    $.each(data.errors, function(key, value){
+                  			$('.alert-danger').show();
+                  			$('.alert-danger').append('<li>'+value+'</li>');
+                		});
+                } else {
+                    $('.alert-danger').hide();
+                    $('#addClientModal').modal('hide');
+                    window.location = data.url
+                }
+            }
+        });
+
     });
     </script>
 

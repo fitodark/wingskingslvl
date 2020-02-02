@@ -82,34 +82,24 @@
                         </li>
                     </ul>
                 </div>
-            {{-- <form action="{{ route('foodsTab', $venta->ventaId) }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            @method('GET') --}}
 
                 <div class="card-footer">
                     <div class="mx-auto" style="width: 200px;">
                         <nav aria-label="Page navigation example">
                           <ul class="pagination">
                             <li class="page-item">
-                              {{-- <a class="page-link" href="#" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                                <span class="sr-only">Previous</span>
-                              </a> --}}
                                 <a class="btn btn-primary" href="{{ route('create', $venta['ventaId']) }}" role="button">Anterior</a>
                             </li>
                             <li class="page-item">
-                              {{-- <a class="btn btn-warning" href="#" role="button" href="#">Cancelar</a> --}}
                                 <a class="btn btn-warning" href="{{ route('cancelarVenta', $venta['ventaId']) }}" role="button">Cancelar</a>
                             </li>
                             <li class="page-item">
-                                {{-- <button type="submit" class="btn btn-primary" name="next">Siguiente</button> --}}
                                 <a class="btn btn-primary" href="{{ route('foodsTab', $venta['ventaId']) }}" role="button">Siguiente</a>
                             </li>
                           </ul>
                         </nav>
                     </div>
                 </div>
-            {{-- </form> --}}
             </div>
         </div>
     </div>

@@ -33,9 +33,10 @@
                   </div>
               </div>
           </div>
+          <div class="alert alert-danger" style="display:none"></div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Agregar</button>
+              <button class="btn btn-primary" id="btnAddClient">Agregar</button>
           </div>
       </form>
     </div>

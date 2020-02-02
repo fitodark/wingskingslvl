@@ -35,7 +35,7 @@
                               </div>
                               <div class="col-xs-12 col-sm-12 col-md-12">
                                   <div class="form-group">
-                                      <strong>Descripcion:</strong>
+                                      <strong>Descripción:</strong>
                                       <textarea class="form-control" style="height:100px" name="detail" placeholder="Descripcion"
                                          value="{{ old('detail') }}"></textarea>
                                   </div>
@@ -55,27 +55,27 @@
                                       <strong>Categoria:</strong>
                                       <select class="custom-select" name="type"
                                           value="{{ old('type') }}">
-                                          <option selected>Selecciona...</option>
-                                          <option value="1">Cocina</option>
-                                          <option value="2">Barra</option>
+                                          @foreach ($categorias as $key => $value)
+                                          <option value="{{ $key }}" {{ ($key == 0) ? 'selected' : '' }}>{{$value}}</option>
+                                          @endforeach
                                       </select>
                                   </div>
                               </div>
 
-                              <div class="col-xs-12 col-sm-12 col-md-12">
-                                  <div class="form-group">
+                              {{-- <div class="col-xs-12 col-sm-12 col-md-12">
+                                  <div class="form-group"> --}}
                                       {{-- <strong>Imagen:</strong>
                                           <div class="custom-file">
                                               <input type="file" name="image" class="custom-file-input" id="image"
                                               aria-describedby="inputGroupFileAddon01">
                                               <label class="custom-file-label" for="image">Seleccionar imagen</label>
                                           </div> --}}
-                                          <strong>Imagen:</strong>
+                                          {{-- <strong>Imagen:</strong>
                                               <input type="file" class="form-control-file" name="product_image" id="exampleInputFile" aria-describedby="fileHelp">
                                               <small id="fileHelp" class="form-text text-muted">Please upload a valid image file. Size of image should not be more than 2MB.</small>
                                           </div>
                                   </div>
-                              </div>
+                              </div> --}}
 
                               <div class="col-xs-12 col-sm-12 col-md-12 text-center">
                                       <button type="submit" class="btn btn-primary">Guardar</button>
