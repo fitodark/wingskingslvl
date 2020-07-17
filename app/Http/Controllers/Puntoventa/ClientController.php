@@ -169,7 +169,8 @@ class ClientController extends Controller
             'name' => $request->get('clientName'),
             'phone' => $request->get('clientPhone'),
             'address' => $request->get('clientAddress'),
-            'reference' => $request->get('clientReference')
+            'reference' => $request->get('clientReference'),
+            'active' => 1
         ]);
         $client->save();
         if ($request->get('ventaid') && $request->get('type')) {
