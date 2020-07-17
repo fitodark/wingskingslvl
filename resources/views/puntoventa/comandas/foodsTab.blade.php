@@ -22,7 +22,7 @@
                                             @foreach ($foodProducts as $food)
                                             <tr>
                                                 <td>{{ $food->name }} - {{ $food->detail }}</td>
-                                                <td>@money($food->price)</td>
+                                                <td width="80px;">@money($food->price)</td>
                                                 @if ($food->type === 2)
                                                   <td>
                                                       <button type="button" class="btn btn-success" data-toggle="modal"

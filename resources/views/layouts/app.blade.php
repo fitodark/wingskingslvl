@@ -232,7 +232,7 @@
 
           $.each($dataElements, function(i, elem){
             var childrens = [];
-            if (i > 0) {
+            if (i >= 0) {
               childrens = $(elem).children();
               if (childrens) {
                 data.push(
@@ -320,7 +320,7 @@
 
         var _token = $('input[name="_token"]').val();
         $.ajax({
-            url : "{{ route('clientes.store') }}",
+            url : "{{ route('addClient') }}",
             method : "POST",
             data : {
                 ventaid : ventaid,

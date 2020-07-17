@@ -70,7 +70,7 @@ class ClientController extends Controller
         }
 
         $attributes = array_merge($attributes, array("active" => 1));
-        Client::create($attributes);
+        $client = Client::create($attributes);
 
         if ($request->get('ventaid') && $request->get('type')) {
             $venta = Venta::find($request->get('ventaid'));
@@ -155,10 +155,10 @@ class ClientController extends Controller
 
     public function addClient (Request $request) {
         $validator = \Validator::make($request->all(), [
-          'name' => 'required',
-          'address' => 'required',
-          'phone' => 'required',
-          'reference' => 'required'
+          'clientName' => 'required',
+          'clientAddress' => 'required',
+          'clientPhone' => 'required',
+          'clientReference' => 'required'
         ]);
 
         if ($validator->fails()) {
