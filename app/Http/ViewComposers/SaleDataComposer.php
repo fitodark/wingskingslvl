@@ -16,10 +16,10 @@ class SaleDataComposer
         $dinerstable = Dinerstable::all();
         $drinkProducts = Product::where([
             ['type', '=', '1'],['active', '=', '1']
-        ])->paginate(10);
+        ])->paginate(15);
         $foodProducts = Product::orderBy('id', 'desc')->where([
             ['type', '=', '2'],['active', '=', '1']
-        ])->orWhere('type', 3)->paginate(10);
+        ])->orWhere('type', 3)->paginate(15);
 
         $piecesList = Config::orderBy('order', 'asc')->where('key', '=',  'pieces')->get();
         $flavorsList = Config::orderBy('order', 'asc')->where('key', '=',  'flavors')->get();

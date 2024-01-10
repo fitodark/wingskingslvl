@@ -1,36 +1,40 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="card">
-        <div class="card-header">Catalogo de Productos</div>
+<div class="container example-container">
+	
+	<div class="row">
+		<div class="col-md-10">
+			<p class="h2 text-black">Catálogo de Productos</p>
+		</div>
+		<div class="col-md-2">
+            <a href="{{ route('catalogos.create') }}" class="btn btn-outline-success btn-add-new" role="button">
+                <i class="fa-sharp fa-solid fa-plus"></i>
+				<span>Agregar</span>
+            </a>
+		</div>
+	</div>
 
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-
-
-            <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
-              <div class="btn-group" role="group" aria-label="First group">
-                <a href="{{ route('catalogos.create') }}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Agregar</a>
-              </div>
-            </div>
-
+    <div class="row">
+		<div class="col-md-12 py-3">
             @if ($message = Session::get('success'))
                 <div class="alert alert-success">
                     <p>{{ $message }}</p>
                 </div>
             @endif
-            </li>
-
-            <li class="list-group-item">
-            <table class="table table-striped">
+        </div>
+    </div>
+    <div class="row">
+		<div class="col-md-12">
+            
+            <table class="table table-striped table-sm">
                 <tr>
-                    <th>#</th>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Categoria</th>
-                    <th width="280px">Acción</th>
+                    <th width="5%">#</th>
+                    <th width="30%">Nombre</th>
+                    <th width="30%">Descripción</th>
+                    <th width="10%">Precio</th>
+                    <th width="15%">Categoria</th>
+                    <th width="20%">Acción</th>
                 </tr>
                 @foreach ($products as $product)
                 <tr>
@@ -44,20 +48,24 @@
 
                             {{-- <a class="btn btn-info" href="{{ route('catalogos.show',$product->id) }}">Detalles</a> --}}
 
-                            <a class="btn btn-primary" href="{{ route('catalogos.edit',$product->id) }}">Editar</a>
+                            <!-- <a class="ico-add" href="{{ route('catalogos.edit',$product->id) }}"></a> -->
+                            <a href="{{ route('catalogos.edit',$product->id) }}">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
 
                             @csrf
                             @method('DELETE')
-
-                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                            <button type="submit" class="btn">
+                                <i class="ico-delete"></i>
+                            </button>
                         </form>
                     </td>
                 </tr>
                 @endforeach
             </table>
             {!! $products->links() !!}
-            </li>
-        </ul>
+            
+        </div>
     </div>
 </div>
 @endsection

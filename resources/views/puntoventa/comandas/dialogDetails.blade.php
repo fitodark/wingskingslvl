@@ -14,6 +14,7 @@
               <input type="text" hidden name="ventaId" id="ventaId">
               <input type="text" hidden name="tab" id="tab">
               <input type="text" hidden name="price" id="price">
+              <input type="text" hidden name="description" id="description">
               <div class="container">
               <div class="row">
                   <div class="col-md-12">
@@ -28,14 +29,18 @@
                           <label for="quantity" class="col-form-label">Cantidad:</label>
                           <input name="cantidad" type="text" class="form-control" id="quantity">
                       </div>
+                      <div class="form-group">
+                          <label for="description" class="col-form-label">Descripcion:</label>
+                          <input name="description" type="text" class="form-control" id="description">
+                      </div>
                   </div>
               </div>
               </div>
 
           </div>
           <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Agregar</button>
+              <button type="button" class="btn-outline-secondary custom" data-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary custom">Agregar</button>
           </div>
       </form>
     </div>

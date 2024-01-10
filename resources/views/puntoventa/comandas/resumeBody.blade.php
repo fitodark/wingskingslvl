@@ -1,12 +1,10 @@
-<ul class="list-group list-group-flush">
-    <li class="list-group-item">
-        <div class="form-row">
-            <div class="form-group col-md-6">
+<div class="row justify-content-center">
+    <div class="col-6 py-2">
                 <label for="location">Ubicación</label>
                 <input class="form-control" id="folio" type="text" placeholder=".form-control-sm"
                 value="{{ ($venta->type == 1)? 'Local':'Domicilio'}}" readonly>
-            </div>
-            <div class="form-group col-md-6">
+    </div>
+    <div class="col-6 py-2">
                 @if ($venta->type == 2)
                     <label for="location">Cliente</label>
                     <input class="form-control" id="location" type="text" placeholder=".form-control-sm"
@@ -16,22 +14,19 @@
                     <input class="form-control" id="location" type="text" placeholder=".form-control-sm"
                     value="{{ $venta->dinerstable->name }}" readonly>
                 @endif
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
+    </div>
+</div>
+<div class="row justify-content-center">
+    <div class="col-6 py-2">
                 <label for="total">Total</label>
                 <input class="form-control" id="total" type="text" placeholder=".form-control-sm"
                 value="@money($venta->montoTotal)" readonly>
-            </div>
-            <div class="form-group col-md-6">
-            </div>
-        </div>
-    </li>
-    <li class="list-group-item">
-        <div class="row justify-content-md-center">
-            <div class="col-md-5">
-              <table class="table table-striped">
+    </div>
+    <div class="col-6 py-2"></div>
+</div>
+<div class="row justify-content-center">
+    <div class="col-6 py-5">
+              <table class="table table-striped table-sm">
                   <tr>
                       <th>Nombre</th>
                       <th>Cantidad</th>
@@ -64,11 +59,9 @@
                   </tr>
                   @endforelse
               </table>
-            </div>
-            <div class="col-md-1">
-            </div>
-            <div class="col-md-6">
-                <table class="table table-striped">
+    </div>
+    <div class="col-6 py-5">
+                <table class="table table-striped table-sm">
                     <tr>
                         <th>Nombre</th>
                         <th>Descripción</th>
@@ -91,7 +84,5 @@
                     </tr>
                     @endforelse
                 </table>
-            </div>
-        </div>
-    </li>
-</ul>
+    </div>
+</div>

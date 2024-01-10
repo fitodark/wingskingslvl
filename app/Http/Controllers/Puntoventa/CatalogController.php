@@ -25,7 +25,7 @@ class CatalogController extends Controller
      */
     public function index()
     {
-        $products = Product::where('active', 1)->orderBy('id', 'desc')->latest()->paginate(10);
+        $products = Product::where('active', 1)->orderBy('id', 'desc')->latest()->paginate(15);
 
         return view('puntoventa.productos.index',compact('products'))
             ->with('i', (request()->input('page', 1) - 1) * 10);

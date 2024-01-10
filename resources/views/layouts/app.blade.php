@@ -7,97 +7,144 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'TPV') }}</title>
 
     <!-- Fonts -->
     <!--<link rel="dns-prefetch" href="//fonts.gstatic.com">-->
     <!--<link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">-->
+    <script src="https://kit.fontawesome.com/e862dac06d.js" crossorigin="anonymous"></script>
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    {{-- <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}" media="screen"> --}}
-    {{-- <link rel="stylesheet" href="../_assets/css/custom.min.css"> --}}
+    <link href="{{ asset('css/mystyle.css') }}" rel="stylesheet">
+    <!-- <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/custom.min.css') }}" rel="stylesheet"> -->
+    
 
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
-          @guest
-            <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-              </div>
-            @else
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="navbar-nav mr-auto">
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{ config('app.name', 'Laravel') }}
-                  </a>
-                  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{{ url('/home') }}">Home</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{{ url('/comandas') }}">Comandas</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{{ route('summary.index') }}">Resumen de Ventas</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{{ url('/catalogos') }}">Catalogos</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{{ route('clientes') }}">Clientes</a>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            @endguest
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav mr-auto">
-
-                    </ul>
-
-                    <!-- Right Side Of Navbar -->
-                    <ul class="navbar-nav ml-auto">
-                        <!-- Authentication Links -->
-                        @guest
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                            </li>
-                            @if (Route::has('register'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                </li>
-                            @endif
-                        @else
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->name }} <span class="caret"></span>
-                                </a>
-
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                        onclick="event.preventDefault();
-                                        document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
-                                    </a>
-
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                        @csrf
-                                    </form>
-                                </div>
-                            </li>
-                        @endguest
-                    </ul>
+        <nav class="navbar navbar-expand-lg navbar-light header-bg">
+            @guest
+                <div class="container">
+                    <a class="navbar-brand" href="{{ url('/') }}">
+                        <i class="fa-solid fa-house-user"></i>
+                    </a>
                 </div>
-            </div>
+            @else
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa-solid fa-house-user"></i>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{{ url('/home') }}">Home</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ url('/comandas') }}">Comandas</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ route('summary.index') }}">Resumen de Ventas</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ url('/catalogos') }}">Productos</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ route('clientes') }}">Clientes</a>
+                    </div>
+                    </li>
+                </ul>
+                </div>
+            @endguest
+            <!-- Right Side Of Navbar -->
+            <ul class="navbar-nav ml-auto my-2 my-lg-0">
+                <!-- Authentication Links -->
+                @guest
+                    <li class="nav-item mr-sm-2">
+                        <a class="nav-link text-black" href="{{ route('login') }}">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                            <span>{{ __('Ingresar') }}</span>
+                        </a>
+                    </li>
+                    @if (Route::has('register'))
+                        <li class="nav-item my-2 my-sm-0">
+                            <a class="nav-link text-black" href="{{ route('register') }}">{{ __('Registrar') }}</a>
+                        </li>
+                    @endif
+                @else
+                    <li class="nav-item dropdown">
+                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                            <!-- {{ Auth::user()->name }}  -->
+                            <i class="fa-solid fa-user"></i>
+                            <span class="caret"></span>
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ route('logout') }}"
+                                onclick="event.preventDefault();
+                                document.getElementById('logout-form').submit();">
+                                {{ __('Logout') }}
+                            </a>
+
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
+                        </div>
+                    </li>
+                @endguest
+            </ul>
         </nav>
 
         <main class="py-4">
             @yield('content')
         </main>
+
+        <footer class="text-center text-white fixed-bottom footer-bg">
+            <!-- Grid container -->
+            <div class="container pt-2">
+                <!-- Section: Social media -->
+                <section class="">
+                <div class="container text-center text-md-start mt-5">
+                    <!-- Grid row -->
+                    <div class="row mt-3">
+                    <!-- Grid column -->
+                    <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-3">
+                        <!-- Content -->
+                        <a class="btn btn-link btn-floating btn-lg text-black m-1" href="#!" role="button" >
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                    </div>
+                    <!-- Grid column -->
+
+                    <!-- Grid column -->
+                    <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-3">
+                        <!-- Links -->
+                        <a class="btn btn-link btn-floating btn-lg text-black m-1" href="#!" role="button" data-mdb-ripple-color="dark">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
+                    <!-- Grid column -->
+
+                    <!-- Grid column -->
+                    <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-3">
+                        <!-- Links -->
+                        <a class="btn btn-link btn-floating btn-lg text-black m-1" href="#!" role="button" data-mdb-ripple-color="dark">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                    <!-- Grid column -->
+                    </div>
+                    <!-- Grid row -->
+                </div>
+                </section>
+                <!-- Section: Social media -->
+            </div>
+            <!-- Grid container -->
+
+            <!-- Copyright -->
+            <div class="text-center text-black p-2 footer-bg">
+                ©2022 Copyright:
+                <a class="text-dark" href="https://ftp.com/">ftp.com</a>
+            </div>
+            <!-- Copyright -->
+        </footer>
     </div>
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
@@ -128,7 +175,7 @@
         }
     });
     $('#dialogDetails').on('show.bs.modal', function (event) {
-        console.log("show modal...");
+        console.log("show simple modal...");
         var button = $(event.relatedTarget);
         var id = button.data('productid');
         var venta = button.data('ventaid');
@@ -224,7 +271,7 @@
           cols += '<td id="' + valuePieces + '">' + labelPieces + '</td>';
           cols += '<td id="' + valueFlavors + '">' + labelFlavors + '</td>';
 
-          cols += '<td><button type="button" class="ibtnDel btn btn-danger">Eliminar</button></td>';
+          cols += '<td><button type="button" class="ibtnDel btn btn-outline-danger btn-sm">Eliminar</button></td>';
           newRow.append(cols);
           $("table.order-list").append(newRow);
           var $dataElements = $('#myTable').find('tr');

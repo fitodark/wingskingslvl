@@ -1,36 +1,40 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="card">
-        <div class="card-header">Catalogo de Clientes</div>
+<div class="container example-container">
+	
+	<div class="row">
+		<div class="col-md-10">
+			<p class="h2 text-black">Catálogo de Clientes</p>
+		</div>
+		<div class="col-md-2">
+            <a href="{{ route('clientes.create') }}" class="btn btn-outline-success btn-add-new" role="button">
+                <i class="fa-sharp fa-solid fa-plus"></i>
+				<span>Agregar</span>
+            </a>
+		</div>
+	</div>
 
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-
-
-            <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
-              <div class="btn-group" role="group" aria-label="First group">
-                <a href="{{ route('clientes.create') }}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Agregar</a>
-              </div>
-            </div>
-
+    <div class="row">
+		<div class="col-md-12 py-3">
             @if ($message = Session::get('success'))
                 <div class="alert alert-success">
                     <p>{{ $message }}</p>
                 </div>
             @endif
-            </li>
-
-            <li class="list-group-item">
-            <table class="table table-striped">
+        </div>
+    </div>
+    <div class="row">
+		<div class="col-md-12">
+            
+            <table class="table table-striped table-sm">
                 <tr>
-                    <th>#</th>
-                    <th>Nombre</th>
-                    <th>Dirección</th>
-                    <th>Telefono</th>
-                    <th>Referencia</th>
-                    <th width="280px">Acción</th>
+                    <th width="5%">#</th>
+                    <th width="20%">Nombre</th>
+                    <th width="25%">Dirección</th>
+                    <th width="10%">Telefono</th>
+                    <th width="25%">Referencia</th>
+                    <th width="15%">Acción</th>
                 </tr>
                 @foreach ($clients as $client)
                 <tr>
@@ -44,20 +48,24 @@
 
                             {{-- <a class="btn btn-info" href="{{ route('clientes.show',$client->id) }}">Detalles</a> --}}
 
-                            <a class="btn btn-primary" href="{{ route('clientes.edit',$client->id) }}">Editar</a>
+                            <!-- <a class="ico-add" href="{{ route('clientes.edit',$client->id) }}"></a> -->
+                            <a href="{{ route('clientes.edit',$client->id) }}">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
 
                             @csrf
                             @method('DELETE')
-
-                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                            <button type="submit" class="btn">
+                                <i class="ico-delete"></i>
+                            </button>
                         </form>
                     </td>
                 </tr>
                 @endforeach
             </table>
             {!! $clients->links() !!}
-            </li>
-        </ul>
+            
+        </div>
     </div>
 </div>
 @endsection

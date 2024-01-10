@@ -45,7 +45,7 @@
               <div class="row">
                   {{-- <div class="col-md-10"></div> --}}
                   <div class="col-md-3 offset-md-9">
-                      <button type="button" class="btn btn-success" id="addrow">Agregar</button>
+                      <button type="button" class="btn btn-outline-success btn-sm" id="addrow">Agregar</button>
                   </div>
               </div>
               <br>
@@ -67,8 +67,8 @@
               </div>
           </div>
           <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-primary" id="addFoodRow">Agregar</button>
+              <button type="button" class="btn-outline-secondary custom" data-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary custom" id="addFoodRow">Agregar</button>
           </div>
       </form>
     </div>

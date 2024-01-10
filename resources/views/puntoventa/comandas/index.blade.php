@@ -1,34 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="card">
-        <div class="card-header">Comandas</div>
+<div class="container example-container">
+	
+	<div class="row">
+		<div class="col-md-10">
+			<p class="h2 text-black">Comandas</p>
+		</div>
+		<div class="col-md-2 ">
+			<a class="btn btn-outline-success btn-add-new" href="{{ route('ventastore') }}" role="button">
+				<i class="fa-sharp fa-solid fa-plus"></i>
+				<span>Agregar</span>
+			</a>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-12 py-3">
+			@include('puntoventa.comandas.ventas')
+		</div>
+	</div>
 
-          <ul class="list-group list-group-flush">
-              <li class="list-group-item">
-                <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
-                  <div class="btn-group" role="group" aria-label="First group">
-                    <a href="{{ route('ventastore') }}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Agregar</a>
-                  </div>
-                </div>
-              </li>
-              <li class="list-group-item">
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <strong>Whoops!</strong> There were some problems with your input.<br><br>
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                @include('puntoventa.comandas.ventas')
-              </li>
-          </ul>
-    </div>
+	
 </div>
 @include('puntoventa.comandas.ventaDetails')
 @include('puntoventa.comandas.finalizarVenta')

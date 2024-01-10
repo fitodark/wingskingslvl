@@ -1,0 +1,151 @@
+html, body {
+    background-color:#F8FAFC !important;
+    color: #636b6f !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 200 !important;
+    height: 100vh !important;
+    margin: 0 !important;
+}
+
+.full-height {
+    height: 100vh;
+}
+
+.flex-center {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.position-ref {
+    position: relative;
+}
+
+.top-right {
+    position: absolute;
+    right: 10px;
+    top: 18px;
+}
+
+.content {
+    text-align: center;
+}
+
+.title {
+    font-size: 84px;
+}
+
+.links > a {
+    color: #636b6f;
+    padding: 0 25px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .1rem;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.m-b-md {
+    margin-bottom: 30px;
+}
+
+.text-black {
+    color: #000000 !important;
+}
+
+.header-bg {
+    background-color: #DF8B33 !important;
+}
+
+.footer-bg {
+    background-color: #F8FAFC !important;
+}
+
+.card-bg {
+    background-color: #F8FAFC !important;
+    padding-top: 45px;
+    font-size: large;
+}
+
+.btn-ingresar {
+    color: #fff !important;
+    background-color: #DF8B33 !important;
+    border-color: #DF8B33 !important;
+}
+
+.btn-add-new {
+    float: inline-end;
+}
+
+.hero-image {
+    background-image: url(/img/wings_back.png);
+    width: 100% !important;
+    height: 100% !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    position: relative !important;
+}
+
+.ico-add {
+    background-image: url(/img/add.svg);
+    background-repeat: no-repeat !important;
+    padding: 5px 5px 10px 40px;
+}
+
+.ico-print {
+    background-image: url(/img/print.svg);
+    background-repeat: no-repeat !important;
+    padding: 5px 5px 10px 30px;
+}
+
+.ico-delete {
+    background-image: url(/img/delete.svg);
+    background-repeat: no-repeat !important;
+    padding: 5px 5px 10px 30px;
+}
+
+.ico-details {
+    background-image: url(/img/details.svg);
+    background-repeat: no-repeat !important;
+    padding: 5px 5px 10px 40px;
+}
+
+.example-container {
+    width: 1024px;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+    color: #fff;
+    border-color: #DF8B33;
+    background-color: #DF8B33;
+}
+
+.custom.btn-primary {
+    width: 100%;
+    background-color: #DF8B33; /*2cc8df*/
+    border: none;
+    color: white;
+    font-weight:450;
+}
+
+.custom.btn-primary:hover {
+    background-color: #DF8B33;
+    border-color: #DF8B33;
+    outline: none;
+    box-shadow: none;
+}
+  
+.custom.btn-primary:focus {
+    background-color: #DF8B33;
+    outline: none;
+    box-shadow: none;
+}
+
+.custom.btn-outline-secondary {
+    width: 100%;
+    font-weight:450;
+    color: #6c757d;
+    background-color: #ffffff;
+    border-color: #6c757d;
+}

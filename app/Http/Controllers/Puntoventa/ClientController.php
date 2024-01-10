@@ -21,7 +21,7 @@ class ClientController extends Controller
      */
     public function index()
     {
-        $clients = Client::where('active', 1)->orderBy('id', 'desc')->latest()->paginate(10);
+        $clients = Client::where('active', 1)->orderBy('id', 'desc')->latest()->paginate(15);
 
         return view('puntoventa.clientes.index',compact('clients'))
             ->with('i', (request()->input('page', 1) - 1) * 10);

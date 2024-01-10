@@ -49,7 +49,8 @@ class VentasProductosController extends Controller
                 'IdProducto' => $request->get('idProduct'),
                 'cantidad' => $request->get('cantidad'),
                 'montoVenta' => floatval($request->get('cantidad')) * floatval($request->get('price')),
-                'order' => $venta->order
+                'order' => $venta->order,
+                'descripcion' => $request->get('description'),
             ]);
         }
 

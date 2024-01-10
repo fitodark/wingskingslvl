@@ -6,6 +6,7 @@ use App\Client;
 use App\Venta;
 use App\VentasProductos;
 use App\Dinerstable;
+use App\Config;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -110,8 +111,7 @@ class VentasController extends Controller
      * @param  \App\Venta  $venta
      * @return \Illuminate\Http\Response
      */
-    public function show(Venta $venta)
-    {
+    public function show(Venta $venta) {
         //
     }
 
@@ -121,8 +121,7 @@ class VentasController extends Controller
      * @param  \App\Venta  $venta
      * @return \Illuminate\Http\Response
      */
-    public function edit(Venta $venta)
-    {
+    public function edit(Venta $venta) {
         //
     }
 
@@ -133,8 +132,7 @@ class VentasController extends Controller
      * @param  \App\Venta  $venta
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Venta $venta)
-    {
+    public function update(Request $request, Venta $venta) {
         if ($venta != null) {
             $venta->type = $request->get('type');
             if ($request->get('type') == 1) {
@@ -155,8 +153,7 @@ class VentasController extends Controller
      * @param  \App\Venta  $venta
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Venta $venta)
-    {
+    public function destroy(Venta $venta) {
         //
     }
 
@@ -201,6 +198,8 @@ class VentasController extends Controller
     }
 
     public function printProductsOrder(Request $request, Venta $venta) {
+        $printStatus = Config::where('key', '=', 'printStatus')->first();
+
         $arrayBebidas = VentasProductos::where('IdVenta', $venta->ventaId)
             ->where('order', $venta->order)
             ->whereHas('product', function (Builder $query) {
@@ -213,7 +212,9 @@ class VentasController extends Controller
                 $query->where('type', '=', 2)->orWhere('type', '=', 3);
             })->get();
 
-        $this->printProducts($venta, $arrayBebidas, $arrayComidas);
+        if ($printStatus->value == 'true') {
+            $this->printProducts($venta, $arrayBebidas, $arrayComidas);
+        }
         return redirect()->route('finalizarVenta', [$venta]);
     }
 }

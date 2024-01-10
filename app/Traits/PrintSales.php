@@ -11,8 +11,7 @@ use Mike42\Escpos\EscposImage;
 trait PrintSales {
 
     public function printVenta(Venta $venta, $options = null) {
-        // $printKitchen = Config::where('key', '=', 'printKitchen')->first();
-        // $printBar = Config::where('key', '=', 'printBar')->first();
+        $printStatus = Config::where('key', '=', 'printStatus')->first();
         $printPrincipal = Config::where('key', '=', 'printPrincipal')->first();
         $logoTicket = Config::where('key', '=', 'logoTicket')->first();
         $titleTicket = Config::where('key', '=', 'titleTicket')->first();
@@ -22,6 +21,7 @@ trait PrintSales {
         $fooderTicket = Config::where('key', '=', 'fooderTicket')->first();
 
         try {
+            if ($printStatus->value == 'true') {
             $connector = new WindowsPrintConnector($printPrincipal->value);
             $printer = new Printer($connector);
 
@@ -78,6 +78,7 @@ trait PrintSales {
 
             $printer->cut();
             $printer->close();
+            }
         } catch(Exception $e) {
             echo "Couldn't print to this printer: " . $e -> getMessage() . "\n";
         }
