@@ -71,6 +71,9 @@
                                     <tr>
                                 @endif
                                     <td>{{ $record['product']->name }} - {{ $record['product']->detail }}
+                                        @if ($record->product->type != 2 && is_null($record['descripcion'] == false))
+                                            [{{ $record['descripcion'] }}]
+                                        @endif
                                         @if ($record->product->type == 2)
                                             <br>
                                             @foreach (json_decode($record['descripcion'], TRUE) as $key => $value)
