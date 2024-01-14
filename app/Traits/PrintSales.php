@@ -155,7 +155,7 @@ trait PrintSales {
             $printer->setJustification(Printer::JUSTIFY_LEFT);
             $printer->text($ventaProducto->cantidad . " x " . $ventaProducto->product->name
                 .(is_null($ventaProducto->product->detail)?  "\n":' - '  . $ventaProducto->product->detail . "\n")
-                .(is_null($ventaProducto->descripcion)? '':' - '  . $ventaProducto->descripcion . "\n"));
+                .(is_null($ventaProducto->descripcion)? '':"["  . $ventaProducto->descripcion . "]" . "\n"));
 
             if ($ventaProducto->product->type == 2 ) {
                 $printer->setJustification(Printer::JUSTIFY_RIGHT);
