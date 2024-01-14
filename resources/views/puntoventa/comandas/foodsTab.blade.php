@@ -72,7 +72,7 @@
                                 @endif
                                     <td>{{ $record['product']->name }} - {{ $record['product']->detail }}
                                         @if ($record->product->type != 2 && is_null($record['descripcion']) == false)
-                                            {{ $record['descripcion'] }}
+                                            [{{ $record['descripcion'] }}]
                                         @endif
                                         @if ($record->product->type == 2)
                                             <br>
