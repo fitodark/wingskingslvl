@@ -96,55 +96,6 @@
             @yield('content')
         </main>
 
-        <footer class="text-center text-white fixed-bottom footer-bg">
-            <!-- Grid container -->
-            <div class="container pt-2">
-                <!-- Section: Social media -->
-                <section class="">
-                <div class="container text-center text-md-start mt-5">
-                    <!-- Grid row -->
-                    <div class="row mt-3">
-                    <!-- Grid column -->
-                    <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-3">
-                        <!-- Content -->
-                        <a class="btn btn-link btn-floating btn-lg text-black m-1" href="#!" role="button" >
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                    </div>
-                    <!-- Grid column -->
-
-                    <!-- Grid column -->
-                    <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-3">
-                        <!-- Links -->
-                        <a class="btn btn-link btn-floating btn-lg text-black m-1" href="#!" role="button" data-mdb-ripple-color="dark">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                    </div>
-                    <!-- Grid column -->
-
-                    <!-- Grid column -->
-                    <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-3">
-                        <!-- Links -->
-                        <a class="btn btn-link btn-floating btn-lg text-black m-1" href="#!" role="button" data-mdb-ripple-color="dark">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                    </div>
-                    <!-- Grid column -->
-                    </div>
-                    <!-- Grid row -->
-                </div>
-                </section>
-                <!-- Section: Social media -->
-            </div>
-            <!-- Grid container -->
-
-            <!-- Copyright -->
-            <div class="text-center text-black p-2 footer-bg">
-                ©2022 Copyright:
-                <a class="text-dark" href="https://ftp.com/">ftp.com</a>
-            </div>
-            <!-- Copyright -->
-        </footer>
     </div>
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>

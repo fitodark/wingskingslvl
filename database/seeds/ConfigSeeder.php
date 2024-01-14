@@ -186,7 +186,7 @@ class ConfigSeeder extends Seeder
 	
         Config::Create([
           'key' => 'printStatus',
-          'value' => true
+          'value' => 'true'
         ]);
     }
 }
