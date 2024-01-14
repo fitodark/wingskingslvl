@@ -145,7 +145,7 @@ class ClientController extends Controller
     public function getQueryClient (Request $request) {
         if ($request->get('query')) {
             $query = $request->get('query');
-            $data = Client::where('name', 'like', '%'.$query.'%')->get();
+            $data = Client::where('name', 'like', '%'.$query.'%')->orWhere('phone', 'like', $query.'%')->get();
             return response()->json($data);
         } else {
             return [];

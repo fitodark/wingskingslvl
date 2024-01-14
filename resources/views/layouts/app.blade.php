@@ -117,11 +117,9 @@
             });
         },
         displayText: function (item) {
-            return item.name + ', ' + item.address;
+            return '[' + item.name + ']' + item.name + ' - ' + item.address;
         },
         afterSelect: function (item) {
-            console.log('afterSelect');
-            console.log(item);
             $('#clientId').val(item.id);
         }
     });
