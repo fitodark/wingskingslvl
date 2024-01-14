@@ -149,5 +149,44 @@ class ConfigSeeder extends Seeder
           'order' => '10'
         ]);
 
+        Config::Create([
+          'key' => 'flavors',
+          'value' => 'Valentina',
+          'order' => '11'
+        ]);
+
+        Config::Create([
+          'key' => 'flavors',
+          'value' => 'Infierno',
+          'order' => '12'
+        ]);
+
+        Config::Create([
+          'key' => 'flavors',
+          'value' => 'TNT',
+          'order' => '13'
+        ]);
+
+        Config::Create([
+          'key' => 'flavors',
+          'value' => 'Maracuya',
+          'order' => '14'
+        ]);
+
+        Config::Create([
+          'key' => 'flavors',
+          'value' => 'Natural',
+          'order' => '15'
+        ]);
+
+        Config::Create([
+          'key' => 'printPrincipal',
+          'value' => 'POS-XThermalPrinter'
+        ]);
+	
+        Config::Create([
+          'key' => 'printStatus',
+          'value' => true
+        ]);
     }
 }
