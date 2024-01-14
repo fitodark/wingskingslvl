@@ -154,8 +154,8 @@ trait PrintSales {
             /*Alinear a la izquierda para la cantidad y el nombre*/
             $printer->setJustification(Printer::JUSTIFY_LEFT);
             $printer->text($ventaProducto->cantidad . " x " . $ventaProducto->product->name
-                .is_null($ventaProducto->product->detail)?  "\n":' - '  . $ventaProducto->product->detail . "\n"
-                .is_null($ventaProducto->description)? '':' - '  . $ventaProducto->description . "\n");
+                .(is_null($ventaProducto->product->detail)?  "\n":' - '  . $ventaProducto->product->detail . "\n")
+                .(is_null($ventaProducto->description)? '':' - '  . $ventaProducto->description . "\n"));
 
             if ($ventaProducto->product->type == 2 ) {
                 $printer->setJustification(Printer::JUSTIFY_RIGHT);
