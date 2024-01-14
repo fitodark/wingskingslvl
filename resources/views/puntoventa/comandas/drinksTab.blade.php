@@ -56,7 +56,11 @@
                                 @else
                                     <tr>
                                 @endif
-                                    <td>{{ $record['product']->name }} - {{ $record['product']->detail }}</td>
+                                    <td>{{ $record['product']->name }} - {{ $record['product']->detail }}
+                                        @if ($record->product->type != 2 && is_null($record['descripcion']) == false)
+                                            <br>[{{ $record['descripcion'] }}]
+                                        @endif
+                                    </td>
                                     <td>{{ $record['cantidad'] }}</td>
                                     <td>@money($record['montoVenta'])</td>
                                     <td>
