@@ -1,4 +1,4 @@
-<div class="modal" id="addClientModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="addClientModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document" style="z-index: 999999999;">
     <div class="modal-content">
       <div class="modal-header">
@@ -7,39 +7,18 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <form method="POST" action="{{ route('addClient') }}">
+      <form class="needs-validation" method="POST" action="{{ route('addClient') }}" novalidate>
           @csrf
           <div class="modal-body">
-              <input type="text" hidden name="ventaid" id="ventaid">
-              <input type="text" hidden name="type" id="type">
-              <div class="form-row">
-                  <div class="form-group col-md-6">
-                      <label for="clientName">Nombre</label>
-                      <input id="clientName" name="clientName" type="text" class="form-control" placeholder="Nombre del cliente">
-                  </div>
-                  <div class="form-group col-md-6">
-                      <label for="clientPhone">Teléfono</label>
-                      <input id="clientPhone" name="clientPhone" type="text" class="form-control" placeholder="Teléfono del cliente">
-                  </div>
-              </div>
-              <div class="form-row">
-                  <div class="form-group col-md-6">
-                      <label for="clientAddress">Dirección</label>
-                      <input id="clientAddress" name="clientAddress" type="text" class="form-control" placeholder="Dirección del cliente">
-                  </div>
-                  <div class="form-group col-md-6">
-                      <label for="clientReference">Referencia</label>
-                      <input id="clientReference" name="clientReference" type="text" class="form-control" placeholder="Referencia">
-                  </div>
-              </div>
+              @include('puntoventa.clientes.clientBodyForm', array('disabled'=>'false'))
           </div>
-          <div class="alert alert-danger" style="display:none"></div>
+          <!-- <div class="alert alert-danger" style="display:none"></div> -->
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-primary" id="btnAddClientt">Agregar</button>
+              <!-- <button type="submit" class="btn btn-primary" id="btnAddClient">Agregar</button> -->
+              <button type="submit" class="btn btn-primary">Agregar</button>
           </div>
       </form>
     </div>
   </div>
-</div>
 </div>

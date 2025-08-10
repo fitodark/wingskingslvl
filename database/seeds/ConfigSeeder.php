@@ -15,12 +15,12 @@ class ConfigSeeder extends Seeder
         //
         Config::Create([
           'key' => 'printKitchen',
-          'value' => 'POS-80C'
+          'value' => 'XP-80COCINA'
         ]);
 
         Config::Create([
           'key' => 'printBar',
-          'value' => 'POS-80C'
+          'value' => 'XP-80BARRA'
         ]);
 
         Config::Create([
@@ -181,12 +181,22 @@ class ConfigSeeder extends Seeder
 
         Config::Create([
           'key' => 'printPrincipal',
-          'value' => 'POS-XThermalPrinter'
+          'value' => 'XP-80C1'
         ]);
 	
         Config::Create([
           'key' => 'printStatus',
           'value' => 'true'
+        ]);
+
+        Config::Create([
+          'key' => 'discountPercentage',
+          'value' => '5'
+        ]);
+
+        Config::Create([
+          'key' => 'salesNumber',
+          'value' => '3'
         ]);
     }
 }

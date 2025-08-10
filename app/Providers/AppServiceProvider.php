@@ -42,7 +42,10 @@ class AppServiceProvider extends ServiceProvider
                       echo 'Local';
                       break;
                   case 2:
-                      echo '<b>Domicilio</b>';
+                      echo 'Domicilio';
+                      break;
+                  case 3:
+                      echo 'Domicilio';
                       break;
                   default:
                       echo 'No asignado';
@@ -82,6 +85,17 @@ class AppServiceProvider extends ServiceProvider
                       echo 'Cocina (General)';
                       break;
               } ?>";
+        });
+
+        Blade::directive('discount', function ($discountPercentage = 0) {
+            return "<?php echo $discountPercentage. ' %'; ?>";
+        });
+
+        Blade::directive('discountApply', function ($discountApply) {
+            return "<?php echo empty($discountApply)? '':
+                (($discountApply==0)? '':
+                    (($discountApply==1)? 'Aplica Descuento':'')
+                ); ?>";
         });
 
     }

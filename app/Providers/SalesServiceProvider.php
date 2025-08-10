@@ -26,5 +26,8 @@ class SalesServiceProvider extends ServiceProvider
     {
         View::composer('puntoventa.comandas.index',
            'App\Http\ViewComposers\SalesComposer');
+        
+        View::composer('puntoventa.comandas.index',
+           'App\Http\ViewComposers\DiscountDataComposer');
     }
 }

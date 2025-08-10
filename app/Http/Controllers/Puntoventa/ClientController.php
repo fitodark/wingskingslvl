@@ -5,10 +5,16 @@ namespace App\Http\Controllers\Puntoventa;
 use App\Client;
 use App\Venta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+
+use App\Traits\ComandasDataLibrary;
 
 class ClientController extends Controller
 {
+
+    use ComandasDataLibrary;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -154,32 +160,113 @@ class ClientController extends Controller
     }
 
     public function addClient (Request $request) {
-        $validator = \Validator::make($request->all(), [
-          'clientName' => 'required',
-          'clientAddress' => 'required',
-          'clientPhone' => 'required',
-          'clientReference' => 'required'
-        ]);
+        // $validator = \Validator::make($request->all(), [
+        //     'name' => ['required', function ($attribute, $value, $fail) {
+        //         if (empty($value)) {
+        //             $fail('El nombre del cliente es obligatorio');
+        //         }
+        //     }],
+        //     'phone' => ['required', function ($attribute, $value, $fail) {
+        //         if (empty($value)) {
+        //             $fail('El Telefono del cliente es obligatorio');
+        //         }
+        //     }],
+        //     'address' => ['required', function ($attribute, $value, $fail) {
+        //         if (empty($value)) {
+        //             $fail('La dirección del cliente es obligatoria');
+        //         }
+        //     }],
+        //     'reference' => ['required', function ($attribute, $value, $fail) {
+        //         if (empty($value)) {
+        //             $fail('La referencia del cliente es obligatoria');
+        //         }
+        //     }]
+        // ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()->all()]);
-        }
+        $venta = Venta::find($request->get('ventaid'));
+        // if ($validator->fails()) {
+        //     return response()->json([
+        //         'errors' => $validator->errors()->all(),
+        //         'success'=>true
+        //     ]);
+        // }
 
         $client = new Client([
-            'name' => $request->get('clientName'),
-            'phone' => $request->get('clientPhone'),
-            'address' => $request->get('clientAddress'),
-            'reference' => $request->get('clientReference'),
+            'name' => $request->get('name'),
+            'phone' => $request->get('phone'),
+            'address' => $request->get('address'),
+            'reference' => $request->get('reference'),
             'active' => 1
         ]);
         $client->save();
-        if ($request->get('ventaid') && $request->get('type')) {
-            $venta = Venta::find($request->get('ventaid'));
-            $venta->client_id = $client->id;
-            $venta->type = $request->get('type');
+
+        $clientDB = Client::find($client->id);
+        if ($venta) {
+            $venta->client_id = $clientDB->id;
+            //$venta->type = $request->get('type');
             $venta->save();
         }
-        return redirect()->route('drinksTab', [$venta]);
+        Log::info('venta: '.$venta->ventaId);
+        Log::info('cliente: '.$client->id);
+
+        return redirect()->route('create', [$venta, $clientDB]);
+    }
+
+    public function updateClient (Request $request) {
+        $validator = \Validator::make($request->all(), [
+            'name' => ['required', function ($attribute, $value, $fail) {
+                if (empty($value)) {
+                    $fail('El nombre del cliente es obligatorio');
+                }
+            }]
+        ]);
+
+        $venta = Venta::find($request->get('ventaid'));
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()->all(),
+                'success'=>true
+            ]);
+        }
+        $dbClient = Client::find($request->get('clientId'));
+        $dbClient->update([
+            'name' => $request->get('name'),
+            'phone' => $request->get('phone'),
+            'address' => $request->get('address'),
+            'reference' => $request->get('reference'),
+            'active' => 1
+        ]);
+        return redirect()->route('create', [$venta, $dbClient]);
+    }
+
+    public function getClient (Request $request) {
+        if ($request->get('id')) {
+            $clientId = $request->get('id');
+            $objDiscountPercentage = $this->getDiscountPercentage($clientId);
+            return response()->json($objDiscountPercentage);
+        } else {
+            return [];
+        }
+    }
+
+    public function getClientDetails (Request $request) {
+        if ($request->get('id')) {
+            $clientId = $request->get('id');
+            $objDiscountPercentage = $this->getClientSalesDetails($clientId);
+            return response()->json($objDiscountPercentage);
+        } else {
+            return [];
+        }
+    }
+
+    public function getByClientAndDate(Request $request) {
+        if ($request->get('id')) {
+            $clientId = $request->get('id');
+            $objSales = $this->getVentaByClientAndDate($clientId, date('Y-m'));
+            return response()->json($objSales);
+        } else {
+            return [];
+        }
     }
 
 }

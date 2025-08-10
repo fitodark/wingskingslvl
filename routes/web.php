@@ -16,8 +16,8 @@ Route::get('/', function () {
 });
 // Route::view('/', 'welcome');
 
-Auth::routes([ 'register' => false ]);
-// Auth::routes([ 'register' => true ]);
+//Auth::routes([ 'register' => false ]);
+//Auth::routes([ 'register' => true ]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 
@@ -34,14 +34,15 @@ Route::resources([
   'clientes' => 'Puntoventa\ClientController'
   //'summary' => 'Puntoventa\SalesSummaryController'
 ]);
-Route::get('/create/{venta?}', 'Puntoventa\VentasController@create')->name('create');
+Route::get('/create/{venta?}/{client?}', 'Puntoventa\VentasController@create')->name('create');
+Route::put('/update/{venta?}/{client?}', 'Puntoventa\VentasController@update')->name('update');
 Route::get('/ventastore', 'Puntoventa\VentasController@store')->name('ventastore');
 Route::post('/cerrarVenta', 'Puntoventa\VentasController@cerrarVenta')->name('cerrarVenta');
 
-Route::get('/addMoreProducts/{venta}', 'Puntoventa\NavVentasController@addMoreProducts')->name('addMoreProducts');
-Route::get('/drinksTab/{venta}', 'Puntoventa\NavVentasController@drinksTab')->name('drinksTab');
-Route::get('/foodsTab/{venta}', 'Puntoventa\NavVentasController@foodsTab')->name('foodsTab');
-Route::get('/resumeTab/{venta}/{enableFooter?}', 'Puntoventa\NavVentasController@resumeTab')->name('resumeTab');
+Route::get('/addMoreProducts/{venta}/{client?}', 'Puntoventa\NavVentasController@addMoreProducts')->name('addMoreProducts');
+Route::get('/drinksTab/{venta}/{client?}', 'Puntoventa\NavVentasController@drinksTab')->name('drinksTab');
+Route::get('/foodsTab/{venta}/{client?}', 'Puntoventa\NavVentasController@foodsTab')->name('foodsTab');
+Route::get('/resumeTab/{venta}/{clientId?}/{enableFooter?}', 'Puntoventa\NavVentasController@resumeTab')->name('resumeTab');
 Route::post('/addProductVenta', 'Puntoventa\VentasProductosController@store')->name('addProductVenta');
 //Route::get('/addCliente/{venta}', 'Puntoventa\NavVentasController@addCliente')->name('addCliente');
 Route::get('/finalizarVenta/{venta}', 'Puntoventa\NavVentasController@finalizarVenta')->name('finalizarVenta');
@@ -53,6 +54,10 @@ Route::get('/ticket/print', 'PrinterController@print')->name('printticket');
 Route::get('/getQueryClient/{query?}', 'Puntoventa\ClientController@getQueryClient')->name('getQueryClient');
 Route::post('/addClient', 'Puntoventa\ClientController@addClient')->name('addClient');
 Route::get('/clientes', 'Puntoventa\ClientController@index')->name('clientes');
+Route::post('/updateClient', 'Puntoventa\ClientController@updateClient')->name('updateClient');
+Route::get('/getClient/{clientId?}', 'Puntoventa\ClientController@getClient')->name('getClient');
+Route::get('/getClientDetails/{clientId?}', 'Puntoventa\ClientController@getClientDetails')->name('getClientDetails');
+Route::get('/getByClientAndDate/{clientId?}', 'Puntoventa\ClientController@getByClientAndDate')->name('getByClientAndDate');
 
 Route::get('/venta/print/{venta?}', 'Puntoventa\VentasController@printSale')->name('ventaprint');
 Route::get('/printProductsOrder/{venta?}', 'Puntoventa\VentasController@printProductsOrder')->name('printProductsOrder');

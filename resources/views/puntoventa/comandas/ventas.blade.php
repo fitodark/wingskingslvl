@@ -16,15 +16,25 @@
         <td>{{ $venta->ventaId }}</td>
         <td>
             @if ($venta->type === 1)
-                {{ $venta->dinerstable->name }}
-            @else
+                <b>{{ $venta->dinerstable->name }}</b><br>
+                {{ !empty($venta->client)? $venta->client->name:'' }}
+                {{ !empty($venta->client)? '('.$venta->client->phone.')':'' }}
+            @endif 
+            @if ($venta->type === 2)
                 {{ $venta->client->name }} ( {{ $venta->client->phone }} )<br>
                 {{ $venta->client->address }}
+            @endif
+            @if ($venta->type === 3)
+                Para Llevar (Pasan a recoger)<br>
+                {{ !empty($venta->client)? $venta->client->name:'' }}
+                {{ !empty($venta->client)? '('.$venta->client->phone.')':'' }}
             @endif
         </td>
         <td>@ventaType($venta->type)</td>
         <td>@ventaEstatus($venta->estatus)</td>
-        <td>@money($venta->montoTotal)</td>
+        <td>@money($venta->montoTotal)<br>
+            @discountApply($venta->apply_discount)
+        </td>
         @if (Route::currentRouteName() == 'comandas')
         <td>
             <form method="POST">
@@ -32,7 +42,7 @@
                 <!-- <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">Detalles</button> -->
 
                 @if ($venta->estatus == 1)
-                    <a class="ico-add" href="{{ route('addMoreProducts', $venta->ventaId) }}"></a>
+                    <a class="ico-add" href="{{ route('addMoreProducts', [$venta->ventaId, $venta->client_id]) }}"></a>
                 @else
                     <button type="ico-add" class="btn btn-outline-info"></button>
                 @endif
@@ -44,14 +54,17 @@
                         data-target="#finalizarVentaModal"
                         data-ventaid="{{ $venta->ventaId }}"
                         data-location="{{ ($venta->type === 1)? $venta->dinerstable->name:$venta->client->address }}"
-                        data-total="{{ $venta->montoTotal }}">
+                        data-total="{{ $venta->montoTotal }}"
+                        data-montototaldescuento="{{ $venta->montoTotalDescuento }}"
+                        data-discountpercentage="{{ $discountPercentageObject->value }}"
+                        data-applydiscount="{{ $venta->apply_discount }}">
                         <i class="ico-delete"></i>
                     </button>
                 @else
                     <button type="ico-delete" class="btn btn-outline-success"></button>
                 @endif
 
-                <a class="ico-details" href="{{ route('resumeTab', [$venta->ventaId, 0]) }}"></a>
+                <a class="ico-details" href="{{ route('resumeTab', [$venta->ventaId, $venta->client_id]) }}"></a>
             </form>
         </td>
         @endif

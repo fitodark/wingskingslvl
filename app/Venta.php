@@ -28,6 +28,7 @@ class Venta extends Model
       'dinerstable_id',
       'client_id',
       'montoTotal',
+      'montoTotalDescuento',
       'montoSubtotal',
       'montoIva',
       'cantidadRecibida',
@@ -35,7 +36,8 @@ class Venta extends Model
       'type',
       'estatus',
       'activo',
-      'order'
+      'order',
+      'apply_discount'
     ];
 
     public function ventasProductos()

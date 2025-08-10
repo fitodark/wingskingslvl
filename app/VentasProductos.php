@@ -11,7 +11,7 @@ class VentasProductos extends Model
      *
      * @var string
      */
-    protected $table = 'ventasProductos';
+    protected $table = 'ventasproductos';
 
     /**
      * The primary key associated with the table.

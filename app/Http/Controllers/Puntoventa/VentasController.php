@@ -7,10 +7,12 @@ use App\Venta;
 use App\VentasProductos;
 use App\Dinerstable;
 use App\Config;
+use App\PromotionsClients;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
 
 use Mike42\Escpos\Printer;
@@ -18,11 +20,13 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\EscposImage;
 
 use App\Traits\PrintSales;
+use App\Traits\ComandasDataLibrary;
 
 class VentasController extends Controller
 {
 
     use PrintSales;
+    use ComandasDataLibrary;
 
     public function __construct()
     {
@@ -44,40 +48,39 @@ class VentasController extends Controller
      * @param  \App\Venta  $venta
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request, Venta $venta = null)
+    public function create(Venta $venta = null, Client $client = null)
     {
+        $discountPercentage = 0;
+        $objTotalSales = null;
         if ($venta != null) {
-            if ($venta->type == 1) {
-                if ($venta->dinerstable) {
-                    $table = $venta->dinerstable;
-                } else {
-                    $table = new Dinerstable();
-                }
-                $arrayClient = new Client([
-                  'name' => '',
-                  'phone' => '',
-                  'address' => '',
-                  'reference' => ''
-                ]);
+            if ($venta->dinerstable) {
+                $table = $venta->dinerstable;
             } else {
-                if ($venta->client) {
-                    $arrayClient = $venta->client;
-                } else {
-                    $arrayClient = new Client([
-                      'name' => '',
-                      'phone' => '',
-                      'address' => '',
-                      'reference' => ''
-                    ]);
-                }
-                $arrayClient = $venta->client;
                 $table = new Dinerstable();
             }
+
             $action = 'modify';
             $type = $venta->type;
         }
+        if ($client != null){
+            $client = Client::find($client->id);
+        } else if ($venta->client != null){
+            $client = Client::find($venta->client->id);
+        }
+        if ($client) {
+            $arrayDiscountPercentage = $this->getDiscountPercentage($client->id);
+            if (is_array($arrayDiscountPercentage) && count($arrayDiscountPercentage) > 0) {
+                $discountPercentage = $arrayDiscountPercentage[0]->discountPercentage;
+            } else {
+                $totalSales = $this->getTotalVentaByClientId($client->id, date('Y-m'));
+                if (is_array($totalSales) && count($totalSales) > 0) {
+                    $objTotalSales = $totalSales[0];
+                }
+            }
+        }
 
-        return view('puntoventa.comandas.tableSelection', compact('action', 'venta', 'type', 'arrayClient', 'table'));
+        return view('puntoventa.comandas.clientSelection', 
+            compact('action', 'venta', 'type', 'table', 'client', 'discountPercentage'));
     }
 
     /**
@@ -88,6 +91,7 @@ class VentasController extends Controller
      */
     public function store(Request $request)
     {
+        $currentDateTime = date('Y-m-d H:i:s');
         $venta = new Venta([
             'IdUsuario' => auth()->user()->id,
             'montoTotal' => '0',
@@ -98,7 +102,9 @@ class VentasController extends Controller
             'type' => 1,
             'estatus' => 1,
             'activo' => 0,
-            'order' => 1
+            'order' => 1,
+            'created_at' => $currentDateTime,
+            'updated_at' => $currentDateTime
         ]);
         $venta->save();
 
@@ -132,19 +138,27 @@ class VentasController extends Controller
      * @param  \App\Venta  $venta
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Venta $venta) {
+    public function update(Request $request, Venta $venta, Client $client = null) {
         if ($venta != null) {
             $venta->type = $request->get('type');
             if ($request->get('type') == 1) {
                 $venta->dinerstable_id = $request->get('table');
-                $venta->client_id = null;
             } else {
                 $venta->dinerstable_id = null;
-                $venta->client_id = $request->get('clientId');
             }
-            $venta->save();
+            $venta->client_id = $request->get('clientId');
+            $venta->update($request->all());
         }
-        return redirect()->route('drinksTab', [$venta]);
+        if ($client != null){
+            $client = Client::find($client->id);
+        } else {
+            $client = Client::find($venta->client_id);
+        }
+        $discountPercentage = 0;
+        if ($request->get('discountPercentage')) {
+            $discountPercentage = $request->get('discountPercentage');
+        }
+        return redirect()->route('drinksTab', ['venta' => $venta, 'client' => $client, 'discountPercentage' => $discountPercentage]);
     }
 
     /**
@@ -161,8 +175,10 @@ class VentasController extends Controller
         $venta = Venta::find($request->get('ventaid'));
         $validator = \Validator::make($request->all(), [
             'quantity' => ['required', function ($attribute, $value, $fail) use ($venta) {
-                if ($value < $venta->montoTotal) {
-                    $fail('La cantidad ingresada no es valida');
+                if ($venta->apply_discount == 0 && $value < $venta->montoTotal) {
+                    $fail('La cantidad ingresada es menor al Monto Total');
+                } else if ($venta->apply_discount == 1 && $value < $venta->montoTotalDescuento) {
+                    $fail('La cantidad ingresada es menor al Monto Total con descuento');
                 }
             }]
         ]);
@@ -174,6 +190,31 @@ class VentasController extends Controller
         $venta->estatus = 2;
         $venta->cantidadRecibida = $request->get('quantity');
         $venta->save();
+
+        // Guardar registro de promocion
+        $date = date("Y-m-d");
+        Log::info('date: '.$date);
+
+        $promotionDB = $this->getPromotionsClients($venta->ventaId, $date);
+        if ($venta->apply_discount == 1 && $promotionDB->isEmpty()) {
+            $arrayDiscountPercentage = $this->getDiscountPercentage($venta->client_id);
+            $objDiscountPercentage = $arrayDiscountPercentage[0];
+
+            Log::info('create promotion');
+            $promotion = new PromotionsClients ([
+                'IdVenta' => $venta->ventaId,
+                'client_id' => $venta->client_id,
+                'porcentaje' => $objDiscountPercentage->discountPercentage,
+                'cantidadVentas' => $objDiscountPercentage->total,
+                'montoDescuento'=> $venta->montoTotalDescuento,
+                'estatus' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+            $promotion->save();
+        }
+        // -------------------------------
+
         $this->printFinaliceSale($venta);
 
         return response()->json([
@@ -213,8 +254,14 @@ class VentasController extends Controller
             })->get();
 
         if ($printStatus->value == 'true') {
-            $this->printProducts($venta, $arrayBebidas, $arrayComidas);
+            try{
+                $this->printProducts($venta, $arrayBebidas, $arrayComidas);
+            } catch (Exception | ErrorException $e) {
+                Log::info('Exception to print: '.$e->getMessage());
+            }
         }
-        return redirect()->route('finalizarVenta', [$venta]);
+        $clientId = $request->get('clientId');
+        $apply = $request->get('apply');
+        return redirect()->route('finalizarVenta', ['venta' => $venta, 'clientId' => $clientId, 'apply' => $apply]);
     }
 }

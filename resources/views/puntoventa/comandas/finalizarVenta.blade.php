@@ -9,6 +9,7 @@
             </div>
             <form method="POST" action="{{ route('cerrarVenta') }}">
             @csrf
+                <input type="text" hidden name="applydiscount" id="applydiscount">
                 <div class="modal-body">
                     <div class="form-row">
                         <div class="form-group col-md-6">
@@ -22,8 +23,18 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-12">
-                            <label for="total">Total</label>
+                            <label for="total">Monto Total</label>
                             <input class="form-control form-control-sm" id="total" type="text" placeholder=".form-control-sm" readonly>
+                        </div>
+                    </div>
+                    <div class="form-row" id="rowdiscount">
+                        <div class="form-group col-md-6">
+                            <label for="total">Total con descuento</label>
+                            <input class="form-control form-control-sm" id="montototaldescuento" type="text" placeholder=".form-control-sm" readonly>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="total">% Descuento</label>
+                            <input class="form-control form-control-sm" id="discountpercentage" type="text" placeholder=".form-control-sm" readonly>
                         </div>
                     </div>
                     <div class="form-row">

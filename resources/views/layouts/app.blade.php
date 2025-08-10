@@ -120,7 +120,35 @@
             return '[' + item.phone + '] ' + item.name + ' - ' + item.address;
         },
         afterSelect: function (item) {
+            $('#client').val(item);
             $('#clientId').val(item.id);
+            $('#clientName').val(item.name);
+            $('#clientPhone').val(item.phone);
+            $('#clientAddress').val(item.address);
+            $('#clientReference').val(item.reference);
+
+            var _token = $('input[name="_token"]').val();
+            $.ajax({
+                url : "{{ route('getClient') }}",
+                method : "GET",
+                data : {
+                    id : item.id,
+                    _token : _token
+                },
+                success : function (data) {
+                    console.log("getClientById");
+                    //console.log(data);
+                    if (data && data.length) {
+                        $var = data[0];
+                        console.log(data[0]);
+                        $('#promotion').val($var.discountPercentage + " %");
+                        $('#discountPercentage').val($var.discountPercentage);
+                    } else {
+                        $('#promotion').val("0 %");
+                        $('#discountPercentage').val(0);
+                    }
+                }
+            });
         }
     });
     $('#dialogDetails').on('show.bs.modal', function (event) {
@@ -157,7 +185,7 @@
         modal.find('.modal-body #tab').val(tab);
         modal.find('.modal-body #price').val(price);
 
-        document.getElementById('myTable').innerHTML = "";
+        document.getElementById('tableBody').innerHTML = "";
 
         $('#addFoodRow').prop('disabled', true);
     })
@@ -167,14 +195,26 @@
         var location = button.data('location');
         var total = button.data('total');
         var ventaId = button.data('ventaid');
-
+        var montoTotalDescuento = button.data('montototaldescuento');
+        var discountPercentage = button.data('discountpercentage');
+        var applyDiscount = button.data('applydiscount');
+        console.log(button);
         var modal = $(this);
         modal.find('.modal-body #location').val(location);
         modal.find('.modal-body #total').val(total);
         modal.find('.modal-body #folio').val(ventaId);
         modal.find('.modal-body #quantity').val('');
+        modal.find('.modal-body #montototaldescuento').val(montoTotalDescuento);
+        modal.find('.modal-body #discountpercentage').val(discountPercentage);
+        modal.find('.modal-body #applydiscount').val(applyDiscount);
+        if (applyDiscount == 1) {
+            $('#rowdiscount').show();
+        } else {
+            $('#rowdiscount').hide();
+        }
     })
     $('#addClientModal').on('show.bs.modal', function (event) {
+        console.log("addClientModal ...");
         var button = $(event.relatedTarget);
         // var productname = button.data('productname');
         var ventaid = button.data('ventaid');
@@ -186,7 +226,136 @@
         modal.find('.modal-body #clientPhone').val('');
         modal.find('.modal-body #clientAddress').val('');
         modal.find('.modal-body #clientReference').val('');
-    })
+        
+    });
+    $('#editClientModal').on('show.bs.modal', function (event) {
+        console.log("editClientModal ...");
+        var button = $(event.relatedTarget);
+        console.log("editClientModal:" + document.getElementById("clientName").value);
+        console.log("editClientModal:" + document.getElementById("clientId").value);
+
+        var modal = $(this);
+        if (document.getElementById("clientId").value !== '') {
+            console.log("editClientModal: show modal");
+            var ventaid = button.data('ventaid');
+
+            modal.find('.modal-body #type').val(2);
+            modal.find('.modal-body #ventaid').val(ventaid);
+            modal.find('.modal-body #clientId').val(
+                document.getElementById("clientId").value);
+            modal.find('.modal-body #modalClientName').val(
+                document.getElementById("clientName").value);
+            modal.find('.modal-body #modalClientPhone').val(
+                document.getElementById("clientPhone").value);
+            modal.find('.modal-body #modalClientAddress').val(
+                document.getElementById("clientAddress").value);
+            modal.find('.modal-body #modalClientReference').val(
+                document.getElementById("clientReference").value);
+            modal.find('.modal-body #disabled').val(false);
+        } else {
+            console.log("editClientModal: hide modal");
+            $('#editClientModal').modal('hide');
+        }
+    });
+
+    $('#clientSalesDetailsModalResume').on('show.bs.modal', function (event) {
+        console.log("#clientSalesDetailsModalResume");
+        var button = $(event.relatedTarget);
+        var clientId = button.data('clientid');
+        var _token = $('input[name="_token"]').val();
+        console.log(clientId);
+
+        if (clientId !== undefined && clientId != '') {
+            $.ajax({
+                url : "{{ route('getClientDetails') }}",
+                method : "GET",
+                data : {
+                    id : clientId,
+                    _token : _token
+                },
+                success : function (data) {
+                    if (data && data.length) {
+                        console.log('success: ', data);
+                        document.getElementById('salesTableBody').innerHTML = "";
+
+                        $.each(data, function(i, elem){
+                            console.log('each', elem['ventaId']);
+                            var cols = "";
+                            var newRow = $("<tr>");
+
+                            cols += '<td>' + elem['ventaId'] + '</td>';
+                            cols += '<td>' + '$ ' + elem['montoTotal'] + '</td>';
+                            cols += '<td>' + elem['date'] + '</td>';
+
+                            newRow.append(cols);
+                            $("table.sales-list").append(newRow);
+                        });
+                    } else {
+                        console.log('no hay datos');
+                    }
+                }
+            });
+        }
+    });
+    $('#clientSalesDetailsModal').on('show.bs.modal', function (event) {
+        console.log("#clientSalesDetailsModal");
+        console.log(document.getElementById("clientId"));
+        var modal = $(this)
+        var button = $(event.relatedTarget);
+        var clientId = document.getElementById("clientId").value;
+        var _token = $('input[name="_token"]').val();
+
+        if (clientId !== undefined) {
+            $.ajax({
+                url : "{{ route('getClientDetails') }}",
+                method : "GET",
+                data : {
+                    id : clientId,
+                    _token : _token
+                },
+                success : function (data) {
+                    if (data && data.length) {
+                        console.log('success: ', data);
+                        document.getElementById('salesTableBody').innerHTML = "";
+
+                        $.each(data, function(i, elem){
+                            console.log('each', elem['ventaId']);
+                            var cols = "";
+                            var newRow = $("<tr>");
+
+                            cols += '<td>' + elem['ventaId'] + '</td>';
+                            cols += '<td>' + '$ ' + elem['montoTotal'] + '</td>';
+                            cols += '<td>' + elem['date'] + '</td>';
+
+                            newRow.append(cols);
+                            $("table.sales-list").append(newRow);
+                        });
+                    } else {
+                        console.log('no hay datos');
+                    }
+                }
+            });
+        }
+    });
+    $("#cleanClient").on("click", function(event) {
+        console.log("cleanClientInfo ...");
+        $('#clientId').val('');
+        $('#clientName').val('');
+        $('#clientPhone').val('');
+        $('#clientAddress').val('');
+        $('#clientReference').val('');
+        $('#modalClientName').val('');
+        $('#modalClientPhone').val('');
+        $('#modalClientAddress').val('');
+        $('#modalClientReference').val('');
+        $('#type').val(1);
+        $('#table').val('');
+        $('#findClient').val('');
+        $('#collapseOne').collapse('show');
+        $('#promotion').val("0 %");
+        $('#discountPercentage').val(0);
+        document.getElementById("customRadio1").checked = true;
+    });
     $('#exampleModal').on('show.bs.modal', function (event) {
         console.log("show exampleModal modal...");
     })
@@ -194,18 +363,28 @@
         console.log("carousel events...");
     })
     $('#collapseOne').on('shown.bs.collapse', function (event) {
-        console.log('collapseOne');
+        console.log('shown collapseOne');
+        console.log(event);
         $('#type').val(1);
         $('#table').val('');
     })
-    $('#collapseTwo').on('shown.bs.collapse', function (event) {
-        console.log('collapseTwo');
+    $('#collapseOne').on('hidden.bs.collapse', function (event) {
+        console.log('hidden collapseOne');
+        console.log(event);
+        $('#type').val(1);
+        $('#table').val('');
+    })
+    $('#customRadio2').click(function (event) {
+        //$('#collapseOne').collapse('hide');
+        console.log('click customRadio2');
         $('#type').val(2);
-        $('#findClient').val('');
-        $('#clientName').val('');
-        $('#clientPhone').val('');
-        $('#clientAddress').val('');
-        $('#clientReference').val('');
+        $('#table').val('');
+    })
+    $('#customRadio3').click(function (event) {
+        //$('#collapseOne').collapse('hide');
+        console.log('click customRadio3');
+        $('#type').val(3);
+        $('#table').val('');
     })
     $("#addrow").on("click", function () {
         var newRow = $("<tr>");
@@ -273,6 +452,7 @@
         event.preventDefault();
         var quantity = $('#quantity').val();
         var ventaid = $('#folio').val();
+        var discountpercentage = $('#discountpercentage').val();
 
         var _token = $('input[name="_token"]').val();
         $.ajax({
@@ -281,6 +461,7 @@
             data : {
                 quantity : quantity,
                 ventaid : ventaid,
+                discountpercentage: discountpercentage,
                 _token : _token
             },
             success : function (data) {
@@ -309,10 +490,10 @@
         event.preventDefault();
         var ventaid = $('#ventaid').val();
         var type = $('#type').val();
-        var clientName = $('#clientName').val();
-        var clientPhone = $('#clientPhone').val();
-        var clientAddress = $('#clientAddress').val();
-        var clientReference = $('#clientReference').val();
+        var clientName = $('#modalClientName').val();
+        var clientPhone = $('#modalClientPhone').val();
+        var clientAddress = $('#modalClientAddress').val();
+        var clientReference = $('#modalClientReference').val();
 
         var _token = $('input[name="_token"]').val();
         $.ajax({
@@ -332,9 +513,23 @@
                 if(data.errors) {
                     $('.alert-danger').html('');
                     $.each(data.errors, function(key, value){
-                  			$('.alert-danger').show();
-                  			$('.alert-danger').append('<li>'+value+'</li>');
-                		});
+                        if (key == 0) {
+                            $('#clientNameError').show();
+                            $('#clientNameError').append('<li>'+value+'</li>');
+                        }
+                        if (key == 1) {
+                            $('#clientAddressError').show();
+                            $('#clientAddressError').append('<li>'+value+'</li>');
+                        }
+                        if (key == 2) {
+                            $('#clientPhoneError').show();
+                            $('#clientPhoneError').append('<li>'+value+'</li>');
+                        }
+                        if (key == 3) {
+                            $('#clientReferenceError').show();
+                            $('#clientReferenceError').append('<li>'+value+'</li>');
+                        }
+                    });
                 } else {
                     $('.alert-danger').hide();
                     $('#addClientModal').modal('hide');
@@ -344,6 +539,25 @@
         });
 
     });
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+            })
+    })();
     </script>
 
 </body>

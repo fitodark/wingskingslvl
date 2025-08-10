@@ -87,13 +87,13 @@
                     <div class="row justify-content-center">
                         <div class="col-3"></div>
                         <div class="col-2 justify-content-center">
-                            <a class="btn btn-primary custom" href="{{ route('create', $venta['ventaId']) }}" role="button">Anterior</a>
+                            <a class="btn btn-primary custom" href="{{ route('create', ['venta' => $venta['ventaId'], 'client' => $client['id']]) }}" role="button">Anterior</a>
                         </div>
                         <div class="col-2 justify-content-center">
                             <a class="btn btn-outline-secondary custom" href="{{ route('cancelarVenta', $venta['ventaId']) }}" role="button">Regresar</a>
                         </div>
                         <div class="col-2 justify-content-center">
-                            <a class="btn btn-primary custom" href="{{ route('foodsTab', $venta['ventaId']) }}" role="button">Siguiente</a>
+                            <a class="btn btn-primary custom" href="{{ route('foodsTab', ['venta' => $venta['ventaId'], 'client' => $client['id']]) }}" role="button">Siguiente</a>
                         </div>
                         <div class="col-3"></div>
                     </div>
