@@ -19,6 +19,7 @@ trait PrintSales {
         $addressComTicket = Config::where('key', '=', 'addressComTicket')->first();
         $fooderPropTicket = Config::where('key', '=', 'fooderPropTicket')->first();
         $fooderTicket = Config::where('key', '=', 'fooderTicket')->first();
+        $discountPercentage = Config::where('key', '=', 'discountPercentage')->first();
 
         try {
             if ($printStatus->value == 'true') {
@@ -63,9 +64,17 @@ trait PrintSales {
             /* Terminamos de imprimir los productos, ahora va el total */
             $printer->text("--------\n");
             $printer->text("TOTAL: $". round($venta->montoTotal, 2) ."\n");
+            if ($venta->apply_discount == 1) {
+                $printer->text("DESCUENTO: ". $discountPercentage->value ." %\n");
+                $printer->text("CON DESCUENTO: $". round($venta->montoTotalDescuento, 2) ."\n");
+            }
             if ($options['total']) {
                 $printer->text("RECIBI: $". round($venta->cantidadRecibida, 2) ."\n");
-                $printer->text("CAMBIO: $". round(floatval($venta->cantidadRecibida) - floatval($venta->montoTotal), 2)."\n");
+                if ($venta->apply_discount == 1) {
+                    $printer->text("CAMBIO: $". round(floatval($venta->cantidadRecibida) - floatval($venta->montoTotalDescuento), 2)."\n");
+                } else {
+                    $printer->text("CAMBIO: $". round(floatval($venta->cantidadRecibida) - floatval($venta->montoTotal), 2)."\n");
+                }
             }
 
             /* Podemos poner también un pie de página */
