@@ -154,7 +154,7 @@ trait PrintSales {
 
         if ($venta->type == 1) {
             $printer->text("Ubicación: " . $venta->dinerstable->name . "\n\n");
-        } else if ($venta->type == 2) {
+        } else if ($venta->type == 2 or $venta->type == 3) {
             $printer->text("Cliente: " . $venta->client->name . ", (" . $venta->client->phone . ")" . "\n");
             $printer->text("         " . $venta->client->address . "\n\n");
         }
