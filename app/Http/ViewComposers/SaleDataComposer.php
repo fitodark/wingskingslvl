@@ -19,7 +19,9 @@ class SaleDataComposer
         ])->paginate(15);
         $foodProducts = Product::orderBy('id', 'desc')->where([
             ['type', '=', '2'],['active', '=', '1']
-        ])->orWhere('type', 3)->paginate(15);
+        ])->orWhere([
+            ['type', '=', '3'],['active', '=', '1']
+        ])->paginate(15);
 
         $piecesList = Config::orderBy('order', 'asc')->where('key', '=',  'pieces')->get();
         $flavorsList = Config::orderBy('order', 'asc')->where('key', '=',  'flavors')->get();

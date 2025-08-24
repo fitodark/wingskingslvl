@@ -67,7 +67,9 @@ return [
     |
     */
 
-    'timezone' => 'America/Mexico_City',
+    //'timezone' => 'America/Mexico_City',
+    //'timezone' => env('TIME_ZONE', 'GMT-06:00'),
+    'timezone' => env('APP_TIMEZONE', 'UTC'),
 
     /*
     |--------------------------------------------------------------------------

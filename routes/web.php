@@ -63,3 +63,7 @@ Route::get('/venta/print/{venta?}', 'Puntoventa\VentasController@printSale')->na
 Route::get('/printProductsOrder/{venta?}', 'Puntoventa\VentasController@printProductsOrder')->name('printProductsOrder');
 Route::get('/summary/{date?}', 'Puntoventa\SalesSummaryController@index')->name('summary.index');
 Route::post('/findSales', 'Puntoventa\SalesSummaryController@findSales')->name('findSales');
+
+Route::get('/timezone', function () {
+    return [config('app.timezone'), date('Y-m-d H:i:s')];
+});

@@ -41,7 +41,7 @@ trait ComandasDataLibrary {
             where date_format(v.created_at, '%Y-%m') = :date and v.activo = 1 and v.estatus = 2 
             and v.client_id in (:clientId) and (v.ventaId > pc.IdVenta or pc.IdVenta is null)
             group by v.client_id, c.name
-            HAVING count(v.ventaId) >= (select c.value from configs c where c.key = 'salesNumber')
+            HAVING count(v.ventaId) >= (select c.value from configs c where c.key = 'salesNumber' and c.value > 0)
             order by v.created_at desc"), array('clientId' => $clientId, 'date' => date('Y-m')));
         $queries = DB::getQueryLog();
         return $results;
