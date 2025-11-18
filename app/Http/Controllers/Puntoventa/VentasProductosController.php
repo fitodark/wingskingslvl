@@ -34,6 +34,10 @@ class VentasProductosController extends Controller
     {
          // dd($request->all());
         $venta = Venta::find($request->get('ventaId'));
+        // si al venta esta cerrada regresar al listado de comandas
+        if ($venta->estatus == 2) {
+            return redirect()->route('comandas');
+        }
         $product = VentasProductos::where('IdProducto', $request->get('idProduct'))
             ->where('IdVenta', $request->get('ventaId'))->first();
 
@@ -110,8 +114,14 @@ class VentasProductosController extends Controller
      */
     public function destroy(Request $request, VentasProductos $producto)
     {
-        $producto->delete();
         $venta = Venta::find($producto->IdVenta);
+        // si al venta esta cerrada regresar al listado de comandas
+        if ($venta->estatus == 2) {
+            return redirect()->route('comandas');
+        }
+        // marcar el producto como inactivo
+        $producto->estatus = 0;
+        $producto->save();
 
         $venta->cantidadProductos -= $producto->cantidad;
         $result = $this->getMontoTotalVenta($venta->ventaId);

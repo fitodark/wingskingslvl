@@ -26,7 +26,9 @@ class VentasProductos extends Model
         'cantidad',
         'montoVenta',
         'descripcion',
-        'order'
+        'order',
+        'estatus',
+        'delete_flag'
     ];
 
     public function product()

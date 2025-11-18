@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Puntoventa;
 
 use App\Client;
 use App\Venta;
+use App\VentasProductos;
 use App\PromotionsClients;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -114,12 +115,32 @@ class NavVentasController extends Controller
         } else {
             $ventaDB->apply_discount = FALSE;
         }
+        //User::where('active', 0)->update(['status' => 'inactive']);
+        VentasProductos::where('IdVenta', $venta->ventaId)
+            ->where('delete_flag', true)
+            ->where([
+                ['estatus', '=', 1]
+            ])
+            ->update(['delete_flag' => false]);
         $ventaDB->activo = 1;
         $ventaDB->save();
         return redirect()->route('comandas', [$venta]);
     }
 
     public function cancelarVenta(Request $request, Venta $venta = null) {
+        VentasProductos::where('IdVenta', $venta->ventaId)
+            ->where('delete_flag', true)
+            ->where([
+                ['estatus', '=', 1]
+            ])->update(['estatus' => 0]);
+
+        $result = $this->getMontoTotalVenta($venta->ventaId);
+        if (count($result) > 0) {
+            $venta->montoTotal = $result[0]->montoVenta;
+        } else {
+            $venta->montoTotal = 0;
+        }
+        $venta->save();
         return redirect()->route('comandas');
     }
 }

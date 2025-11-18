@@ -11,7 +11,9 @@ trait ComandasDataLibrary {
     public function getDrinkData($ventaId) {
         $arrayBebidas = VentasProductos::where('IdVenta', $ventaId)
               ->whereHas('product', function (Builder $query) {
-                  $query->where('type', '=', '1');
+                  $query->where('type', '=', '1')->where([
+                        ['estatus', '=', 1]
+                    ]);
               })->get();
         return $arrayBebidas;
     }
@@ -19,7 +21,9 @@ trait ComandasDataLibrary {
     public function getFoodData($ventaId) {
         $arrayComidas = VentasProductos::where('IdVenta', $ventaId)
             ->whereHas('product', function (Builder $query) {
-                $query->where('type', '=', 2)->orWhere('type', '=', 3);
+                $query->where('type', '=', 2)->orWhere('type', '=', 3)->where([
+                        ['estatus', '=', 1]
+                    ]);
             })->get();
         return $arrayComidas;
     }
@@ -66,6 +70,9 @@ trait ComandasDataLibrary {
         $montoTotal = DB::table('ventasproductos')
                     ->select(DB::raw('sum(montoVenta) as montoVenta, sum(cantidad) as cantidad'))
                     ->where('idVenta', '=', $ventaId)
+                    ->where([
+                        ['estatus', '=', 1]
+                    ])
                     ->groupBy('idVenta')
                     ->get();
         return $montoTotal;

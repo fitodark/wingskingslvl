@@ -64,13 +64,15 @@
                                     <td>{{ $record['cantidad'] }}</td>
                                     <td>@money($record['montoVenta'])</td>
                                     <td>
-                                        <form action="{{ route('eliminarProducto', $record['ventasProductosId']) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <input type="text" hidden name="tab" id="tab" value="drinks">
+                                        @if ($record->delete_flag == true)
+                                            <form action="{{ route('eliminarProducto', $record['ventasProductosId']) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="text" hidden name="tab" id="tab" value="drinks">
 
-                                            <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
-                                        </form>
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                                 @empty
