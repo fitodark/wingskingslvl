@@ -52,14 +52,16 @@ trait PrintSales {
             }
             # Para mostrar el total
             foreach ($venta->ventasProductos as $ventaProducto) {
-                /*Alinear a la izquierda para la cantidad y el nombre*/
-                $printer->setJustification(Printer::JUSTIFY_LEFT);
-                $printer->text($ventaProducto->cantidad . " x " . $ventaProducto->product->name . ' - '
-                    . $ventaProducto->product->detail . "\n");
+                if ($ventaProducto->estatus == 1) {
+                    /*Alinear a la izquierda para la cantidad y el nombre*/
+                    $printer->setJustification(Printer::JUSTIFY_LEFT);
+                    $printer->text($ventaProducto->cantidad . " x " . $ventaProducto->product->name . ' - '
+                        . $ventaProducto->product->detail . "\n");
 
-                /*Y a la derecha para el importe*/
-                $printer->setJustification(Printer::JUSTIFY_RIGHT);
-                $printer->text('$ ' . $ventaProducto->montoVenta . "\n");
+                    /*Y a la derecha para el importe*/
+                    $printer->setJustification(Printer::JUSTIFY_RIGHT);
+                    $printer->text('$ ' . $ventaProducto->montoVenta . "\n");
+                }
             }
             /* Terminamos de imprimir los productos, ahora va el total */
             $printer->text("--------\n");
@@ -160,6 +162,7 @@ trait PrintSales {
         }
 
         foreach ($arrayProductos as $ventaProducto) {
+            if ($ventaProducto->estatus == 1) {
             /*Alinear a la izquierda para la cantidad y el nombre*/
             $printer->setJustification(Printer::JUSTIFY_LEFT);
             $printer->text($ventaProducto->cantidad . " x " . $ventaProducto->product->name
@@ -173,6 +176,7 @@ trait PrintSales {
                 foreach (json_decode($ventaProducto->descripcion, TRUE) as $key => $value) {
                     $printer->text($value[0]['value'] . ' - ' . $value[1]['value']. "\n");
                 }
+            }
             }
         }
         /* Podemos poner también un pie de página */

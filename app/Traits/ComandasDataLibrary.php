@@ -21,7 +21,9 @@ trait ComandasDataLibrary {
     public function getFoodData($ventaId) {
         $arrayComidas = VentasProductos::where('IdVenta', $ventaId)
             ->whereHas('product', function (Builder $query) {
-                $query->where('type', '=', 2)->orWhere('type', '=', 3)->where([
+                $query->where('type', '=', 2)->where([
+                        ['estatus', '=', 1]
+                    ])->orWhere('type', '=', 3)->where([
                         ['estatus', '=', 1]
                     ]);
             })->get();

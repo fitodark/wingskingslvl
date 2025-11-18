@@ -47,6 +47,8 @@ class VentasProductosController extends Controller
                 'cantidad' => $request->get('cantidad'),
                 'montoVenta' => floatval($request->get('cantidad')) * floatval($request->get('price')),
                 'descripcion' => $request->get('description'),
+                'estatus' => true,
+                'delete_flag' => true,
                 'order' => $venta->order
             ]);
         } else {
@@ -59,6 +61,8 @@ class VentasProductosController extends Controller
                 'cantidad' => $request->get('cantidad'),
                 'montoVenta' => floatval($request->get('cantidad')) * floatval($request->get('price')),
                 'order' => $venta->order,
+                'estatus' => true,
+                'delete_flag' => true,
                 'descripcion' => $request->get('description'),
             ]);
         }
