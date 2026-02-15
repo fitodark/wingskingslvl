@@ -44,10 +44,15 @@
             value="@money($totalVentasTransferArray->montoTotalVentas)">
         </div>
 
-        <div class="form-group col-md-6">
+        <div class="form-group col-md-3">
             <label for="clientReference" class="form-label">Total Compras:</label>
             <input name="clientReference" id="clientReference" class="form-control" type="text" aria-label="Disabled input example" disabled
             value="@money($totalComprasArray->montoTotalCompras)">
+        </div>
+        <div class="form-group col-md-3">
+            <label for="clientReference" class="form-label">Efectivo Real:</label>
+            <input name="clientReference" id="clientReference" class="form-control" type="text" aria-label="Disabled input example" disabled
+            value="@money(($corteCajaCurrent->montoApertura + $totalVentasEfectivoArray->montoTotalVentas) - $totalComprasArray->montoTotalCompras)">
         </div>
     </div>
     <div class="row">

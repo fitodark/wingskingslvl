@@ -33,7 +33,7 @@ trait CorteCajaDataLibrary {
                     from corte_caja cc
                     left join corte_caja_movimientos ccm on ccm.idCorte = cc.idCorte
                 ) as ccm group by ccm.idCorte
-            ) mov on mov.idCorte = cc.idCorte set cc.montoCierre = mov.montoTotal
+            ) mov on mov.idCorte = cc.idCorte set cc.montoCierre = cc.montoApertura + mov.montoTotal
             where cc.idCorte = :idCorte "), array('idCorte' => $idCorte));
         $queries = DB::getQueryLog();
         return $results;
