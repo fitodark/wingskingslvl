@@ -31,8 +31,12 @@ Route::resources([
   'catalogos' => 'Puntoventa\CatalogController',
   'usuarios' => 'Users\UsersController',
   'ventas' => 'Puntoventa\VentasController',
-  'clientes' => 'Puntoventa\ClientController'
-  //'summary' => 'Puntoventa\SalesSummaryController'
+  'clientes' => 'Puntoventa\ClientController',
+  'compras' => 'ComprasController',
+  'comprasproductos' => 'ComprasProductosController',
+  'inventarioproductos' => 'InventarioProductosController',
+  'cortecaja' => 'CorteCajaController',
+  'cortecajamovimientos' => 'CorteCajaMovimientosController'
 ]);
 Route::get('/create/{venta?}/{client?}', 'Puntoventa\VentasController@create')->name('create');
 Route::put('/update/{venta?}/{client?}', 'Puntoventa\VentasController@update')->name('update');
@@ -63,6 +67,24 @@ Route::get('/venta/print/{venta?}', 'Puntoventa\VentasController@printSale')->na
 Route::get('/printProductsOrder/{venta?}', 'Puntoventa\VentasController@printProductsOrder')->name('printProductsOrder');
 Route::get('/summary/{date?}', 'Puntoventa\SalesSummaryController@index')->name('summary.index');
 Route::post('/findSales', 'Puntoventa\SalesSummaryController@findSales')->name('findSales');
+
+Route::get('/cortecaja', 'CorteCajaController@index')->name('cortecaja');
+Route::get('/current/{date?}', 'CorteCajaController@current')->name('current');
+Route::post('/cerrarcortecaja', 'CorteCajaController@cerrarcortecaja')->name('cerrarcortecaja');
+Route::get('/cortecaja/detalle/{idCorte}', 'CorteCajaController@detalles')->name('cortecajadetalle');
+
+Route::get('/cortecajamovimientos', 'CorteCajaMovimientosController@index')->name('cortecajamovimientos');
+
+Route::get('/inventarioproductos', 'InventarioProductosController@index')->name('inventarioproductos');
+Route::put('/inventarioproductos/{idInventarioProducto?}', 'InventarioProductosController@update')->name('inventarioproductos.update');
+Route::get('/inventarioproductos/{idInventarioProducto?}/edit', 'InventarioProductosController@edit')->name('inventarioproductos.edit');
+
+Route::get('/compras', 'ComprasController@index')->name('compras');
+Route::get('/compras/create/{idCompra?}', 'ComprasController@create')->name('compras.create');
+Route::get('/compras/addProducts/{idCompra}', 'ComprasController@addProducts')->name('compras.addProducts');
+Route::post('/compras/addCompraProductos', 'ComprasController@addCompraProductos')->name('addCompraProductos');
+Route::put('/compras/update/{idCompra}', 'ComprasController@update')->name('compras.update');
+Route::get('/comprasproductos/delete/{idCompraProducto?}', 'ComprasProductosController@delete')->name('comprasproductos.delete');
 
 Route::get('/timezone', function () {
     return [config('app.timezone'), date('Y-m-d H:i:s')];

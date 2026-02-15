@@ -37,7 +37,8 @@ class Venta extends Model
       'estatus',
       'activo',
       'order',
-      'apply_discount'
+      'apply_discount',
+      'payment_type'
     ];
 
     public function ventasProductos()

@@ -29,5 +29,11 @@ class SalesServiceProvider extends ServiceProvider
         
         View::composer('puntoventa.comandas.index',
            'App\Http\ViewComposers\DiscountDataComposer');
+        
+        View::composer('puntoventa.comandas.index',
+           'App\Http\ViewComposers\CorteCajaComposer');
+
+        View::composer('cortecajamovimientos.index',
+           'App\Http\ViewComposers\CorteCajaComposer');
     }
 }

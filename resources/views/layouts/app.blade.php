@@ -42,12 +42,20 @@
                         <a class="dropdown-item" href="{{ url('/home') }}">Home</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ url('/comandas') }}">Comandas</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="{{ route('summary.index') }}">Resumen de Ventas</a>
+                        <!-- <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ route('summary.index') }}">Resumen de Ventas</a> -->
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ url('/catalogos') }}">Productos</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('clientes') }}">Clientes</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ route('cortecaja') }}">Cortes de Caja</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ route('cortecajamovimientos') }}">Registrar Movimientos al Corte</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ route('inventarioproductos') }}">Inventario</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ route('compras') }}">Compras</a>
                     </div>
                     </li>
                 </ul>
@@ -453,6 +461,7 @@
         var quantity = $('#quantity').val();
         var ventaid = $('#folio').val();
         var discountpercentage = $('#discountpercentage').val();
+        var paymenttype = $('#paymenttype').val();
 
         var _token = $('input[name="_token"]').val();
         $.ajax({
@@ -462,6 +471,7 @@
                 quantity : quantity,
                 ventaid : ventaid,
                 discountpercentage: discountpercentage,
+                paymenttype: paymenttype,
                 _token : _token
             },
             success : function (data) {
@@ -483,6 +493,11 @@
     });
     $('.datepicker').datepicker({
         format: "dd/mm/yyyy",
+        language: "es",
+        autoclose: true
+    });
+    $('.datepickercorteformat').datepicker({
+        format: "yyyy-mm-dd",
         language: "es",
         autoclose: true
     });
@@ -558,6 +573,48 @@
             }, false)
             })
     })();
+    $('#cerrarcortecajamodal').on('show.bs.modal', function (event) {
+        console.log("show modal cerrarcortecaja...");
+        var button = $(event.relatedTarget);
+        var idcorte = button.data('idcorte');
+        var fechaapertura = button.data('fechaapertura');
+        console.log(button);
+        var modal = $(this);
+        modal.find('.modal-body #idcorte').val(idcorte);
+        modal.find('.modal-body #fechaapertura').val(fechaapertura);
+    })
+    $("#cerrarcortecaja").click(function(event) {
+        console.log("cerrarcortecaja");
+        event.preventDefault();
+        var idcorte = $('#idcorte').val();
+        console.log(idcorte);
+
+        var _token = $('input[name="_token"]').val();
+        $.ajax({
+            url : "{{ route('cerrarcortecaja') }}",
+            method : "POST",
+            data : {
+                idcorte : idcorte,
+                _token : _token
+            },
+            success : function (data) {
+                console.log(data);
+                if(data.errors) {
+                    $('.alert-danger').html('');
+                    $.each(data.errors, function(key, value){
+                  			$('.alert-danger').show();
+                  			$('.alert-danger').append('<li>'+value+'</li>');
+                		});
+                } else {
+                    $('.alert-danger').hide();
+                    $('#cerrarcortecajamodal').modal('hide');
+                    window.location = data.url
+                }
+            }
+        });
+
+    });
+
     </script>
 
 </body>

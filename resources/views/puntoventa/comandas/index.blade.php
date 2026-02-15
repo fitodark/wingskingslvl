@@ -5,7 +5,7 @@
 	
 	<div class="row">
 		<div class="col-md-10">
-			<p class="h2 text-black">Comandas</p>
+			<p class="h3 text-black">Comandas con corte al dia: @dateformat($corteCajaCurrent->fechaApertura)</p>
 		</div>
 		<div class="col-md-2 ">
 			<a class="btn btn-outline-success btn-add-new" href="{{ route('ventastore') }}" role="button">

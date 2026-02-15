@@ -136,4 +136,72 @@ trait ComandasDataLibrary {
         //Log::info('getPromotionsClients: '.print_r($queries));
         return $montoTotal;
     }
+
+    public function getInventarioProductosDetails() {
+        DB::connection()->enableQueryLog();
+
+        $results = DB::select( DB::raw("
+            select p.id, p.name  
+            from inventario_productos ip 
+            left join products p on p.id = ip.idProducto
+            where p.active is true
+            union 
+            select p.id, p.name
+            from products p 
+            where p.active is true and p.type = 4"));
+        $queries = DB::getQueryLog();
+        //dd($queries);
+        //Log::info('getPromotionsClients: '.print_r($queries));
+        return $results;
+    }
+
+    public function getUpdateMontosInventario($idCompra) {
+        DB::connection()->enableQueryLog();
+
+        $results = DB::select( DB::raw("
+            update inventario_productos inupdate
+            inner join compras_productos cp on inupdate.idProducto = cp.idProducto 
+            inner join compras c on c.idCompra = cp.idCompra 
+            set inupdate.cantidad = inupdate.cantidad + cp.cantidad
+            where cp.idCompra = :idCompra and c.status = 0"), array('idCompra' => $idCompra));
+        $queries = DB::getQueryLog();
+        return $results;
+    }
+
+    public function getTotalVenta($idCorte, $paymentType) {
+        DB::connection()->enableQueryLog();
+
+        $results = DB::select( DB::raw("
+            select max(cm.idCorteMovimiento) as idCorteMovimiento, 
+                count(cm.idCorteMovimiento) as totalVentas,
+                sum(cm.monto) as montoTotalVentas
+            from corte_caja_movimientos cm
+            inner join ventas v on v.ventaId = cm.idVenta
+            where cm.idCorte = :idCorte and v.payment_type = :paymentType
+            group by cm.idCorte"), array('idCorte' => $idCorte, 'paymentType' => $paymentType));
+        $queries = DB::getQueryLog();
+        //dd($queries);
+        return $results;
+    }
+
+    public function getTotalCompras($idCorte) {
+        DB::connection()->enableQueryLog();
+
+        $resumeTotalSales = DB::table('corte_caja_movimientos')
+                    ->select(DB::raw("max(idCorteMovimiento) as idCorteMovimiento, count(idCorteMovimiento) as totalCompras
+                    , sum(monto) as montoTotalCompras"))
+                    ->where([
+                        ['idCorte', '=', $idCorte]
+                    ])->where([
+                        ['idTipo', '=', 2]
+                    ])->orWhere([
+                        ['idCorte', '=', $idCorte]
+                    ])->where([
+                        ['idTipo', '=', 3]
+                    ])->groupBy('idCorte')
+                    ->get();
+        $queries = DB::getQueryLog();
+        //dd($queries);
+        return $resumeTotalSales;
+    }
 }

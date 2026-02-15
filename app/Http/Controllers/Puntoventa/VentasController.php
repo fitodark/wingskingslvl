@@ -8,6 +8,7 @@ use App\VentasProductos;
 use App\Dinerstable;
 use App\Config;
 use App\PromotionsClients;
+use App\CorteCajaMovimientos;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -21,12 +22,14 @@ use Mike42\Escpos\EscposImage;
 
 use App\Traits\PrintSales;
 use App\Traits\ComandasDataLibrary;
+use App\Traits\CorteCajaDataLibrary;
 
 class VentasController extends Controller
 {
 
     use PrintSales;
     use ComandasDataLibrary;
+    use CorteCajaDataLibrary;
 
     public function __construct()
     {
@@ -40,6 +43,15 @@ class VentasController extends Controller
      */
     public function index()
     {
+        // validar si existe el corte de caja activo
+        $corteCajaCurrent = $this->getCurrentCorteCaja(null);
+        if ($corteCajaCurrent == null || $corteCajaCurrent->isEmpty()) {
+            return redirect('cortecaja')
+                        ->withErrors([
+                            'cortecajarequired' => 'Para generar comandas, debe dar de alta el nuevo corte de caja.!',
+                        ])
+                        ->withInput();
+        }
         return view('puntoventa.comandas.index');
     }
 
@@ -187,8 +199,10 @@ class VentasController extends Controller
             return response()->json(['errors' => $validator->errors()->all()]);
         }
 
+        $currentDateTime = date('Y-m-d H:i:s');
         $venta->estatus = 2;
         $venta->cantidadRecibida = $request->get('quantity');
+        $venta->payment_type = $request->get('paymenttype');
         $venta->save();
 
         // Guardar registro de promocion
@@ -208,14 +222,33 @@ class VentasController extends Controller
                 'cantidadVentas' => $objDiscountPercentage->total,
                 'montoDescuento'=> $venta->montoTotalDescuento,
                 'estatus' => 1,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                'created_at' => $currentDateTime,
+                'updated_at' => $currentDateTime
             ]);
             $promotion->save();
         }
         // -------------------------------
 
         $this->printFinaliceSale($venta);
+
+        // ---------- Guardar el registro de la venta en el corte de caja activo ----------
+        $corteCajaCurrent = $this->getCurrentCorteCaja(null);
+        if (!$corteCajaCurrent->isEmpty()) {
+            $corteCaja = $corteCajaCurrent[0];
+            $corteCajaMovimiento = new CorteCajaMovimientos([
+                'idCorte' => $corteCaja->idCorte,
+                'idVenta' => $venta->ventaId,
+                'idCompra' => null,
+                'descripcion' => null,
+                'monto' => $venta->montoTotal,
+                'idTipo' => 1,
+                'created_at' => $currentDateTime,
+                'updated_at' => $currentDateTime
+            ]);
+            $corteCajaMovimiento->save();
+            $this->getUpdateMontoTotalCorte($corteCaja->idCorte);
+        }
+        // ---------- Guardar el registro de la venta en el corte de caja activo ----------
 
         return response()->json([
             'success'=>true,

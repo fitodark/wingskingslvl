@@ -44,6 +44,15 @@
                             <div class="alert alert-danger" style="display:none"></div>
                         </div>
                     </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="quantity" class="col-form-label">Tipo de pago:</label>
+                            <select name="paymenttype" id="paymenttype" class="form-control">
+                                <option value="1">Efectivo</option>
+                                <option value="2">Transferencia</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>

@@ -41,7 +41,8 @@ class CatalogController extends Controller
         $categorias = [
             '1' => 'Barra',
             '2' => 'Cocina (Alitas)',
-            '3' => 'Cocina (General)'
+            '3' => 'Cocina (General)',
+            '4' => 'Insumo'
         ];
         return view('puntoventa.productos.create',compact('categorias'));
     }

@@ -84,6 +84,9 @@ class AppServiceProvider extends ServiceProvider
                   case 3:
                       echo 'Cocina (General)';
                       break;
+                  case 4:
+                      echo 'Insumo';
+                      break;
               } ?>";
         });
 
@@ -98,6 +101,80 @@ class AppServiceProvider extends ServiceProvider
                 ); ?>";
         });
 
+        Blade::directive('corteCajaEstatus', function ($corteStatus) {
+            return "<?php
+                switch ($corteStatus) {
+                    case true:
+                        echo 'Abierto';
+                        break;
+                    case false:
+                        echo 'Finalizado';
+                        break;
+                    default:
+                        echo 'No asignado';
+                        break;
+                }
+             ?>";
+        });
+
+        Blade::directive('dateformat', function (string $date) {
+            return "<?php echo date('M j, y', strtotime($date)); ?>";
+        });
+
+        Blade::directive('datetimeformat', function (string $date) {
+            return "<?php echo date('M j - H:i', strtotime($date)); ?>";
+        });
+
+        Blade::directive('tipoMovimiento', function ($idTipo) {
+            return "<?php
+                switch ($idTipo) {
+                    case 1:
+                        echo 'Venta';
+                        break;
+                    case 2:
+                        echo 'Compra';
+                        break;
+                    case 3:
+                        echo 'Compra libre';
+                        break;
+                    default:
+                        echo 'No asignado';
+                        break;
+                }
+             ?>";
+        });
+
+        Blade::directive('compraEstatus', function ($corteStatus) {
+            return "<?php
+                switch ($corteStatus) {
+                    case false:
+                        echo 'Abierto';
+                        break;
+                    case true:
+                        echo 'Finalizado';
+                        break;
+                    default:
+                        echo 'No asignado';
+                        break;
+                }
+             ?>";
+        });
+
+        Blade::directive('paymenttype', function ($corteStatus) {
+            return "<?php
+                switch ($corteStatus) {
+                    case 1:
+                        echo 'Efectivo';
+                        break;
+                    case 2:
+                        echo 'Transferencia';
+                        break;
+                    default:
+                        echo 'No asignado';
+                        break;
+                }
+             ?>";
+        });
     }
 }
 

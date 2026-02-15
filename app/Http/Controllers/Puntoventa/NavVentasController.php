@@ -104,8 +104,6 @@ class NavVentasController extends Controller
         $arrayDiscountPercentage = $this->getDiscountPercentage($clientId);
         Log::info('apply: '.$apply);
         if (is_array($arrayDiscountPercentage) && count($arrayDiscountPercentage) > 0 && $apply == 1) {
-            $currentDateTime = date('Y-m-d H:i:s');
-
             $objDiscountPercentage = $arrayDiscountPercentage[0];
             $discountPercentage = $objDiscountPercentage->discountPercentage;
             $montoDescuento = $ventaDB->montoTotal - round(($ventaDB->montoTotal * ($discountPercentage / 100)), 0, PHP_ROUND_HALF_EVEN);
@@ -115,7 +113,7 @@ class NavVentasController extends Controller
         } else {
             $ventaDB->apply_discount = FALSE;
         }
-        //User::where('active', 0)->update(['status' => 'inactive']);
+
         VentasProductos::where('IdVenta', $venta->ventaId)
             ->where('delete_flag', true)
             ->where([
