@@ -227,13 +227,10 @@ class VentasController extends Controller
             ]);
             $promotion->save();
         }
-        // -------------------------------
-
-        $this->printFinaliceSale($venta);
-
         // ---------- Guardar el registro de la venta en el corte de caja activo ----------
         $corteCajaCurrent = $this->getCurrentCorteCaja(null);
-        if (!$corteCajaCurrent->isEmpty()) {
+        $isExistVenta = CorteCajaMovimientos::where('IdVenta', $venta->ventaId)->get();
+        if (!$corteCajaCurrent->isEmpty() && $isExistVenta->isEmpty()) {
             $corteCaja = $corteCajaCurrent[0];
             $corteCajaMovimiento = new CorteCajaMovimientos([
                 'idCorte' => $corteCaja->idCorte,
@@ -249,6 +246,8 @@ class VentasController extends Controller
             $this->getUpdateMontoTotalCorte($corteCaja->idCorte);
         }
         // ---------- Guardar el registro de la venta en el corte de caja activo ----------
+
+        $this->printFinaliceSale($venta);
 
         return response()->json([
             'success'=>true,
