@@ -142,7 +142,7 @@ class CorteCajaController extends Controller
 
     public function detalles(Request $request, string $idCorte = null)
     {
-        $request->user()->authorizeRoles(['admin']);
+        $request->user()->authorizeRoles(['admin', 'encargado']);
 
         if ($idCorte == null) {
             return redirect()->route('cortecaja');
