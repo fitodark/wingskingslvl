@@ -203,6 +203,7 @@ class VentasController extends Controller
         $venta->estatus = 2;
         $venta->cantidadRecibida = $request->get('quantity');
         $venta->payment_type = $request->get('paymenttype');
+        $venta->id_user_close = auth()->user()->id;
         $venta->save();
 
         // Guardar registro de promocion

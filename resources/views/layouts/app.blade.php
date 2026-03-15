@@ -7,7 +7,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'TPV') }}</title>
+    <title>{{ config('app.name', 'WKings PV') }}</title>
 
     <!-- Fonts -->
     <!--<link rel="dns-prefetch" href="//fonts.gstatic.com">-->
@@ -56,6 +56,8 @@
                         <a class="dropdown-item" href="{{ route('inventarioproductos') }}">Inventario</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('compras') }}">Compras</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ route('usuarios') }}">Usuarios</a>
                     </div>
                     </li>
                 </ul>
@@ -71,15 +73,15 @@
                             <span>{{ __('Ingresar') }}</span>
                         </a>
                     </li>
-                    @if (Route::has('register'))
+                    <!-- @if (Route::has('register') )
                         <li class="nav-item my-2 my-sm-0">
                             <a class="nav-link text-black" href="{{ route('register') }}">{{ __('Registrar') }}</a>
                         </li>
-                    @endif
+                    @endif -->
                 @else
                     <li class="nav-item dropdown">
                         <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                            <!-- {{ Auth::user()->name }}  -->
+                            {{ Auth::user()->name }} 
                             <i class="fa-solid fa-user"></i>
                             <span class="caret"></span>
                         </a>
@@ -393,6 +395,10 @@
         console.log('click customRadio3');
         $('#type').val(3);
         $('#table').val('');
+    })
+    $('#change-password').click(function (event) {
+        document.getElementById('password').disabled = !event.currentTarget.checked;
+        document.getElementById('password-confirm').disabled = !event.currentTarget.checked;
     })
     $("#addrow").on("click", function () {
         var newRow = $("<tr>");

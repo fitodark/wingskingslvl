@@ -71,9 +71,15 @@
                                     {{ $value[0]['value'] }} - {{ $value[1]['value']}} <br>
                             @endforeach
                         @endif
-                      </td>
-                      <td>{{ $record['cantidad'] }}</td>
-                      <td>@money($record['montoVenta'])</td>
+                        </td>
+                        <td>{{ $record['cantidad'] }}</td>
+                        <td>
+                        @if ($record->estatus == 1)
+                            @money($record['montoVenta'])
+                        @else
+                            Eliminado
+                        @endif
+                        </td>
                   </tr>
                   @empty
                   <tr>
@@ -100,7 +106,13 @@
                             @endif
                         </td>
                         <td>{{ $record['cantidad'] }}</td>
-                        <td>@money($record['montoVenta'])</td>
+                        <td>
+                            @if ($record->estatus == 1)
+                                @money($record['montoVenta'])
+                            @else
+                                Eliminado
+                            @endif
+                        </td>
                     </tr>
                     @empty
                     <tr>

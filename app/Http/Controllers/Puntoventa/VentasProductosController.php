@@ -49,7 +49,9 @@ class VentasProductosController extends Controller
                 'descripcion' => $request->get('description'),
                 'estatus' => true,
                 'delete_flag' => true,
-                'order' => $venta->order
+                'order' => $venta->order,
+                'id_user_create' => auth()->user()->id
+
             ]);
         } else {
             // $product->cantidad += $request->get('cantidad');
@@ -64,6 +66,7 @@ class VentasProductosController extends Controller
                 'estatus' => true,
                 'delete_flag' => true,
                 'descripcion' => $request->get('description'),
+                'id_user_create' => auth()->user()->id
             ]);
         }
 
@@ -124,7 +127,10 @@ class VentasProductosController extends Controller
             return redirect()->route('comandas');
         }
         // marcar el producto como inactivo
+        $producto->order = 0;
+        $producto->delete_flag = false;
         $producto->estatus = 0;
+        $producto->id_user_delete = auth()->user()->id;
         $producto->save();
 
         $venta->cantidadProductos -= $producto->cantidad;

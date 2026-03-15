@@ -28,11 +28,23 @@ class VentasProductos extends Model
         'descripcion',
         'order',
         'estatus',
-        'delete_flag'
+        'delete_flag',
+        'id_user_delete',
+        'id_user_create'
     ];
 
     public function product()
     {
        return $this->hasOne('App\Product', 'id', 'IdProducto');
+    }
+
+    public function userCreate()
+    {
+       return $this->hasOne('App\Product', 'id', 'id_user_create');
+    }
+
+    public function userDelete()
+    {
+       return $this->hasOne('App\Product', 'id', 'id_user_delete');
     }
 }

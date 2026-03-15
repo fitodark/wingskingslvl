@@ -54,7 +54,11 @@
                                 @if ($venta->order == $record->order)
                                     <tr class="table-success">
                                 @else
-                                    <tr>
+                                    @if ($record->estatus == 0)
+                                        <tr class="table-danger">
+                                    @else
+                                        <tr>
+                                    @endif
                                 @endif
                                     <td>{{ $record['product']->name }} - {{ $record['product']->detail }}
                                         @if ($record->product->type != 2 && is_null($record['descripcion']) == false)
@@ -64,7 +68,7 @@
                                     <td>{{ $record['cantidad'] }}</td>
                                     <td>@money($record['montoVenta'])</td>
                                     <td>
-                                        @if ($record->delete_flag == true)
+                                        @if ($record->estatus == 1)
                                             <form action="{{ route('eliminarProducto', $record['ventasProductosId']) }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')

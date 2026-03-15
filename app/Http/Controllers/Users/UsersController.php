@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Users;
 
 use App\User;
+use App\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UsersController extends Controller
 {
@@ -18,12 +21,28 @@ class UsersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::latest()->paginate(5);
+        $request->user()->authorizeRoles(['admin']);
+        $users = User::latest()->paginate(15);
 
         return view('config.users.index',compact('users'))
-          ->with('i', (request()->input('page', 1) - 1) * 5);
+          ->with('i', (request()->input('page', 1) - 1) * 15);
+    }
+
+        /**
+     * Get a validator for an incoming registration request.
+     *
+     * @param  array  $data
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function validator(array $data)
+    {
+        return Validator::make($data, [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
     }
 
     /**
@@ -33,7 +52,8 @@ class UsersController extends Controller
      */
     public function create()
     {
-        //
+        $disablecheck = false;
+        return view('config.users.create', compact('disablecheck'));
     }
 
     /**
@@ -44,7 +64,30 @@ class UsersController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = \Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'idrol' => ['required'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect('usuarios/create')
+                        ->withErrors($validator)
+                        ->withInput();
+        }
+
+        $newUser = User::Create([
+            'name' => $request->get('name'),
+            'email' => $request->get('email'),
+            'password' => Hash::make($request->get('password')),
+            'status' => true
+        ]);
+
+        $newUser->roles()->attach(Role::where('id', $request->get('idrol'))->first());
+
+        return redirect()->route('usuarios')
+                ->with('success','Usuario creado correctamente.');
     }
 
     /**
@@ -64,9 +107,16 @@ class UsersController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function edit(User $user)
+    public function edit(String $id)
     {
-        //
+        $user = User::find($id);
+        $rol = $user->stringRole->first();
+        $disablecheck = true;
+        $arraystatus = [
+            '0' => 'Inactivo',
+            '1' => 'Activo'
+        ];
+        return view('config.users.edit', compact('user', 'rol', 'disablecheck', 'arraystatus'));
     }
 
     /**
@@ -76,9 +126,42 @@ class UsersController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, String $id)
     {
-        //
+        if (!empty($request->get('change-password')) && $request->get('change-password') == 'on') {
+            $validator = \Validator::make($request->all(), [
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
+                'idrol' => ['required']
+            ]);
+        } else {
+            $validator = \Validator::make($request->all(), [
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255'],
+                'idrol' => ['required']
+            ]);
+        }
+
+        if ($validator->fails()) {
+            return redirect()->route('usuarios.edit', ['id' => $id])
+                        ->withErrors($validator)
+                        ->withInput();
+        }
+
+        $edituser = User::find($id);
+
+        $edituser->name = $request->get('name');
+        $edituser->email = $request->get('email');
+        if ($request->get('change-password') && $request->get('change-password') == 'on') {
+            $edituser->password = Hash::make($request->get('password'));
+        }
+        $edituser->save();
+        $edituser->roles()->detach();
+        $edituser->roles()->attach(Role::where('id', $request->get('idrol'))->first());
+
+        return redirect()->route('usuarios')
+                ->with('success','Usuario editado correctamente.');
     }
 
     /**
@@ -87,8 +170,14 @@ class UsersController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function destroy(String $userId)
     {
         //
+        $deleteuser = User::find($userId);
+        $deleteuser->status = false;
+        $deleteuser->save();
+
+        return redirect()->route('usuarios')
+                        ->with('success','Usuario eliminado correctamente');
     }
 }

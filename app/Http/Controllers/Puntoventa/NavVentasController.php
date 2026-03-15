@@ -69,8 +69,8 @@ class NavVentasController extends Controller
             //$client = Client::find($venta->client_id);
             $clientId = $venta->client_id;
         }
-        $arrayBebidas = $this->getDrinkData($venta->ventaId);
-        $arrayComidas = $this->getFoodData($venta->ventaId);
+        $arrayBebidas = $this->getDrinkDataResume($venta->ventaId);
+        $arrayComidas = $this->getFoodDataResume($venta->ventaId);
         $arrayDiscountPercentage = $this->getDiscountPercentage($clientId);
         $client = Client::find($clientId);
         $discountPercentage = 0;

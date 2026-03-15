@@ -85,6 +85,10 @@ Route::get('/compras/addProducts/{idCompra}', 'ComprasController@addProducts')->
 Route::post('/compras/addCompraProductos', 'ComprasController@addCompraProductos')->name('addCompraProductos');
 Route::put('/compras/update/{idCompra}', 'ComprasController@update')->name('compras.update');
 Route::get('/comprasproductos/delete/{idCompraProducto?}', 'ComprasProductosController@delete')->name('comprasproductos.delete');
+Route::get('/usuarios', 'Users\UsersController@index')->name('usuarios');
+Route::delete('/usuarios/{id}', 'Users\UsersController@destroy')->name('usuarios.destroy');
+Route::get('/usuarios/{id}/edit', 'Users\UsersController@edit')->name('usuarios.edit');
+Route::put('/usuarios/update/{id}', 'Users\UsersController@update')->name('usuarios.update');
 
 Route::get('/timezone', function () {
     return [config('app.timezone'), date('Y-m-d H:i:s')];

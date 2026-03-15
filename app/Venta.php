@@ -38,7 +38,8 @@ class Venta extends Model
       'activo',
       'order',
       'apply_discount',
-      'payment_type'
+      'payment_type',
+      'id_user_close'
     ];
 
     public function ventasProductos()
@@ -65,4 +66,10 @@ class Venta extends Model
     {
        return $this->hasOne('App\Client', 'id', 'client_id');
     }
+
+   public function userClose()
+   {
+      return $this->hasOne('App\User', 'id', 'id_user_close');
+   }
+
 }

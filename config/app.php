@@ -179,6 +179,7 @@ return [
         App\Providers\SaleDataServiceProvider::class,
         App\Providers\SalesSummaryServiceProvider::class,
         App\Providers\SalesServiceProvider::class,
+        App\Providers\RolesServiceProvider::class
 
     ],
 

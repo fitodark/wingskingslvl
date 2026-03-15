@@ -175,6 +175,21 @@ class AppServiceProvider extends ServiceProvider
                 }
              ?>";
         });
+
+        Blade::directive('activo', function ($status) {
+            return "<?php
+              switch ($status) {
+                  case true:
+                      echo 'Activo';
+                      break;
+                  case false:
+                      echo 'Inactivo';
+                      break;
+                  default:
+                      echo 'No asignado';
+                      break;
+              } ?>";
+        });
     }
 }
 

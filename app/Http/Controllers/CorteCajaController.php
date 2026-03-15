@@ -18,8 +18,10 @@ class CorteCajaController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $request->user()->authorizeRoles(['admin', 'encargado']);
+
         $cortecaja = CorteCaja::latest()->paginate(10);
 
         return view('cortecaja.index',compact('cortecaja'))
@@ -138,8 +140,10 @@ class CorteCajaController extends Controller
         ]);
     }
 
-    public function detalles(string $idCorte = null)
+    public function detalles(Request $request, string $idCorte = null)
     {
+        $request->user()->authorizeRoles(['admin']);
+
         if ($idCorte == null) {
             return redirect()->route('cortecaja');
         }
