@@ -61,7 +61,7 @@
                         <td>
                             <form action="{{ route('usuarios.destroy', $user->id) }}" method="POST">
                                 <a href="{{ route('usuarios.edit', $user->id) }}">
-                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    <i class="ico-edit"></i>
                                 </a>
                                 @csrf
                                 @method('DELETE')

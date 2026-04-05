@@ -52,7 +52,7 @@ Route::post('/addProductVenta', 'Puntoventa\VentasProductosController@store')->n
 Route::get('/finalizarVenta/{venta}', 'Puntoventa\NavVentasController@finalizarVenta')->name('finalizarVenta');
 Route::get('/cancelarVenta/{venta?}', 'Puntoventa\NavVentasController@cancelarVenta')->name('cancelarVenta');
 
-Route::delete('/eliminarProducto/{producto}', 'Puntoventa\VentasProductosController@destroy')->name('eliminarProducto');
+Route::post('/eliminarProducto', 'Puntoventa\VentasProductosController@destroy')->name('eliminarProducto');
 Route::get('/ticket/print', 'PrinterController@print')->name('printticket');
 
 Route::get('/getQueryClient/{query?}', 'Puntoventa\ClientController@getQueryClient')->name('getQueryClient');
@@ -72,6 +72,7 @@ Route::get('/cortecaja', 'CorteCajaController@index')->name('cortecaja');
 Route::get('/current/{date?}', 'CorteCajaController@current')->name('current');
 Route::post('/cerrarcortecaja', 'CorteCajaController@cerrarcortecaja')->name('cerrarcortecaja');
 Route::get('/cortecaja/detalle/{idCorte}', 'CorteCajaController@detalles')->name('cortecajadetalle');
+Route::get('/cortecaja/detalleventa/{idCorteMovimiento}', 'CorteCajaController@salesdetail')->name('salesdetail');
 
 Route::get('/cortecajamovimientos', 'CorteCajaMovimientosController@index')->name('cortecajamovimientos');
 

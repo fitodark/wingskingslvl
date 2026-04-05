@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\CorteCaja;
 use App\CorteCajaMovimientos;
+use App\Venta;
 use Illuminate\Http\Request;
 use App\Traits\CorteCajaDataLibrary;
 use App\Traits\ComandasDataLibrary;
@@ -192,4 +193,19 @@ class CorteCajaController extends Controller
             'totalVentasTransferArray',
             'totalComprasArray'));
     }
+
+    public function salesdetail(Request $request, string $idCorteMovimiento = null)
+    {
+        $request->user()->authorizeRoles(['admin']);
+
+        if ($idCorteMovimiento == null) {
+            return redirect()->route('cortecaja');
+        }
+        $movimiento = CorteCajaMovimientos::find($idCorteMovimiento);
+        $venta = $movimiento->venta;
+        $ventaproductos = $venta->ventasProductos()->orderBy('updated_at', 'desc')->get();
+
+        return view('cortecaja.ventadetallesmovimientos', compact('movimiento', 'venta', 'ventaproductos'));
+    }
+
 }

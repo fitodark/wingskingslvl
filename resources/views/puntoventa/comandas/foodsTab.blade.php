@@ -88,15 +88,25 @@
                                     <td>{{ $record['cantidad'] }}</td>
                                     <td>@money($record['montoVenta'])</td>
                                     <td>
-                                        @if ($record->estatus == 1)
-                                            <form action="{{ route('eliminarProducto', $record['ventasProductosId']) }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="text" hidden name="tab" id="tab" value="food">
-
-                                                <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
-                                            </form>
+                                    @if ($record->estatus == 1 && $record->delete_flag == 0)
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal"
+                                            data-target="#eliminarProductoModal"
+                                            data-tab="foods"
+                                            data-productoid="{{ $record->ventasProductosId }}">
+                                            Eliminar
+                                        </button>
+                                    @else
+                                        @if ($record->estatus == 1 && $record->delete_flag == 1)
+                                        <form method="POST" action="{{ route('eliminarProducto') }}">
+                                            @csrf
+                                            <input type="text" hidden name="productoid" id="productoid" value="{{ $record->ventasProductosId }}">
+                                            <input type="text" hidden name="tab" id="tab" value="foods">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" data-toggle="modal">
+                                                Eliminar
+                                            </button>
+                                        </form>
                                         @endif
+                                    @endif
                                     </td>
                                 </tr>
                                 @empty
@@ -130,4 +140,5 @@
 </div>
 @include('puntoventa.comandas.dialogFoodDetails', ['piecesList' => $piecesList, 'flavorsList' => $flavorsList])
 @include('puntoventa.comandas.dialogDetails')
+@include('puntoventa.comandas.eliminarProducto')
 @endsection

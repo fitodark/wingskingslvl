@@ -42,6 +42,7 @@ class UsersController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'pin' => ['required', 'string', 'min:4', 'confirmed'],
         ]);
     }
 
@@ -53,7 +54,8 @@ class UsersController extends Controller
     public function create()
     {
         $disablecheck = false;
-        return view('config.users.create', compact('disablecheck'));
+        $disablecheckpin = false;
+        return view('config.users.create', compact('disablecheck', 'disablecheckpin'));
     }
 
     /**
@@ -68,6 +70,7 @@ class UsersController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'pin' => ['required', 'string', 'min:4', 'confirmed'],
             'idrol' => ['required'],
         ]);
 
@@ -81,6 +84,7 @@ class UsersController extends Controller
             'name' => $request->get('name'),
             'email' => $request->get('email'),
             'password' => Hash::make($request->get('password')),
+            'pin' => Hash::make($request->get('pin')),
             'status' => true
         ]);
 
@@ -112,11 +116,12 @@ class UsersController extends Controller
         $user = User::find($id);
         $rol = $user->stringRole->first();
         $disablecheck = true;
+        $disablecheckpin = true;
         $arraystatus = [
             '0' => 'Inactivo',
             '1' => 'Activo'
         ];
-        return view('config.users.edit', compact('user', 'rol', 'disablecheck', 'arraystatus'));
+        return view('config.users.edit', compact('user', 'rol', 'disablecheck', 'arraystatus', 'disablecheckpin'));
     }
 
     /**
@@ -130,12 +135,15 @@ class UsersController extends Controller
     {
         if (!empty($request->get('change-password')) && $request->get('change-password') == 'on') {
             $validator = \Validator::make($request->all(), [
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
-                'idrol' => ['required']
+                'password' => ['required', 'string', 'min:8', 'confirmed']
             ]);
-        } else {
+        } 
+        if (!empty($request->get('change-pin')) && $request->get('change-pin') == 'on') {
+            $validator = \Validator::make($request->all(), [
+                'pin' => ['required', 'string', 'min:4', 'confirmed']
+            ]);
+        }
+        if (!$validator->fails()) {
             $validator = \Validator::make($request->all(), [
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'string', 'email', 'max:255'],
@@ -155,6 +163,9 @@ class UsersController extends Controller
         $edituser->email = $request->get('email');
         if ($request->get('change-password') && $request->get('change-password') == 'on') {
             $edituser->password = Hash::make($request->get('password'));
+        }
+        if ($request->get('change-pin') && $request->get('change-pin') == 'on') {
+            $edituser->pin = Hash::make($request->get('pin'));
         }
         $edituser->save();
         $edituser->roles()->detach();

@@ -69,6 +69,9 @@
                     <th width="16%">Fecha</th>
                     <th width="15%">Monto</th>
                     <th width="15%">Tipo</th>
+                    @role('admin')
+                    <th width="10%">Acción</th>
+                    @endrole
                 </tr>
                 @foreach ($cortecajamovimientos as $movimiento)
                 <tr>
@@ -92,6 +95,13 @@
                     @else
                         <td>@tipoMovimiento($movimiento->idTipo)</td>
                     @endif
+                    @role('admin')
+                    <td>
+                        @if (!empty($movimiento->idVenta))
+                            <a class="ico-details" href="{{ route('salesdetail', [$movimiento->idCorteMovimiento]) }}"></a>
+                        @endif
+                    </td>
+                    @endrole
                 </tr>
                 @endforeach
             </table>

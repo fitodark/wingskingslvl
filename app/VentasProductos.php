@@ -40,11 +40,11 @@ class VentasProductos extends Model
 
     public function userCreate()
     {
-       return $this->hasOne('App\Product', 'id', 'id_user_create');
+       return $this->hasOne('App\User', 'id', 'id_user_create');
     }
 
     public function userDelete()
     {
-       return $this->hasOne('App\Product', 'id', 'id_user_delete');
+       return $this->hasOne('App\User', 'id', 'id_user_delete');
     }
 }

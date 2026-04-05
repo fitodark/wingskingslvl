@@ -105,6 +105,12 @@ html, body {
     padding: 5px 5px 10px 30px;
 }
 
+.ico-edit {
+    background-image: url(/img/edit.png);
+    background-repeat: no-repeat !important;
+    padding: 5px 5px 10px 30px;
+}
+
 .ico-details {
     background-image: url(/img/details.svg);
     background-repeat: no-repeat !important;

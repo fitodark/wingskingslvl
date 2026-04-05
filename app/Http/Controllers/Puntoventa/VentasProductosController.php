@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Puntoventa;
 use App\Venta;
 use App\VentasProductos;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 
 use App\Traits\ComandasDataLibrary;
+use App\Services\PinAuthService;
 
 class VentasProductosController extends Controller
 {
@@ -119,21 +122,44 @@ class VentasProductosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, VentasProductos $producto)
+    public function destroy(Request $request, PinAuthService $pinService)
     {
-        $venta = Venta::find($producto->IdVenta);
+        // $request->validate([
+        //     'pin' => 'required',
+        //     'productoid' => 'required'
+        // ]);
+
+        $ventaProducto = VentasProductos::find($request->get('productoid'));
+        $deleteFlag = $ventaProducto->delete_flag;
+        // validar unicamente si el producto ya fue comandado
+        // se elimina directo solo cuando la orden no ha sido finalizada
+        if ($deleteFlag == 0) {
+            $usuarioAutoriza = $pinService->validarPin($request->pin);
+            if (!$usuarioAutoriza) {
+                return response()->json(['errors' => ['pin' => 'El PIN es incorrecto!']]);
+            }
+        } else {
+            $usuarioAutoriza = null;
+        }
+
+        $venta = Venta::find($ventaProducto->IdVenta);
         // si al venta esta cerrada regresar al listado de comandas
         if ($venta->estatus == 2) {
             return redirect()->route('comandas');
         }
-        // marcar el producto como inactivo
-        $producto->order = 0;
-        $producto->delete_flag = false;
-        $producto->estatus = 0;
-        $producto->id_user_delete = auth()->user()->id;
-        $producto->save();
 
-        $venta->cantidadProductos -= $producto->cantidad;
+        $venta->cantidadProductos -= $ventaProducto->cantidad;
+        if ($usuarioAutoriza == null) {
+            $ventaProducto->delete();
+        } else {
+            // marcar el producto como inactivo
+            $ventaProducto->order = 0;
+            $ventaProducto->delete_flag = false;
+            $ventaProducto->estatus = 0;
+            $ventaProducto->id_user_delete = $usuarioAutoriza->id;
+            $ventaProducto->save();
+        }
+
         $result = $this->getMontoTotalVenta($venta->ventaId);
         if (count($result) > 0) {
             $venta->montoTotal = $result[0]->montoVenta;
@@ -143,9 +169,23 @@ class VentasProductosController extends Controller
         $venta->save();
 
         if ($request->get('tab') == 'drinks') {
-            return redirect()->route('drinksTab', [$venta, $venta->client_id]);
+            if($deleteFlag == 0) {
+                return response()->json([
+                    'success'=>true,
+                    'url'=> route('drinksTab', [$venta, $venta->client_id])
+                ]);
+            } else {
+                return redirect()->route('drinksTab', [$venta, $venta->client_id]);                
+            }
         } else {
-            return redirect()->route('foodsTab', [$venta, $venta->client_id]);
+            if($deleteFlag == 0) {
+                return response()->json([
+                    'success'=>true,
+                    'url'=> route('foodsTab', [$venta, $venta->client_id])
+                ]);
+            } else {
+                return redirect()->route('foodsTab', [$venta, $venta->client_id]);                
+            }
         }
     }
 }

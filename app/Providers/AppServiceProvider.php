@@ -190,6 +190,26 @@ class AppServiceProvider extends ServiceProvider
                       break;
               } ?>";
         });
+
+        Blade::directive('ventaProductoEstatus', function ($estatus) {
+            return "<?php
+                switch ($estatus) {
+                    case 1:
+                        echo 'Cobrado';
+                        break;
+                    case 0:
+                        echo 'Eliminado';
+                        break;
+                    default:
+                        echo 'No asignado';
+                        break;
+                }
+             ?>";
+        });
+
+        Blade::if('role', function ($role) {
+            return auth()->check() && auth()->user()->hasRole($role);
+        });
     }
 }
 

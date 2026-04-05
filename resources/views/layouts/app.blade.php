@@ -400,6 +400,10 @@
         document.getElementById('password').disabled = !event.currentTarget.checked;
         document.getElementById('password-confirm').disabled = !event.currentTarget.checked;
     })
+    $('#change-pin').click(function (event) {
+        document.getElementById('pin').disabled = !event.currentTarget.checked;
+        document.getElementById('pin-confirm').disabled = !event.currentTarget.checked;
+    })
     $("#addrow").on("click", function () {
         var newRow = $("<tr>");
         var cols = "";
@@ -620,7 +624,62 @@
         });
 
     });
+    $('#eliminarProductoModal').on('show.bs.modal', function (event) {
+        console.log("show modal eliminarProductoModal...");
+        var button = $(event.relatedTarget);
+        var productoid = button.data('productoid');
+        var tab = button.data('tab');
 
+        console.log("productoid: ", productoid);
+        console.log("tab: ", tab);
+
+        var modal = $(this);
+        modal.find('#productoid').val(productoid);
+        modal.find('.modal-body #modaltab').val(tab);
+
+        let inputPin = $('#pin');
+        inputPin.val('');      // limpiar campo
+        inputPin.focus();
+        $('.alert-danger').html('');
+        $('.alert-danger').hide();
+    })
+    $("#eliminarProducto").click(function(event) {
+        event.preventDefault();
+        var productoid = $('#productoid').val();
+        var pin = $('#pin').val();
+        var tab = $('#modaltab').val();
+
+        console.log("productoid: ", productoid);
+        console.log("tab: ", tab);
+
+        var _token = $('input[name="_token"]').val();
+        $.ajax({
+            url : "{{ route('eliminarProducto') }}",
+            method : "POST",
+            data : {
+                productoid: productoid,
+                pin: pin,
+                tab: tab,
+                _token : _token
+            },
+            success : function (data) {
+                console.log(data);
+                if(data.errors) {
+                    $('.alert-danger').html('');
+                    $.each(data.errors, function(key, value){
+                  			$('.alert-danger').show();
+                  			$('.alert-danger').append('<li>'+value+'</li>');
+                		});
+                } else {
+                    $('.alert-danger').html('');
+                    $('.alert-danger').hide();
+                    $('#eliminarProductoModal').modal('hide');
+                    window.location = data.url
+                }
+            }
+        });
+
+    });
     </script>
 
 </body>

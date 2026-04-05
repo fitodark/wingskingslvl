@@ -147,7 +147,7 @@
                             </a>
                         </div>
                         <div class="col-2 justify-content-center">
-                            <a class="btn btn-outline-secondary custom" href="{{ route('cancelarVenta') }}" role="button">Cancelar</a>
+                            <a class="btn btn-outline-secondary custom" href="{{ route('cancelarVenta', $venta['ventaId']) }}" role="button">Cancelar</a>
                         </div>
                         <div class="col-2 justify-content-center">
                             <button type="submit" class="btn btn-primary custom" name="next">Siguiente</button>

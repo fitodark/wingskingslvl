@@ -16,8 +16,6 @@
             </span>
         @enderror
     </div>
-</div>
-<div class="row">
     <div class="form-group col-md-6">
         <strong>Email:</strong>
         @if (empty($user))
@@ -61,20 +59,6 @@
     </div>
 </div>
 
-<!-- @if (!empty($user))
-<div class="row">
-    <div class="form-group col-md-6">
-        <strong>Estatus:</strong>
-        <select name="status" id="status" class="form-control" value="{{ $user->status }}">
-        @foreach ($arraystatus as $key => $value)
-        <option disable="true" value="{{ $key }}"
-            {{ ($key == $user->status) ? 'selected' : '' }}>{{ $value}}</option>
-        @endforeach
-        </select>
-    </div>
-</div>
-@endif -->
-
 <div class="row">
     <div class="form-group col-md-6">
     <div class="form-check">
@@ -98,8 +82,6 @@
             </span>
         @enderror
     </div>
-</div>
-<div class="row">
     <div class="form-group col-md-6">
         <strong>Confirmar Contraseña:</strong>
         <input id="password-confirm" type="password" class="form-control" 
@@ -107,3 +89,46 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="form-group col-md-6">
+    <div class="form-check">
+        <input id="change-pin" type="checkbox" class="form-check-input" 
+        name="change-pin" {{ ($disablecheckpin) ? '' : 'disabled' }}>
+        <label class="form-check-label" for="change-pin">
+            Cambiar PIN
+        </label>
+    </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="form-group col-md-6">
+        <strong>PIN:</strong>
+        <input id="pin" type="password" class="form-control @error('pin') is-invalid @enderror" 
+        name="pin" required autocomplete="new-password-pin" {{ ($disablecheckpin) ? 'disabled' : '' }}>
+        @error('password')
+            <span class="invalid-feedback" role="alert">
+                <strong>{{ $message }}</strong>
+            </span>
+        @enderror
+    </div>
+    <div class="form-group col-md-6">
+        <strong>Confirmar PIN:</strong>
+        <input id="pin-confirm" type="password" class="form-control" 
+        name="pin_confirmation" required autocomplete="new-password-pin" {{ ($disablecheckpin) ? 'disabled' : '' }}>
+    </div>
+</div>
+
+@if (!empty($user))
+<div class="row">
+    <div class="form-group col-md-6">
+        <strong>Estatus:</strong>
+        <select name="status" id="status" class="form-control" value="{{ $user->status }}">
+        @foreach ($arraystatus as $key => $value)
+        <option disable="true" value="{{ $key }}"
+            {{ ($key == $user->status) ? 'selected' : '' }}>{{ $value}}</option>
+        @endforeach
+        </select>
+    </div>
+</div>
+@endif
