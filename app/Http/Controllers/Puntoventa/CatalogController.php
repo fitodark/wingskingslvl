@@ -38,13 +38,7 @@ class CatalogController extends Controller
      */
     public function create()
     {
-        $categorias = [
-            '1' => 'Barra',
-            '2' => 'Cocina (Alitas)',
-            '3' => 'Cocina (General)',
-            '4' => 'Insumo'
-        ];
-        return view('puntoventa.productos.create',compact('categorias'));
+        return view('puntoventa.productos.create');
     }
 
     /**
@@ -104,13 +98,7 @@ class CatalogController extends Controller
      */
     public function edit(Product $catalogo)
     {
-        $categorias = [
-            '1' => 'Barra',
-            '2' => 'Cocina (Alitas)',
-            '3' => 'Cocina (General)',
-            '4' => 'Insumo'
-        ];
-        return view('puntoventa.productos.edit',compact('catalogo', 'categorias'));
+        return view('puntoventa.productos.edit');
     }
 
     /**

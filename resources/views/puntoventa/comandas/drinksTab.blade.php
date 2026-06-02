@@ -16,12 +16,14 @@
                         <div class="col-6">
                             <table class="table table-striped table-sm">
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Precio</th>
-                                    <th>Acción</th>
+                                    <th width="5%">#</th>
+                                    <th width="65%">Nombre</th>
+                                    <th width="15%">Precio</th>
+                                    <th width="15%">Acción</th>
                                 </tr>
                                 @foreach ($drinkProducts as $drink)
                                 <tr>
+                                    <td>{{ $drink->consecutive_id }}</td>
                                     <td>{{ $drink->name }} - {{ $drink->detail }}</td>
                                     <td>@money($drink->price)</td>
                                     <td>

@@ -248,6 +248,11 @@ class VentasController extends Controller
         }
         // ---------- Guardar el registro de la venta en el corte de caja activo ----------
 
+        /**
+         * restar las cantidades al inventario
+         */
+        $this->getUpdateMontosInventarioFromVentas($venta->ventaId);
+
         $this->printFinaliceSale($venta);
 
         return response()->json([

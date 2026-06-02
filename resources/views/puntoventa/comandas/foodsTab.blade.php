@@ -16,12 +16,14 @@
                         <div class="col-6">
                             <table class="table table-striped table-sm">
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Precio</th>
-                                    <th>Acción</th>
+                                    <th width="5%">#</th>
+                                    <th width="65%">Nombre</th>
+                                    <th width="15%">Precio</th>
+                                    <th width="15%">Acción</th>
                                 </tr>
                                 @foreach ($foodProducts as $food)
                                 <tr>
+                                    <td>{{ $food->consecutive_id }}</td>
                                     <td>{{ $food->name }} - {{ $food->detail }}</td>
                                     <td width="80px;">@money($food->price)</td>
                                     @if ($food->type === 2)

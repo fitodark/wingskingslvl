@@ -50,7 +50,7 @@
 
                             <!-- <a class="ico-add" href="{{ route('catalogos.edit',$product->id) }}"></a> -->
                             <a href="{{ route('catalogos.edit',$product->id) }}">
-                                <i class="fa-solid fa-pen-to-square"></i>
+                                <i class="ico-edit"></i>
                             </a>
 
                             @csrf

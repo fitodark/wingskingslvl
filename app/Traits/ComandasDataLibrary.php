@@ -184,6 +184,19 @@ trait ComandasDataLibrary {
         return $results;
     }
 
+        public function getUpdateMontosInventarioFromVentas($idVenta) {
+        DB::connection()->enableQueryLog();
+
+        $results = DB::select( DB::raw("
+            update inventario_productos ip
+            inner join ventasproductos vp on vp.idProducto = ip.idProducto 
+            inner join ventas v on v.ventaId = vp.IdVenta 
+            set ip.cantidad = ip.cantidad - vp.cantidad
+            where v.ventaId = :idVenta and v.estatus = 2"), array('idVenta' => $idVenta));
+        $queries = DB::getQueryLog();
+        return $results;
+    }
+
     public function getTotalVenta($idCorte, $paymentType) {
         DB::connection()->enableQueryLog();
 

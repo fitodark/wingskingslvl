@@ -55,7 +55,18 @@
                         <strong>Categoria:</strong>
                         <select class="custom-select" name="type"
                             value="{{ old('type') }}">
-                            @foreach ($categorias as $key => $value)
+                            @foreach ($productsType as $key => $value)
+                            <option value="{{ $key }}" {{ ($key == 0) ? 'selected' : '' }}>{{$value}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <strong>Venta en:</strong>
+                        <select class="custom-select" name="promotionType"
+                            value="{{ old('promotionType') }}">
+                            @foreach ($productsPromotionType as $key => $value)
                             <option value="{{ $key }}" {{ ($key == 0) ? 'selected' : '' }}>{{$value}}</option>
                             @endforeach
                         </select>

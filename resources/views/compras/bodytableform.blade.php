@@ -30,7 +30,7 @@
                 <td>@money($producto->monto)</td>
                 <td>
                     @if ($compra->status == false)                    
-                        <a class="ico-print" href="{{ route('comprasproductos.delete', $producto->idCompraProducto) }}"></a>
+                        <a class="ico-delete" href="{{ route('comprasproductos.delete', $producto->idCompraProducto) }}"></a>
                     @endif
                 </td>
             </tr>

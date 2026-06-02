@@ -16,16 +16,15 @@ class InventarioProductosController extends Controller
 
     public function index()
     {
-        $inventarioproductos = InventarioProductos::latest()->paginate(10);
-
-        return view('inventarioproductos.index',compact('inventarioproductos'))
-            ->with('i', (request()->input('page', 1) - 1) * 10);
+        return view('inventarioproductos.index');
     }
 
     public function create()
     {
         $items = Product::where([
                 ['type', '=', 1],['active', '=', true]
+        ])->orWhere([
+            ['type', '=', '4'],['active', '=', true]
         ])->orderBy('name')->pluck('name', 'id');
 
         return view('inventarioproductos.create', compact('items'));
