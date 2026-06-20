@@ -98,7 +98,7 @@ class CatalogController extends Controller
      */
     public function edit(Product $catalogo)
     {
-        return view('puntoventa.productos.edit');
+        return view('puntoventa.productos.edit', compact('catalogo'));
     }
 
     /**

@@ -27,49 +27,38 @@
                       @method('PUT')
 
                        <div class="row">
-                          <div class="col-xs-12 col-sm-12 col-md-12">
-                              <div class="form-group">
+                          <div class="form-group col-md-6">
                                   <strong>Nombre:</strong>
                                   <input type="text" name="name" value="{{ $catalogo->name }}" class="form-control" placeholder="Name">
-                              </div>
                           </div>
-                          <div class="col-xs-12 col-sm-12 col-md-12">
-                              <div class="form-group">
+                          <div class="form-group col-md-6">
                                   <strong>Descripción:</strong>
                                   <textarea class="form-control" style="height:100px" name="detail"
                                       placeholder="Detail">{{ $catalogo->detail }}</textarea>
-                              </div>
                           </div>
-                          <div class="col-xs-12 col-sm-12 col-md-12">
-                              <div class="form-group">
+                          <div class="form-group col-md-6">
                                   <strong>Precio:</strong>
                                   <input type="number" name="price" class="form-control" placeholder="Precio"
                                   pattern="[0-9]+([\.,][0-9]+)?" step="0.01" title="This should be a number with up to 2 decimal places."
                                   value="{{ $catalogo->price }}">
-                              </div>
                           </div>
 
-                          <div class="col-xs-12 col-sm-12 col-md-12">
-                              <div class="form-group">
+                          <div class="form-group col-md-6">
                                   <strong>Categoria:</strong>
                                   <select class="custom-select" name="type" value="{{ $catalogo->type }}">
-                                      @foreach ($categorias as $key => $value)
-                                      <option disable="true" value="{{ $key }}"
-                                          {{ ($key == $catalogo->type) ? 'selected' : '' }}>{{$value}}</option>
-                                      @endforeach
+                                    @foreach ($productsType as $key => $value)
+                                    <option value="{{ $key }}" {{ ($key == 0) ? 'selected' : '' }}>{{$value}}</option>
+                                    @endforeach
                                   </select>
-                              </div>
                           </div>
-
-                          {{-- <div class="col-xs-12 col-sm-12 col-md-12">
-                              <div class="form-group">
-                                  <strong>Imagen:</strong>
-                                  <input type="file" class="form-control-file" name="product_image" id="exampleInputFile" aria-describedby="fileHelp"
-                                   value="{{ $catalogo->image }}">
-                                  <small id="fileHelp" class="form-text text-muted">Please upload a valid image file. Size of image should not be more than 2MB.</small>
-                              </div>
-                          </div> --}}
-
+                        <div class="form-group col-md-6">
+                            <strong>Venta en:</strong>
+                            <select class="custom-select" name="promotionType" value="{{ $catalogo->promotion_type }}">
+                                @foreach ($productsPromotionType as $key => $value)
+                                <option value="{{ $key }}" {{ ($key == 0) ? 'selected' : '' }}>{{$value}}</option>
+                                @endforeach
+                            </select>
+                        </div>
                           <div class="col-xs-12 col-sm-12 col-md-12 text-center">
                             <button type="submit" class="btn btn-primary">Actualizar</button>
                           </div>
