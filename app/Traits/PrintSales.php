@@ -48,7 +48,7 @@ trait PrintSales {
                 $printer->text("Ubicación: " . $venta->dinerstable->name . "\n\n");
             } else if ($venta->type == 2) {
                 $printer->text("Cliente: " . $venta->client->name . ", (" . $venta->client->phone . ")" . "\n");
-                $printer->text("         " . $venta->client->address . " - " . $venta->client->reference. "\n\n");
+                $printer->text("         " . ($venta->direccion_envio ?: $venta->client->address) . " - " . $venta->client->reference. "\n\n");
             }
             # Para mostrar el total
             foreach ($venta->ventasProductos as $ventaProducto) {
@@ -158,7 +158,7 @@ trait PrintSales {
             $printer->text("Ubicación: " . $venta->dinerstable->name . "\n\n");
         } else if ($venta->type == 2 or $venta->type == 3) {
             $printer->text("Cliente: " . $venta->client->name . ", (" . $venta->client->phone . ")" . "\n");
-            $printer->text("         " . $venta->client->address . "\n\n");
+            $printer->text("         " . ($venta->direccion_envio ?: $venta->client->address) . "\n\n");
         }
 
         foreach ($arrayProductos as $ventaProducto) {

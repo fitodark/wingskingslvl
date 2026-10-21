@@ -8,7 +8,7 @@
                 @if ($venta->type == 2 || $venta->type == 3)
                     <label for="location">Cliente</label>
                     <input class="form-control" id="location" type="text" placeholder=".form-control-sm"
-                    value="{{ $venta->client->name }} ( {{ $venta->client->phone }} ) - {{ $venta->client->address }} - {{ $venta->client->reference }}" readonly>
+                    value="{{ $venta->client->name }} ( {{ $venta->client->phone }} ) - {{ $venta->direccion_envio ?: $venta->client->address }} - {{ $venta->client->reference }}" readonly>
                 @elseif ($venta->type == 1)
                     <label for="location">Mesa</label>
                     <input class="form-control" id="location" type="text" placeholder=".form-control-sm"

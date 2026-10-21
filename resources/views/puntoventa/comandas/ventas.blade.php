@@ -12,7 +12,11 @@
     </tr>
     </thead>
     @forelse ($ventas as $venta)
-    <tr>
+    @if ($venta->venta_agente == true)
+        <tr class="table-primary">
+    @else
+        <tr>
+    @endif
         <td>{{ $venta->ventaId }}</td>
         <td>
             @if ($venta->type === 1)
@@ -22,7 +26,7 @@
             @endif 
             @if ($venta->type === 2)
                 {{ $venta->client->name }} ( {{ $venta->client->phone }} )<br>
-                {{ $venta->client->address }}
+                {{ $venta->direccion_envio ?: $venta->client->address }}
             @endif
             @if ($venta->type === 3)
                 Para Llevar (Pasan a recoger)<br>
@@ -33,7 +37,8 @@
         <td>@ventaType($venta->type)</td>
         <td>@ventaEstatus($venta->estatus)</td>
         <td>@money($venta->montoTotal)<br>
-            @discountApply($venta->apply_discount)
+            @discountApply($venta->apply_discount)<br>
+            @paymenttype($venta->payment_type)
         </td>
         @if (Route::currentRouteName() == 'comandas')
         <td>
@@ -53,7 +58,7 @@
                     <button type="button" class="btn" data-toggle="modal"
                         data-target="#finalizarVentaModal"
                         data-ventaid="{{ $venta->ventaId }}"
-                        data-location="{{ ($venta->type === 1)? $venta->dinerstable->name:$venta->client->address }}"
+                        data-location="{{ ($venta->type === 1)? $venta->dinerstable->name:($venta->direccion_envio ?: $venta->client->address) }}"
                         data-total="{{ $venta->montoTotal }}"
                         data-montototaldescuento="{{ $venta->montoTotalDescuento }}"
                         data-discountpercentage="{{ $discountPercentageObject->value }}"

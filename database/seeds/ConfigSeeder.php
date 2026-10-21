@@ -234,6 +234,66 @@ class ConfigSeeder extends Seeder
           'value' => 'Domicilio',
           'order' => '2'
         ]);
+        
+        Config::updateOrCreate([
+          'key' => 'local_phone_number',
+          'value' => '953 117 5127',
+          'order' => '1'
+        ]);
 
-    }
+        Config::updateOrCreate([
+          'key' => 'business_hours',
+          'value' => 'Lunes [13:00 24:00]',
+          'order' => '1'
+        ]);
+
+        Config::updateOrCreate([
+          'key' => 'business_hours',
+          'value' => 'Martes [13:00 24:00]',
+          'order' => '2'
+        ]);
+
+        Config::updateOrCreate([
+          'key' => 'business_hours',
+          'value' => 'Miércoles [13:00 24:00]',
+          'order' => '3'
+        ]);
+
+        Config::updateOrCreate([
+          'key' => 'business_hours',
+          'value' => 'Jueves [13:00 24:00]',
+          'order' => '4'
+        ]);
+
+        Config::updateOrCreate([
+          'key' => 'business_hours',
+          'value' => 'Viernes [13:00 24:00]',
+          'order' => '5'
+        ]);
+
+        Config::updateOrCreate([
+          'key' => 'business_hours',
+          'value' => 'Sábado [13:00 24:00]',
+          'order' => '6'
+        ]);
+
+        Config::updateOrCreate([
+          'key' => 'business_hours',
+          'value' => 'Domingo [13:00 24:00]',
+          'order' => '7'
+        ]);
+
+        Config::updateOrCreate([
+          'key' => 'delivery_time_windows',
+          'value' => 'Baja demanda [13:00 20:00] 40-60',
+          'order' => '1'
+        ]);
+
+        Config::updateOrCreate([
+          'key' => 'delivery_time_windows',
+          'value' => 'Alta demanda [20:00 23:00] 60-80',
+          'order' => '2'
+        ]);
+
+}
 }

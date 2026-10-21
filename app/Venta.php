@@ -39,7 +39,9 @@ class Venta extends Model
       'order',
       'apply_discount',
       'payment_type',
-      'id_user_close'
+      'id_user_close',
+      'direccion_envio',
+      'venta_agente'
     ];
 
     public function ventasProductos()
