@@ -21,11 +21,10 @@ class InventarioProductosController extends Controller
 
     public function create()
     {
-        $items = Product::where([
-                ['type', '=', 1],['active', '=', true]
-        ])->orWhere([
-            ['type', '=', '4'],['active', '=', true]
-        ])->orderBy('name')->pluck('name', 'id');
+        // Lo que se inventaría: bebidas de barra e insumos.
+        $items = Product::whereIn('type', [Product::TIPO_BARRA, Product::TIPO_INSUMO])
+            ->where('active', true)
+            ->orderBy('name')->pluck('name', 'id');
 
         return view('inventarioproductos.create', compact('items'));
     }

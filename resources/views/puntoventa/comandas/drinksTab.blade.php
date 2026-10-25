@@ -13,7 +13,8 @@
 
                 <div class="card-body">
                     <div class="row justify-content-center">
-                        <div class="col-6">
+                        <div class="col-12 col-lg-6">
+                            <p class="h5 text-black">Productos</p>
                             <table class="table table-striped table-sm">
                                 <tr>
                                     <th width="5%">#</th>
@@ -44,7 +45,8 @@
 
                         </div>
                         
-                        <div class="col-6">
+                        <div class="col-12 col-lg-6">
+                            <p class="h5 text-black">Bebidas en la cuenta</p>
                             <table class="table table-striped table-sm">
                                 <tr>
                                     <th>Nombre</th>
@@ -56,21 +58,21 @@
                                 @if ($venta->order == $record->order)
                                     <tr class="table-success">
                                 @else
-                                    @if ($record->estatus == 0)
+                                    @if (!$record->estaActivo())
                                         <tr class="table-danger">
                                     @else
                                         <tr>
                                     @endif
                                 @endif
                                     <td>{{ $record['product']->name }} - {{ $record['product']->detail }}
-                                        @if ($record->product->type != 2 && is_null($record['descripcion']) == false)
+                                        @if (!$record->product->llevaSabores() && is_null($record['descripcion']) == false)
                                             <br>[{{ $record['descripcion'] }}]
                                         @endif
                                     </td>
                                     <td>{{ $record['cantidad'] }}</td>
                                     <td>@money($record['montoVenta'])</td>
                                     <td>
-                                    @if ($record->estatus == 1 && $record->delete_flag == 0)
+                                    @if ($record->estaActivo() && $record->estaComandado())
                                         <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal"
                                             data-target="#eliminarProductoModal"
                                             data-tab="drinks"
@@ -78,7 +80,7 @@
                                             Eliminar
                                         </button>
                                     @else
-                                        @if ($record->estatus == 1 && $record->delete_flag == 1)
+                                        @if ($record->estaActivo() && !$record->estaComandado())
                                         <form method="POST" action="{{ route('eliminarProducto') }}">
                                             @csrf
                                             <input type="text" hidden name="productoid" id="productoid" value="{{ $record->ventasProductosId }}">
@@ -101,19 +103,11 @@
                     </div>
                 </div>
 
-                <div class="card-footer text-center">
-                    <div class="row justify-content-center">
-                        <div class="col-3"></div>
-                        <div class="col-2 justify-content-center">
-                            <a class="btn btn-primary custom" href="{{ route('create', ['venta' => $venta['ventaId'], 'client' => $client['id']]) }}" role="button">Anterior</a>
-                        </div>
-                        <div class="col-2 justify-content-center">
-                            <a class="btn btn-outline-secondary custom" href="{{ route('cancelarVenta', $venta['ventaId']) }}" role="button">Regresar</a>
-                        </div>
-                        <div class="col-2 justify-content-center">
-                            <a class="btn btn-primary custom" href="{{ route('foodsTab', ['venta' => $venta['ventaId'], 'client' => $client['id']]) }}" role="button">Siguiente</a>
-                        </div>
-                        <div class="col-3"></div>
+                <div class="card-footer">
+                    <div class="wk-wizard-nav">
+                        <a class="btn btn-outline-primary custom" href="{{ route('create', ['venta' => $venta['ventaId'], 'client' => optional($client)->id]) }}" role="button">Anterior</a>
+                        <button type="submit" form="cancelarVentaForm" class="btn btn-outline-secondary custom">Regresar</button>
+                        <a class="btn btn-primary custom" href="{{ route('foodsTab', ['venta' => $venta['ventaId'], 'client' => optional($client)->id]) }}" role="button">Siguiente</a>
                     </div>
                 </div>
 
@@ -123,4 +117,13 @@
 </div>
 @include('puntoventa.comandas.dialogDetails')
 @include('puntoventa.comandas.eliminarProducto')
+{{-- Fuera de otros forms; el botón Regresar lo envía con form="cancelarVentaForm" --}}
+<form id="cancelarVentaForm" method="POST" action="{{ route('cancelarVenta', $venta['ventaId']) }}">
+    @csrf
+</form>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/comandas.js') }}"></script>
+@endpush
+

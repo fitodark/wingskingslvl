@@ -1,65 +1,71 @@
-<div class="modal" id="finalizarVentaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document" style="z-index: 999999999;">
+<div class="modal fade" id="finalizarVentaModal" tabindex="-1" role="dialog" aria-labelledby="finalizarVentaTitulo" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Finalizar Venta</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <h5 class="modal-title" id="finalizarVentaTitulo">Cobrar venta</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+            {{-- Se envía por AJAX (public/js/comandas.js); Enter en "Recibido" también cobra. --}}
             <form method="POST" action="{{ route('cerrarVenta') }}">
             @csrf
-                <input type="text" hidden name="applydiscount" id="applydiscount">
+                <input type="hidden" name="applydiscount" id="applydiscount">
                 <div class="modal-body">
                     <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="location">Folio</label>
-                            <input class="form-control form-control-sm" id="folio" type="text" placeholder=".form-control-sm" readonly>
+                        <div class="form-group col-4">
+                            <label for="folio">Folio</label>
+                            <input class="form-control" id="folio" type="text" readonly>
                         </div>
-                        <div class="form-group col-md-6">
+                        <div class="form-group col-8">
                             <label for="location">Ubicación</label>
-                            <input class="form-control form-control-sm" id="location" type="text" placeholder=".form-control-sm" readonly>
+                            <input class="form-control" id="location" type="text" readonly>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group col-md-12">
+                        <div class="form-group col-12">
                             <label for="total">Monto Total</label>
-                            <input class="form-control form-control-sm" id="total" type="text" placeholder=".form-control-sm" readonly>
+                            <input class="form-control" id="total" type="text" readonly>
                         </div>
                     </div>
                     <div class="form-row" id="rowdiscount">
-                        <div class="form-group col-md-6">
-                            <label for="total">Total con descuento</label>
-                            <input class="form-control form-control-sm" id="montototaldescuento" type="text" placeholder=".form-control-sm" readonly>
+                        <div class="form-group col-6">
+                            <label for="montototaldescuento">Total con descuento</label>
+                            <input class="form-control" id="montototaldescuento" type="text" readonly>
                         </div>
-                        <div class="form-group col-md-6">
-                            <label for="total">% Descuento</label>
-                            <input class="form-control form-control-sm" id="discountpercentage" type="text" placeholder=".form-control-sm" readonly>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group col-md-12">
-                            <label for="quantity" class="col-form-label">Cantidad:</label>
-                            <input name="cantidad" type="number" class="form-control" name="quantity" id="quantity" value="{{ old('quantiy') }}">
-                            <div class="alert alert-danger" style="display:none"></div>
+                        <div class="form-group col-6">
+                            <label for="discountpercentage">% Descuento</label>
+                            <input class="form-control" id="discountpercentage" type="text" readonly>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group col-md-12">
-                            <label for="quantity" class="col-form-label">Tipo de pago:</label>
+                        <div class="form-group col-12">
+                            <label for="paymenttype">Tipo de pago</label>
                             <select name="paymenttype" id="paymenttype" class="form-control">
-                                <option value="1">Efectivo</option>
-                                <option value="2">Transferencia</option>
+                                @foreach (\App\Venta::PAGOS as $clave => $nombre)
+                                    <option value="{{ $clave }}">{{ $nombre }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
+                    <div class="form-row align-items-end">
+                        <div class="form-group col-8">
+                            <label for="quantity">Recibido</label>
+                            <input type="number" class="form-control form-control-lg" name="quantity" id="quantity"
+                                inputmode="decimal" min="0" step="0.01" autocomplete="off">
+                        </div>
+                        <div class="form-group col-4">
+                            <button type="button" class="btn btn-outline-secondary btn-block" id="pagoExacto">Pago exacto</button>
+                        </div>
+                    </div>
+                    <p class="h5 mb-2" id="cambio"></p>
+                    <div class="alert alert-danger" style="display:none"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                    <button class="btn btn-primary" id="finalizarVenta">Finalizar Venta</button>
+                    <button type="submit" class="btn btn-primary" id="finalizarVenta">Cobrar y cerrar</button>
                 </div>
             </form>
         </div>
     </div>
-</div>
 </div>

@@ -6,6 +6,37 @@ use Illuminate\Database\Eloquent\Model;
 
 class Venta extends Model
 {
+    // ventas.type
+    const TIPO_LOCAL = 1;
+    const TIPO_DOMICILIO = 2;
+    const TIPO_PARA_LLEVAR = 3;
+
+    const TIPOS = [
+        self::TIPO_LOCAL => 'Local',
+        self::TIPO_DOMICILIO => 'Domicilio',
+        self::TIPO_PARA_LLEVAR => 'Para llevar',
+    ];
+
+    // ventas.estatus
+    const ESTATUS_ABIERTA = 1;
+    const ESTATUS_CERRADA = 2;
+    const ESTATUS_CANCELADA = 3;
+
+    const ESTATUS = [
+        self::ESTATUS_ABIERTA => 'Abierto',
+        self::ESTATUS_CERRADA => 'Finalizado',
+        self::ESTATUS_CANCELADA => 'Cancelado',
+    ];
+
+    // ventas.payment_type (null mientras la venta está abierta)
+    const PAGO_EFECTIVO = 1;
+    const PAGO_TRANSFERENCIA = 2;
+
+    const PAGOS = [
+        self::PAGO_EFECTIVO => 'Efectivo',
+        self::PAGO_TRANSFERENCIA => 'Transferencia',
+    ];
+
     /**
      * The table associated with the model.
      *
@@ -26,6 +57,7 @@ class Venta extends Model
       'IdUsuario',
       'branchofficeterminal_id',
       'dinerstable_id',
+      'nombre_cuenta',
       'client_id',
       'montoTotal',
       'montoTotalDescuento',
@@ -72,6 +104,78 @@ class Venta extends Model
    public function userClose()
    {
       return $this->hasOne('App\User', 'id', 'id_user_close');
+   }
+
+   /**
+    * Mesa y/o nombre de la cuenta, ej. "Mesa 3 - Cuenta de Patricia".
+    * Ambos son opcionales, por eso se arma solo con lo que exista.
+    */
+   public function getEtiquetaCuentaAttribute()
+   {
+      $partes = array_filter([
+         optional($this->dinerstable)->name,
+         $this->nombre_cuenta,
+      ], 'strlen');
+
+      return implode(' - ', $partes);
+   }
+
+   /**
+    * Cuántas órdenes de alitas activas tienen sabores que no cuadran
+    * (pasa con ventas del agente, que se insertan directo en la base).
+    */
+   public function getSaboresConProblemaAttribute()
+   {
+      return $this->ventasProductos->filter(function ($vp) {
+         return $vp->problema_sabores !== null;
+      })->count();
+   }
+
+   public function esLocal()
+   {
+      return $this->type == self::TIPO_LOCAL;
+   }
+
+   public function esDomicilio()
+   {
+      return $this->type == self::TIPO_DOMICILIO;
+   }
+
+   public function esParaLlevar()
+   {
+      return $this->type == self::TIPO_PARA_LLEVAR;
+   }
+
+   public function estaAbierta()
+   {
+      return $this->estatus == self::ESTATUS_ABIERTA;
+   }
+
+   public function estaCerrada()
+   {
+      return $this->estatus == self::ESTATUS_CERRADA;
+   }
+
+   /**
+    * Lo que se cobra: con descuento si se aplicó.
+    */
+   public function getMontoACobrarAttribute()
+   {
+      return $this->apply_discount == 1 ? $this->montoTotalDescuento : $this->montoTotal;
+   }
+
+   /**
+    * Texto de ubicación para listas, resumen y tickets.
+    */
+   public function getUbicacionAttribute()
+   {
+      if ($this->esDomicilio()) {
+         return 'Domicilio';
+      }
+      if ($this->esParaLlevar()) {
+         return 'Para Llevar (Pasan a recoger)' . ($this->nombre_cuenta ? ' - ' . $this->nombre_cuenta : '');
+      }
+      return $this->etiqueta_cuenta ?: 'Sin mesa';
    }
 
 }

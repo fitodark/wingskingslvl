@@ -4,46 +4,89 @@ namespace App\Traits;
 use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
+use App\Product;
+use App\Venta;
 use App\VentasProductos;
 
 trait ComandasDataLibrary {
 
+    // Bebidas = productos de barra; comidas = cocina (alitas y general).
+    // Las versiones *Resume dejan fuera los renglones eliminados.
+
     public function getDrinkData($ventaId) {
-        $arrayBebidas = VentasProductos::where('IdVenta', $ventaId)
-              ->whereHas('product', function (Builder $query) {
-                  $query->where('type', '=', '1');
-              })->get();
-        return $arrayBebidas;
+        return VentasProductos::where('IdVenta', $ventaId)
+            ->whereHas('product', function (Builder $query) {
+                $query->where('type', Product::TIPO_BARRA);
+            })->get();
     }
 
     public function getDrinkDataResume($ventaId) {
-        $arrayBebidas = VentasProductos::where('IdVenta', $ventaId)
-              ->whereHas('product', function (Builder $query) {
-                  $query->where('type', '=', '1')->where([
-                        ['estatus', '=', 1]
-                    ]);
-              })->get();
-        return $arrayBebidas;
+        return VentasProductos::where('IdVenta', $ventaId)
+            ->activos()
+            ->whereHas('product', function (Builder $query) {
+                $query->where('type', Product::TIPO_BARRA);
+            })->get();
     }
 
     public function getFoodData($ventaId) {
-        $arrayComidas = VentasProductos::where('IdVenta', $ventaId)
+        return VentasProductos::where('IdVenta', $ventaId)
             ->whereHas('product', function (Builder $query) {
-                $query->where('type', '=', 2)->orWhere('type', '=', 3);
+                $query->whereIn('type', Product::TIPOS_COCINA);
             })->get();
-        return $arrayComidas;
     }
 
     public function getFoodDataResume($ventaId) {
-        $arrayComidas = VentasProductos::where('IdVenta', $ventaId)
+        return VentasProductos::where('IdVenta', $ventaId)
+            ->activos()
             ->whereHas('product', function (Builder $query) {
-                $query->where('type', '=', 2)->where([
-                        ['estatus', '=', 1]
-                    ])->orWhere('type', '=', 3)->where([
-                        ['estatus', '=', 1]
-                    ]);
+                $query->whereIn('type', Product::TIPOS_COCINA);
             })->get();
-        return $arrayComidas;
+    }
+
+    /**
+     * Productos de la orden actual de la venta ($venta->order), separados
+     * en bebidas (barra) y comidas (cocina).
+     *
+     * @return array [$arrayBebidas, $arrayComidas]
+     */
+    public function getProductosOrden(\App\Venta $venta) {
+        $arrayBebidas = VentasProductos::where('IdVenta', $venta->ventaId)
+            ->where('order', $venta->order)
+            ->whereHas('product', function (Builder $query) {
+                $query->where('type', Product::TIPO_BARRA);
+            })->get();
+
+        $arrayComidas = VentasProductos::where('IdVenta', $venta->ventaId)
+            ->where('order', $venta->order)
+            ->whereHas('product', function (Builder $query) {
+                $query->whereIn('type', Product::TIPOS_COCINA);
+            })->get();
+
+        return [$arrayBebidas, $arrayComidas];
+    }
+
+    /**
+     * Deja la venta activa en la bandeja después de mandar la orden:
+     * aplica el descuento si corresponde y marca los productos como comandados
+     * (a partir de aquí eliminarlos requiere PIN).
+     */
+    public function activarVenta(\App\Venta $venta, $clientId, $apply) {
+        $arrayDiscountPercentage = $this->getDiscountPercentage($clientId);
+        if (is_array($arrayDiscountPercentage) && count($arrayDiscountPercentage) > 0 && $apply == 1) {
+            $discountPercentage = $arrayDiscountPercentage[0]->discountPercentage;
+            $venta->montoTotalDescuento = $venta->montoTotal - round(($venta->montoTotal * ($discountPercentage / 100)), 0, PHP_ROUND_HALF_EVEN);
+            $venta->apply_discount = TRUE;
+        } else {
+            $venta->apply_discount = FALSE;
+        }
+
+        VentasProductos::where('IdVenta', $venta->ventaId)
+            ->where('delete_flag', true)
+            ->activos()
+            ->update(['delete_flag' => false]);
+
+        $venta->activo = 1;
+        $venta->save();
     }
 
     public function getDiscountPercentage($clientId) {
@@ -88,9 +131,7 @@ trait ComandasDataLibrary {
         $montoTotal = DB::table('ventasproductos')
                     ->select(DB::raw('sum(montoVenta) as montoVenta, sum(cantidad) as cantidad'))
                     ->where('idVenta', '=', $ventaId)
-                    ->where([
-                        ['estatus', '=', 1]
-                    ])
+                    ->where('estatus', VentasProductos::ESTATUS_ACTIVO)
                     ->groupBy('idVenta')
                     ->get();
         return $montoTotal;
@@ -103,13 +144,10 @@ trait ComandasDataLibrary {
                     ->select(DB::raw("max(ventaId) as ventaId, count(ventaId) as totalVentas
                     , sum(montoTotal) as montoTotal
                     , client_id, max(date_format(created_at, '%Y-%m-%d %H:%i')) as date"))
-                    ->where([
-                        ['client_id', '=', $clientId]
-                    ])->where([
-                        ['estatus', '=', 2]
-                    ])->where([
-                        ['activo', '=', 1]
-                    ])->where(
+                    ->where('client_id', $clientId)
+                    ->where('estatus', Venta::ESTATUS_CERRADA)
+                    ->where('activo', 1)
+                    ->where(
                         DB::raw("DATE_FORMAT(created_at,'%Y-%m')"), '=', $date
                     )->groupBy('client_id')
                     ->get();
@@ -124,13 +162,10 @@ trait ComandasDataLibrary {
         $resumeTotalSales = DB::table('ventas')
                     ->select(DB::raw("ventaId, montoTotal
                     , client_id, date_format(created_at, '%Y-%m-%d %H:%i') as date"))
-                    ->where([
-                        ['client_id', '=', $clientId]
-                    ])->where([
-                        ['estatus', '=', 2]
-                    ])->where([
-                        ['activo', '=', 1]
-                    ])->where(
+                    ->where('client_id', $clientId)
+                    ->where('estatus', Venta::ESTATUS_CERRADA)
+                    ->where('activo', 1)
+                    ->where(
                         DB::raw("DATE_FORMAT(created_at,'%Y-%m')"), '=', $date
                     )->get();
         $queries = DB::getQueryLog();
@@ -164,7 +199,7 @@ trait ComandasDataLibrary {
             union 
             select p.id, p.name
             from products p 
-            where p.active is true and p.type = 4"));
+            where p.active is true and p.type = :insumo"), ['insumo' => Product::TIPO_INSUMO]);
         $queries = DB::getQueryLog();
         //dd($queries);
         //Log::info('getPromotionsClients: '.print_r($queries));
@@ -187,12 +222,19 @@ trait ComandasDataLibrary {
         public function getUpdateMontosInventarioFromVentas($idVenta) {
         DB::connection()->enableQueryLog();
 
-        $results = DB::select( DB::raw("
+        // Se agrupa por producto porque MySQL actualiza cada fila de inventario una sola vez
+        // por UPDATE con join; sin agrupar, dos renglones del mismo producto solo restaban uno.
+        // vp.estatus = 1 excluye los productos eliminados de la venta.
+        $results = DB::update("
             update inventario_productos ip
-            inner join ventasproductos vp on vp.idProducto = ip.idProducto 
-            inner join ventas v on v.ventaId = vp.IdVenta 
-            set ip.cantidad = ip.cantidad - vp.cantidad
-            where v.ventaId = :idVenta and v.estatus = 2"), array('idVenta' => $idVenta));
+            inner join (
+                select vp.idProducto, sum(vp.cantidad) as cantidad
+                from ventasproductos vp
+                inner join ventas v on v.ventaId = vp.IdVenta
+                where v.ventaId = :idVenta and v.estatus = 2 and vp.estatus = 1
+                group by vp.idProducto
+            ) vendidos on vendidos.idProducto = ip.idProducto
+            set ip.cantidad = ip.cantidad - vendidos.cantidad", array('idVenta' => $idVenta));
         $queries = DB::getQueryLog();
         return $results;
     }
@@ -219,15 +261,9 @@ trait ComandasDataLibrary {
         $resumeTotalSales = DB::table('corte_caja_movimientos')
                     ->select(DB::raw("max(idCorteMovimiento) as idCorteMovimiento, count(idCorteMovimiento) as totalCompras
                     , sum(monto) as montoTotalCompras"))
-                    ->where([
-                        ['idCorte', '=', $idCorte]
-                    ])->where([
-                        ['idTipo', '=', 2]
-                    ])->orWhere([
-                        ['idCorte', '=', $idCorte]
-                    ])->where([
-                        ['idTipo', '=', 3]
-                    ])->groupBy('idCorte')
+                    ->where('idCorte', $idCorte)
+                    ->whereIn('idTipo', [\App\CorteCajaMovimientos::TIPO_COMPRA, \App\CorteCajaMovimientos::TIPO_COMPRA_LIBRE])
+                    ->groupBy('idCorte')
                     ->get();
         $queries = DB::getQueryLog();
         //dd($queries);

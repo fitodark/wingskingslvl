@@ -29,5 +29,10 @@
         <server name="MAIL_DRIVER" value="array"/>
         <server name="QUEUE_CONNECTION" value="sync"/>
         <server name="SESSION_DRIVER" value="array"/>
+        <!-- Base exclusiva de pruebas: se borra y recrea en cada corrida. Nunca la real. -->
+        <server name="DB_DATABASE" value="wingskings_test"/>
+        <env name="DB_DATABASE" value="wingskings_test" force="true"/>
+        <server name="AGENTE_TOKEN" value="token-de-prueba"/>
+        <env name="AGENTE_TOKEN" value="token-de-prueba" force="true"/>
     </php>
 </phpunit>

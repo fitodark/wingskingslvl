@@ -57,7 +57,7 @@ class CorteCajaMovimientosController extends Controller
             'idCompra' => null,
             'descripcion' => $request->get('descripcion'),
             'monto' => $request->get('monto'),
-            'idTipo' => 3,
+            'idTipo' => \App\CorteCajaMovimientos::TIPO_COMPRA_LIBRE,
             'created_at' => $currentDateTime,
             'updated_at' => $currentDateTime
         ]);

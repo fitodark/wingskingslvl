@@ -10,7 +10,7 @@ class SalesComposer {
     public function compose(View $view) {
         $ventas = Venta::orderBy('ventaId', 'desc')
             ->where('activo', 1)
-            ->where('estatus', 1)
+            ->where('estatus', \App\Venta::ESTATUS_ABIERTA)
             ->paginate(10);
 //dd($ventas);
         $view->with('ventas', $ventas)

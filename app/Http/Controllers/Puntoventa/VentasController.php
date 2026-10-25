@@ -4,21 +4,11 @@ namespace App\Http\Controllers\Puntoventa;
 
 use App\Client;
 use App\Venta;
-use App\VentasProductos;
 use App\Dinerstable;
-use App\Config;
-use App\PromotionsClients;
-use App\CorteCajaMovimientos;
+use App\Exceptions\VentaException;
+use App\Services\VentaService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Builder;
-
-use Mike42\Escpos\Printer;
-use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
-use Mike42\Escpos\EscposImage;
 
 use App\Traits\PrintSales;
 use App\Traits\ComandasDataLibrary;
@@ -46,6 +36,11 @@ class VentasController extends Controller
         // validar si existe el corte de caja activo
         $corteCajaCurrent = $this->getCurrentCorteCaja(null);
         if ($corteCajaCurrent == null || $corteCajaCurrent->isEmpty()) {
+            // El mesero no tiene acceso a cortes de caja: se le avisa en Home.
+            if (!auth()->user()->hasAnyRole(['admin', 'encargado'])) {
+                return redirect()->route('home')
+                    ->withErrors(['cortecajarequired' => 'No hay corte de caja abierto. Pide al encargado que lo abra para poder generar comandas.']);
+            }
             return redirect('cortecaja')
                         ->withErrors([
                             'cortecajarequired' => 'Para generar comandas, debe dar de alta el nuevo corte de caja.!',
@@ -111,8 +106,8 @@ class VentasController extends Controller
             'montoIva' => '0',
             'cantidadRecibida' => '0',
             'cantidadProductos' => '0',
-            'type' => 1,
-            'estatus' => 1,
+            'type' => Venta::TIPO_LOCAL,
+            'estatus' => Venta::ESTATUS_ABIERTA,
             'activo' => 0,
             'order' => 1,
             'created_at' => $currentDateTime,
@@ -152,14 +147,43 @@ class VentasController extends Controller
      */
     public function update(Request $request, Venta $venta, Client $client = null) {
         if ($venta != null) {
-            $venta->type = $request->get('type');
-            if ($request->get('type') == 1) {
-                $venta->dinerstable_id = $request->get('table');
-            } else {
-                $venta->dinerstable_id = null;
+            $tipo = (int) $request->get('type', Venta::TIPO_LOCAL);
+            $mesa = ($tipo == Venta::TIPO_LOCAL && $request->filled('table')) ? $request->get('table') : null;
+            $nombreCuenta = trim((string) $request->get('nombre_cuenta'));
+            if ($tipo == Venta::TIPO_DOMICILIO || $nombreCuenta === '') {
+                $nombreCuenta = null;
             }
+
+            $validator = \Validator::make($request->all(), [
+                'table' => 'nullable|exists:dinerstables,id',
+                'nombre_cuenta' => 'nullable|string|max:60',
+                'type' => 'nullable|in:' . implode(',', array_keys(Venta::TIPOS)),
+            ], [
+                'nombre_cuenta.max' => 'El nombre de la cuenta no debe pasar de 60 caracteres.',
+            ]);
+            // En local basta con mesa o nombre de cuenta; en para llevar, cliente o nombre de cuenta.
+            $validator->after(function ($validator) use ($tipo, $mesa, $nombreCuenta, $request) {
+                if ($tipo == Venta::TIPO_LOCAL && $mesa === null && $nombreCuenta === null) {
+                    $validator->errors()->add('ubicacion', 'Selecciona una mesa o escribe el nombre de la cuenta.');
+                }
+                if ($tipo == Venta::TIPO_DOMICILIO && !$request->filled('clientId')) {
+                    $validator->errors()->add('ubicacion', 'Domicilio requiere seleccionar un cliente.');
+                }
+                if ($tipo == Venta::TIPO_PARA_LLEVAR && $nombreCuenta === null && !$request->filled('clientId')) {
+                    $validator->errors()->add('ubicacion', 'Para llevar requiere un cliente o el nombre de la cuenta.');
+                }
+            });
+            if ($validator->fails()) {
+                return back()->withErrors($validator)->withInput();
+            }
+
+            $venta->type = $tipo;
+            $venta->dinerstable_id = $mesa;
+            $venta->nombre_cuenta = $nombreCuenta;
             $venta->client_id = $request->get('clientId');
-            $venta->update($request->all());
+            // Solo se guardan los campos de este paso; antes se hacía update($request->all())
+            // y el formulario podía sobrescribir montos o estatus.
+            $venta->save();
         }
         if ($client != null){
             $client = Client::find($client->id);
@@ -183,77 +207,32 @@ class VentasController extends Controller
         //
     }
 
-    public function cerrarVenta(Request $request) {
+    /**
+     * Cobrar desde la bandeja (modal, AJAX). Las reglas viven en VentaService::cobrar.
+     */
+    public function cerrarVenta(Request $request, VentaService $ventas) {
         $venta = Venta::find($request->get('ventaid'));
+        if ($venta == null) {
+            return response()->json(['errors' => ['No se encontró la venta.']]);
+        }
         $validator = \Validator::make($request->all(), [
-            'quantity' => ['required', function ($attribute, $value, $fail) use ($venta) {
-                if ($venta->apply_discount == 0 && $value < $venta->montoTotal) {
-                    $fail('La cantidad ingresada es menor al Monto Total');
-                } else if ($venta->apply_discount == 1 && $value < $venta->montoTotalDescuento) {
-                    $fail('La cantidad ingresada es menor al Monto Total con descuento');
-                }
-            }]
+            'quantity' => 'required|numeric',
+            'paymenttype' => 'required|in:' . implode(',', array_keys(Venta::PAGOS)),
+        ], [
+            'quantity.required' => 'Captura la cantidad recibida.',
+            'quantity.numeric' => 'La cantidad recibida debe ser un número.',
+            'paymenttype.required' => 'Selecciona el método de pago.',
+            'paymenttype.in' => 'Selecciona el método de pago.',
         ]);
-
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()->all()]);
         }
 
-        $currentDateTime = date('Y-m-d H:i:s');
-        $venta->estatus = 2;
-        $venta->cantidadRecibida = $request->get('quantity');
-        $venta->payment_type = $request->get('paymenttype');
-        $venta->id_user_close = auth()->user()->id;
-        $venta->save();
-
-        // Guardar registro de promocion
-        $date = date("Y-m-d");
-        Log::info('date: '.$date);
-
-        $promotionDB = $this->getPromotionsClients($venta->ventaId, $date);
-        if ($venta->apply_discount == 1 && $promotionDB->isEmpty()) {
-            $arrayDiscountPercentage = $this->getDiscountPercentage($venta->client_id);
-            $objDiscountPercentage = $arrayDiscountPercentage[0];
-
-            Log::info('create promotion');
-            $promotion = new PromotionsClients ([
-                'IdVenta' => $venta->ventaId,
-                'client_id' => $venta->client_id,
-                'porcentaje' => $objDiscountPercentage->discountPercentage,
-                'cantidadVentas' => $objDiscountPercentage->total,
-                'montoDescuento'=> $venta->montoTotalDescuento,
-                'estatus' => 1,
-                'created_at' => $currentDateTime,
-                'updated_at' => $currentDateTime
-            ]);
-            $promotion->save();
+        try {
+            $ventas->cobrar($venta, $request->get('quantity'), $request->get('paymenttype'), auth()->id());
+        } catch (VentaException $e) {
+            return response()->json(['errors' => [$e->getMessage()]]);
         }
-        // ---------- Guardar el registro de la venta en el corte de caja activo ----------
-        $corteCajaCurrent = $this->getCurrentCorteCaja(null);
-        $isExistVenta = CorteCajaMovimientos::where('IdVenta', $venta->ventaId)->get();
-        if (!$corteCajaCurrent->isEmpty() && $isExistVenta->isEmpty()) {
-            $corteCaja = $corteCajaCurrent[0];
-            $corteCajaMovimiento = new CorteCajaMovimientos([
-                'idCorte' => $corteCaja->idCorte,
-                'idVenta' => $venta->ventaId,
-                'idCompra' => null,
-                'descripcion' => null,
-                'monto' => $venta->montoTotal,
-                'idTipo' => 1,
-                'created_at' => $currentDateTime,
-                'updated_at' => $currentDateTime
-            ]);
-            $corteCajaMovimiento->save();
-            $this->getUpdateMontoTotalCorte($corteCaja->idCorte);
-        }
-        // ---------- Guardar el registro de la venta en el corte de caja activo ----------
-
-        /**
-         * restar las cantidades al inventario
-         */
-        $this->getUpdateMontosInventarioFromVentas($venta->ventaId);
-
-        $this->printFinaliceSale($venta);
 
         return response()->json([
             'success'=>true,
@@ -276,30 +255,16 @@ class VentasController extends Controller
         return redirect()->route('comandas');
     }
 
-    public function printProductsOrder(Request $request, Venta $venta) {
-        $printStatus = Config::where('key', '=', 'printStatus')->first();
-
-        $arrayBebidas = VentasProductos::where('IdVenta', $venta->ventaId)
-            ->where('order', $venta->order)
-            ->whereHas('product', function (Builder $query) {
-                $query->where('type', '=', '1');
-            })->get();
-
-        $arrayComidas = VentasProductos::where('IdVenta', $venta->ventaId)
-            ->where('order', $venta->order)
-            ->whereHas('product', function (Builder $query) {
-                $query->where('type', '=', 2)->orWhere('type', '=', 3);
-            })->get();
-
-        if ($printStatus->value == 'true') {
-            try{
-                $this->printProducts($venta, $arrayBebidas, $arrayComidas);
-            } catch (Exception | ErrorException $e) {
-                Log::info('Exception to print: '.$e->getMessage());
-            }
+    /**
+     * "Comandar" en el resumen: imprime cocina/barra y deja la venta activa en la bandeja.
+     */
+    public function printProductsOrder(Request $request, VentaService $ventas, Venta $venta) {
+        try {
+            $ventas->comandar($venta, $request->get('clientId'), $request->get('apply'));
+        } catch (VentaException $e) {
+            return redirect()->route('comandas')->withErrors(['venta' => $e->getMessage()]);
         }
-        $clientId = $request->get('clientId');
-        $apply = $request->get('apply');
-        return redirect()->route('finalizarVenta', ['venta' => $venta, 'clientId' => $clientId, 'apply' => $apply]);
+
+        return redirect()->route('comandas');
     }
 }

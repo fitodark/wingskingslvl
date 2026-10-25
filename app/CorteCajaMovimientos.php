@@ -6,6 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class CorteCajaMovimientos extends Model
 {
+    // corte_caja_movimientos.idTipo
+    const TIPO_VENTA = 1;
+    const TIPO_COMPRA = 2;
+    const TIPO_COMPRA_LIBRE = 3;
+
+    const TIPOS = [
+        self::TIPO_VENTA => 'Venta',
+        self::TIPO_COMPRA => 'Compra',
+        self::TIPO_COMPRA_LIBRE => 'Compra libre',
+    ];
+
     /**
      * The table associated with the model.
      *

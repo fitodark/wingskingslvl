@@ -19,22 +19,26 @@
         <div class="form-group col-md-3">
             <label class="form-label">Folio Venta:</label>
             <input class="form-control" type="text" aria-label="Disabled input example" disabled
-            value="{{$venta->ventaId}}">
+            value="{{ $venta->ventaId }}">
         </div>
         <div class="form-group col-md-3">
             <label >Ubicación</label>
             <input class="form-control" type="text" placeholder=".form-control-sm" disabled
-            value="{{ ($venta->type == 1)? $venta->dinerstable->name:(($venta->type == 2)? 'Domicilio':'Para Llevar (Pasan a recoger)')}}">
+            value="{{ $venta->ubicacion }}">
         </div>
         <div class="form-group col-md-6">
-            @if ($venta->type == 2 || $venta->type == 3)
+            @if (!$venta->esLocal() && !empty($venta->client))
                 <label>Cliente</label>
                 <input class="form-control" type="text" placeholder=".form-control-sm" disabled
                 value="{{ $venta->client->name }} ( {{ $venta->client->phone }} ) - {{ $venta->client->address }} - {{ $venta->client->reference }}">
-            @elseif ($venta->type == 1)
-                <label>Mesa</label>
+            @elseif ($venta->esParaLlevar())
+                <label>Cuenta</label>
                 <input class="form-control" type="text" placeholder=".form-control-sm" disabled
-                value="{{ $venta->dinerstable->name }}" readonly>
+                value="{{ $venta->nombre_cuenta }}">
+            @elseif ($venta->esLocal())
+                <label>Mesa / Cuenta</label>
+                <input class="form-control" type="text" placeholder=".form-control-sm" disabled
+                value="{{ $venta->etiqueta_cuenta ?: 'Sin mesa' }}" readonly>
             @endif
         </div>
     </div>
@@ -78,20 +82,21 @@
                     <th width="15%">Fecha</th>
                 </tr>
                 @foreach ($ventaproductos as $detalleventa)
-                @if ($detalleventa->estatus == 0)
+                @if (!$detalleventa->estaActivo())
                     <tr class="table-danger">
                 @else
                     <tr>
                 @endif
                     <td>{{ $detalleventa->ventasProductosId }}</td>
                     <td>{{ $detalleventa->product->name }} - {{ $detalleventa->product->detail }} 
-                        @if ($detalleventa->product->type != 2 && is_null($detalleventa->descripcion) == false)
+                        @if (!$detalleventa->product->llevaSabores() && is_null($detalleventa->descripcion) == false)
                             <br>[{{ $detalleventa->descripcion }}]
                         @endif
-                        @if ($detalleventa->product->type == 2)
+                        @if ($detalleventa->product->llevaSabores())
                             <br>
-                            @foreach (json_decode($detalleventa->descripcion, TRUE) as $key => $value)
-                                    {{ $value[0]['value'] }} - {{ $value[1]['value']}} <br>
+                            {{-- Sin el encabezado "Cantidad - Sabor"; un JSON mal formado no rompe la vista --}}
+                            @foreach (\App\Support\SaboresOrden::renglones($detalleventa->descripcion) ?: [] as $renglon)
+                                    {{ $renglon['cantidad'] }} - {{ $renglon['sabor'] }} <br>
                             @endforeach
                         @endif
                     </td>

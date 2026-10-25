@@ -36,58 +36,15 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::directive('ventaType', function ($amount) {
-            return "<?php
-              switch ($amount) {
-                  case 1:
-                      echo 'Local';
-                      break;
-                  case 2:
-                      echo 'Domicilio';
-                      break;
-                  case 3:
-                      echo 'Domicilio';
-                      break;
-                  default:
-                      echo 'No asignado';
-                      break;
-              } ?>";
+            return "<?php echo e(\App\Venta::TIPOS[$amount] ?? 'No asignado'); ?>";
         });
 
         Blade::directive('ventaEstatus', function ($amount) {
-            return "<?php
-                switch ($amount) {
-                    case 1:
-                        echo 'Abierto';
-                        break;
-                    case 2:
-                        echo 'Finalizado';
-                        break;
-                    case 3:
-                        echo 'Cancelado';
-                        break;
-                    default:
-                        echo 'No asignado';
-                        break;
-                }
-             ?>";
+            return "<?php echo e(\App\Venta::ESTATUS[$amount] ?? 'No asignado'); ?>";
         });
 
         Blade::directive('categoriaType', function ($amount) {
-            return "<?php
-              switch ($amount) {
-                  case 1:
-                      echo 'Barra';
-                      break;
-                  case 2:
-                      echo 'Cocina (Alitas)';
-                      break;
-                  case 3:
-                      echo 'Cocina (General)';
-                      break;
-                  case 4:
-                      echo 'Insumo';
-                      break;
-              } ?>";
+            return "<?php echo e(\App\Product::TIPOS[$amount] ?? ''); ?>";
         });
 
         Blade::directive('discount', function ($discountPercentage = 0) {
@@ -97,7 +54,7 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('discountApply', function ($discountApply) {
             return "<?php echo empty($discountApply)? '':
                 (($discountApply==0)? '':
-                    (($discountApply==1)? 'Aplica Descuento':'')
+                    (($discountApply==1)? 'Aplica Descuento<br>':'')
                 ); ?>";
         });
 
@@ -126,22 +83,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::directive('tipoMovimiento', function ($idTipo) {
-            return "<?php
-                switch ($idTipo) {
-                    case 1:
-                        echo 'Venta';
-                        break;
-                    case 2:
-                        echo 'Compra';
-                        break;
-                    case 3:
-                        echo 'Compra libre';
-                        break;
-                    default:
-                        echo 'No asignado';
-                        break;
-                }
-             ?>";
+            return "<?php echo e(\App\CorteCajaMovimientos::TIPOS[$idTipo] ?? 'No asignado'); ?>";
         });
 
         Blade::directive('compraEstatus', function ($corteStatus) {
@@ -161,19 +103,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::directive('paymenttype', function ($corteStatus) {
-            return "<?php
-                switch ($corteStatus) {
-                    case 1:
-                        echo 'Efectivo';
-                        break;
-                    case 2:
-                        echo 'Transferencia';
-                        break;
-                    default:
-                        echo 'No asignado';
-                        break;
-                }
-             ?>";
+            return "<?php echo e(\App\Venta::PAGOS[$corteStatus] ?? ''); ?>";
         });
 
         Blade::directive('activo', function ($status) {
@@ -192,19 +122,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::directive('ventaProductoEstatus', function ($estatus) {
-            return "<?php
-                switch ($estatus) {
-                    case 1:
-                        echo 'Cobrado';
-                        break;
-                    case 0:
-                        echo 'Eliminado';
-                        break;
-                    default:
-                        echo 'No asignado';
-                        break;
-                }
-             ?>";
+            return "<?php echo e(\App\VentasProductos::ESTATUS[$estatus] ?? 'No asignado'); ?>";
+        });
+
+        // @anyrole('admin', 'encargado') ... @endanyrole
+        Blade::if('anyrole', function (...$roles) {
+            return auth()->check() && auth()->user()->hasAnyRole($roles);
         });
 
         Blade::if('role', function ($role) {
@@ -213,10 +136,3 @@ class AppServiceProvider extends ServiceProvider
     }
 }
 
-
-// return "<?php echo
-// ($amount == 1)? 'Abierto':(
-//     ($amount == 2)? 'Finalizado':(
-//         ($amount == 3)? 'Cancelado':'No asignado'
-//     )
-// );

@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Puntoventa;
 use App\Client;
 use App\Venta;
 use App\VentasProductos;
-use App\PromotionsClients;
+use App\Exceptions\VentaException;
+use App\Services\VentaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -22,9 +23,12 @@ class NavVentasController extends Controller
         $this->middleware('auth');
     }
 
-    public function addMoreProducts(Request $request, Venta $venta, Client $client = null) {
-        $venta->order += 1;
-        $venta->save();
+    public function addMoreProducts(Request $request, VentaService $ventas, Venta $venta, Client $client = null) {
+        try {
+            $ventas->nuevaOrden($venta);
+        } catch (VentaException $e) {
+            return redirect()->route('comandas')->withErrors(['venta' => $e->getMessage()]);
+        }
 
         return redirect()->route('drinksTab', [$venta, $client]);
     }
@@ -95,50 +99,11 @@ class NavVentasController extends Controller
         , 'objTotalSales'));
     }
 
-    public function finalizarVenta(Request $request, Venta $venta) {
-        $clientId = $request->get('clientId');
-        $apply = $request->get('apply');
-        $ventaDB = Venta::find($venta->ventaId);
-
-        Log::info('client: '.$clientId);
-        $arrayDiscountPercentage = $this->getDiscountPercentage($clientId);
-        Log::info('apply: '.$apply);
-        if (is_array($arrayDiscountPercentage) && count($arrayDiscountPercentage) > 0 && $apply == 1) {
-            $objDiscountPercentage = $arrayDiscountPercentage[0];
-            $discountPercentage = $objDiscountPercentage->discountPercentage;
-            $montoDescuento = $ventaDB->montoTotal - round(($ventaDB->montoTotal * ($discountPercentage / 100)), 0, PHP_ROUND_HALF_EVEN);
-
-            $ventaDB->montoTotalDescuento = $montoDescuento;
-            $ventaDB->apply_discount = TRUE;
-        } else {
-            $ventaDB->apply_discount = FALSE;
-        }
-
-        VentasProductos::where('IdVenta', $venta->ventaId)
-            ->where('delete_flag', true)
-            ->where([
-                ['estatus', '=', 1]
-            ])
-            ->update(['delete_flag' => false]);
-        $ventaDB->activo = 1;
-        $ventaDB->save();
-        return redirect()->route('comandas', [$venta]);
-    }
-
-    public function cancelarVenta(Request $request, Venta $venta = null) {
-        VentasProductos::where('IdVenta', $venta->ventaId)
-            ->where('delete_flag', true)
-            ->where([
-                ['estatus', '=', 1]
-            ])->update(['estatus' => 0]);
-
-        $result = $this->getMontoTotalVenta($venta->ventaId);
-        if (count($result) > 0) {
-            $venta->montoTotal = $result[0]->montoVenta;
-        } else {
-            $venta->montoTotal = 0;
-        }
-        $venta->save();
+    /**
+     * "Regresar" en el wizard: descarta lo no comandado de la orden actual.
+     */
+    public function cancelarVenta(Request $request, VentaService $ventas, Venta $venta) {
+        $ventas->cancelarOrdenActual($venta);
         return redirect()->route('comandas');
     }
 }

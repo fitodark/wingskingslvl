@@ -14,14 +14,12 @@ class SaleDataComposer
     public function compose(View $view)
     {
         $dinerstable = Dinerstable::all();
-        $drinkProducts = Product::orderBy('name', 'asc')->where([
-            ['type', '=', '1'],['active', '=', '1']
-        ])->paginate(20);
-        $foodProducts = Product::orderBy('name', 'asc')->where([
-            ['type', '=', '2'],['active', '=', '1']
-        ])->orWhere([
-            ['type', '=', '3'],['active', '=', '1']
-        ])->paginate(20);
+        $drinkProducts = Product::orderBy('name', 'asc')
+            ->where('type', Product::TIPO_BARRA)->where('active', 1)
+            ->paginate(20);
+        $foodProducts = Product::orderBy('name', 'asc')
+            ->whereIn('type', Product::TIPOS_COCINA)->where('active', 1)
+            ->paginate(20);
 
         $drinkProducts->getCollection()->transform(function ($item, $index) use ($drinkProducts) {
             $item->consecutive_id = (($drinkProducts->currentPage() - 1) * $drinkProducts->perPage()) + $index + 1;

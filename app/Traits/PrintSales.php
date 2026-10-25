@@ -3,6 +3,7 @@ namespace App\Traits;
 
 use App\Venta;
 use App\Config;
+use Illuminate\Support\Facades\Log;
 
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
@@ -33,7 +34,7 @@ trait PrintSales {
             try{
                 $logo = EscposImage::load(public_path() ."\\".$logoTicket->value, false);
                 $printer->bitImage($logo);
-            }catch(Exception $e){/*No hacemos nada si hay error*/}
+            }catch(\Exception $e){/*No hacemos nada si hay error*/}
 
             /* Ahora vamos a imprimir un encabezado */
             $printer->text($titleTicket->value . "\n");
@@ -44,15 +45,17 @@ trait PrintSales {
             $printer->setJustification(Printer::JUSTIFY_LEFT);
             $printer->text("Folio #: " . $venta->ventaId . "\n");
 
-            if ($venta->type == 1) {
-                $printer->text("Ubicación: " . $venta->dinerstable->name . "\n\n");
-            } else if ($venta->type == 2) {
+            if ($venta->esLocal()) {
+                $printer->text("Ubicación: " . $venta->ubicacion . "\n\n");
+            } else if ($venta->esDomicilio()) {
                 $printer->text("Cliente: " . $venta->client->name . ", (" . $venta->client->phone . ")" . "\n");
                 $printer->text("         " . ($venta->direccion_envio ?: $venta->client->address) . " - " . $venta->client->reference. "\n\n");
+            } else if ($venta->esParaLlevar() && !empty($venta->nombre_cuenta)) {
+                $printer->text("Cuenta: " . $venta->nombre_cuenta . "\n\n");
             }
             # Para mostrar el total
             foreach ($venta->ventasProductos as $ventaProducto) {
-                if ($ventaProducto->estatus == 1) {
+                if ($ventaProducto->estaActivo()) {
                     /*Alinear a la izquierda para la cantidad y el nombre*/
                     $printer->setJustification(Printer::JUSTIFY_LEFT);
                     $printer->text($ventaProducto->cantidad . " x " . $ventaProducto->product->name . ' - '
@@ -90,8 +93,8 @@ trait PrintSales {
             $printer->cut();
             $printer->close();
             }
-        } catch(Exception $e) {
-            echo "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+        } catch(\Exception $e) {
+            Log::warning('No se pudo imprimir el ticket: ' . $e->getMessage());
         }
 
     }
@@ -100,6 +103,8 @@ trait PrintSales {
         $printKitchen = Config::where('key', '=', 'printKitchen')->first();
         $printBar = Config::where('key', '=', 'printBar')->first();
         $titleTicket = Config::where('key', '=', 'titleTicket')->first();
+        // null = no había productos para esa impresora, true = se imprimió, false = falló
+        $resultado = ['cocina' => null, 'barra' => null];
         // IMPRIMIR ORDE DE COMIDA
         if (!$arrayComidas->isEmpty()) {
             try {
@@ -115,8 +120,10 @@ trait PrintSales {
                 $printer->feed(1);
                 $printer->cut();
                 $printer->close();
-            } catch(Exception $e) {
-                echo "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+                $resultado['cocina'] = true;
+            } catch(\Exception $e) {
+                $resultado['cocina'] = false;
+                Log::warning('No se pudo imprimir la orden de cocina: ' . $e->getMessage());
             }
         }
 
@@ -135,10 +142,13 @@ trait PrintSales {
                 $printer->feed(1);
                 $printer->cut();
                 $printer->close();
-            } catch(Exception $e) {
-                echo "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+                $resultado['barra'] = true;
+            } catch(\Exception $e) {
+                $resultado['barra'] = false;
+                Log::warning('No se pudo imprimir la orden de barra: ' . $e->getMessage());
             }
         }
+        return $resultado;
     }
 
     public function getPrinterBody(Printer $printer, Venta $venta, $arrayProductos, $options) {
@@ -154,27 +164,39 @@ trait PrintSales {
         $printer->setJustification(Printer::JUSTIFY_LEFT);
         $printer->text("Folio: " . $venta->ventaId . "\n");
 
-        if ($venta->type == 1) {
-            $printer->text("Ubicación: " . $venta->dinerstable->name . "\n\n");
-        } else if ($venta->type == 2 or $venta->type == 3) {
-            $printer->text("Cliente: " . $venta->client->name . ", (" . $venta->client->phone . ")" . "\n");
-            $printer->text("         " . ($venta->direccion_envio ?: $venta->client->address) . "\n\n");
+        if ($venta->esLocal()) {
+            $printer->text("Ubicación: " . $venta->ubicacion . "\n\n");
+        } else {
+            if ($venta->esParaLlevar() && !empty($venta->nombre_cuenta)) {
+                $printer->text("Cuenta: " . $venta->nombre_cuenta . "\n");
+            }
+            if (!empty($venta->client)) {
+                $printer->text("Cliente: " . $venta->client->name . ", (" . $venta->client->phone . ")" . "\n");
+                $printer->text("         " . ($venta->direccion_envio ?: $venta->client->address) . "\n");
+            }
+            $printer->text("\n");
         }
 
         foreach ($arrayProductos as $ventaProducto) {
-            if ($ventaProducto->estatus == 1) {
+            if ($ventaProducto->estaActivo()) {
             /*Alinear a la izquierda para la cantidad y el nombre*/
             $printer->setJustification(Printer::JUSTIFY_LEFT);
             $printer->text($ventaProducto->cantidad . " x " . $ventaProducto->product->name
                 .(is_null($ventaProducto->product->detail)?  "\n":' - '  . $ventaProducto->product->detail . "\n")
-                .(($ventaProducto->product->type == 2)? '':
+                .($ventaProducto->product->llevaSabores() ? '':
                     (is_null($ventaProducto->descripcion)? '':"["  . $ventaProducto->descripcion . "]" . "\n")
                 ));
 
-            if ($ventaProducto->product->type == 2 ) {
+            if ($ventaProducto->product->llevaSabores()) {
                 $printer->setJustification(Printer::JUSTIFY_RIGHT);
-                foreach (json_decode($ventaProducto->descripcion, TRUE) as $key => $value) {
-                    $printer->text($value[0]['value'] . ' - ' . $value[1]['value']. "\n");
+                // Mismo formato que antes (encabezado + renglones), pero un JSON mal formado
+                // ya no tumba la orden completa: solo se omiten los sabores.
+                $renglones = \App\Support\SaboresOrden::renglones($ventaProducto->descripcion);
+                if ($renglones) {
+                    $printer->text("Cantidad - Sabor\n");
+                    foreach ($renglones as $renglon) {
+                        $printer->text($renglon['cantidad'] . ' - ' . $renglon['sabor'] . "\n");
+                    }
                 }
             }
             }

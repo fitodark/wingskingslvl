@@ -57,7 +57,10 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,
-            'engine' => null,
+            // InnoDB: transacciones y bloqueo por fila (el cobro depende de eso).
+            // El servidor de WAMP trae MyISAM por defecto. ROW_FORMAT=DYNAMIC permite índices
+            // sobre varchar(255) utf8mb4 (el formato "compact" del servidor solo deja 767 bytes).
+            'engine' => env('DB_ENGINE', 'InnoDB ROW_FORMAT=DYNAMIC'),
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],

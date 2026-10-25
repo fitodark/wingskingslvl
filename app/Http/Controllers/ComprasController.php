@@ -116,7 +116,7 @@ class ComprasController extends Controller
                 'idCompra' => $compra->idCompra,
                 'descripcion' => null,
                 'monto' => $compra->monto,
-                'idTipo' => 2,
+                'idTipo' => \App\CorteCajaMovimientos::TIPO_COMPRA,
                 'created_at' => $currentDateTime,
                 'updated_at' => $currentDateTime
             ]);
