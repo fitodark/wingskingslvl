@@ -129,9 +129,40 @@ html, body {
 }
 
 /* Antes width: 1024px fijo, que en tablet vertical obligaba a desplazar de lado */
-.example-container {
-    width: 100%;
-    max-width: 1024px;
+/* Ancho homologado de las pantallas: 90% en tablet, 80% en pantallas grandes.
+   Reemplaza el máximo por breakpoint de .container (y el tope anterior de 1024px). */
+:root {
+    --wk-ancho-pantalla: 90%;
+}
+@media (min-width: 1200px) {
+    :root {
+        --wk-ancho-pantalla: 80%;
+    }
+}
+.container.example-container {
+    width: var(--wk-ancho-pantalla);
+    max-width: none;
+}
+
+/* Encabezado de pantalla: título a la izquierda, acciones a la derecha. */
+.wk-encabezado {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+    margin-bottom: .5rem;
+}
+.wk-encabezado > .h2,
+.wk-encabezado > .h3 {
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.wk-encabezado-acciones {
+    display: flex;
+    gap: .5rem;
+    flex-shrink: 0;
 }
 
 .custom-control-input:checked ~ .custom-control-label::before {

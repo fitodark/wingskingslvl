@@ -3,16 +3,14 @@
 @section('content')
 <div class="container example-container">
 	
-	<div class="row">
-		<div class="col-md-10">
-			<p class="h2 text-black">Listado de Compras</p>
-		</div>
-		<div class="col-md-2">
-            <a href="{{ route('compras.create') }}" class="btn btn-outline-success btn-add-new" role="button">
-                <i class="fa-sharp fa-solid fa-plus"></i>
-				<span>Agregar</span>
-            </a>
-		</div>
+	<div class="wk-encabezado">
+	    <p class="h2 text-black">Listado de Compras</p>
+	    <div class="wk-encabezado-acciones">
+	        <a href="{{ route('compras.create') }}" class="btn btn-outline-success btn-add-new" role="button">
+	        <i class="fa-sharp fa-solid fa-plus"></i>
+	        <span>Agregar</span>
+	        </a>
+	    </div>
 	</div>
 
     @if ($errors->any())
@@ -37,6 +35,7 @@
     <div class="row">
 		<div class="col-md-12">
             
+            <div class="table-responsive">
             <table class="table table-striped table-sm">
                 <tr>
                     <th width="5%">#</th>
@@ -58,7 +57,7 @@
                     <td>
                         <form action="{{ route('compras.destroy', $compra->idCompra) }}" method="POST">
                             <a href="{{ route('compras.create', $compra->idCompra) }}">
-                                <i class="fa-solid fa-pen-to-square"></i>
+                                <i class="ico-edit"></i>
                             </a>
                             @csrf
                             @if ($compra->status == false)
@@ -72,6 +71,7 @@
                 </tr>
                 @endforeach
             </table>
+            </div>
             {!! $compras->links() !!}
             
         </div>

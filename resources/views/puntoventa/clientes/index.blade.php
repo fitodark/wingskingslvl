@@ -3,16 +3,14 @@
 @section('content')
 <div class="container example-container">
 	
-	<div class="row">
-		<div class="col-md-10">
-			<p class="h2 text-black">Catálogo de Clientes</p>
-		</div>
-		<div class="col-md-2">
-            <a href="{{ route('clientes.create') }}" class="btn btn-outline-success btn-add-new" role="button">
-                <i class="fa-sharp fa-solid fa-plus"></i>
-				<span>Agregar</span>
-            </a>
-		</div>
+	<div class="wk-encabezado">
+	    <p class="h2 text-black">Catálogo de Clientes</p>
+	    <div class="wk-encabezado-acciones">
+	        <a href="{{ route('clientes.create') }}" class="btn btn-outline-success btn-add-new" role="button">
+	        <i class="fa-sharp fa-solid fa-plus"></i>
+	        <span>Agregar</span>
+	        </a>
+	    </div>
 	</div>
 
     <div class="row">
@@ -27,6 +25,7 @@
     <div class="row">
 		<div class="col-md-12">
             
+            <div class="table-responsive">
             <table class="table table-striped table-sm">
                 <tr>
                     <th width="5%">#</th>
@@ -50,7 +49,7 @@
 
                             <!-- <a class="ico-add" href="{{ route('clientes.edit',$client->id) }}"></a> -->
                             <a href="{{ route('clientes.edit',$client->id) }}">
-                                <i class="fa-solid fa-pen-to-square"></i>
+                                <i class="ico-edit"></i>
                             </a>
 
                             @csrf
@@ -63,6 +62,7 @@
                 </tr>
                 @endforeach
             </table>
+            </div>
             {!! $clients->links() !!}
             
         </div>

@@ -2,17 +2,15 @@
 
 @section('content')
 <div class="container example-container">
-    <div class="row">
-		<div class="col-md-10">
-			<p class="h2 text-black">Editar Producto del Inventario</p>
-        </div>
-		<div class="col-md-2 ">
+    <div class="wk-encabezado">
+        <p class="h2 text-black">Editar Producto del Inventario</p>
+        <div class="wk-encabezado-acciones">
             <a class="btn btn-outline-secondary custom" href="{{ route('inventarioproductos') }}" role="button">
-				<i class="fa-sharp fa-solid fa-plus"></i>
-				<span>Regresar</span>
-			</a>
-		</div>
-	</div>
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Regresar</span>
+            </a>
+        </div>
+    </div>
 
     <div class="row">
 		<div class="col-md-12">

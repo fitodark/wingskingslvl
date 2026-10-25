@@ -3,16 +3,14 @@
 @section('content')
 <div class="container example-container">
 	
-	<div class="row">
-		<div class="col-md-10">
-			<p class="h2 text-black">Control de Usuarios</p>
-		</div>
-		<div class="col-md-2">
-            <a href="{{ route('usuarios.create') }}" class="btn btn-outline-success btn-add-new" role="button">
-                <i class="fa-sharp fa-solid fa-plus"></i>
-				<span>Agregar</span>
-            </a>
-		</div>
+	<div class="wk-encabezado">
+	    <p class="h2 text-black">Control de Usuarios</p>
+	    <div class="wk-encabezado-acciones">
+	        <a href="{{ route('usuarios.create') }}" class="btn btn-outline-success btn-add-new" role="button">
+	        <i class="fa-sharp fa-solid fa-plus"></i>
+	        <span>Agregar</span>
+	        </a>
+	    </div>
 	</div>
   
     @if ($errors->any())
@@ -37,15 +35,16 @@
 
     <div class="row">
         <div class="col-md-12">
-            <div class="card-body">
+            <div>
+                <div class="table-responsive">
                 <table class="table table-striped table-sm">
                     <tr>
-                        <th width="5%">No</th>
-                        <th width="30%">Name</th>
-                        <th width="20%">E-Mail</th>
+                        <th width="5%">#</th>
+                        <th width="30%">Nombre</th>
+                        <th width="20%">Correo</th>
                         <th width="15%">Rol</th>
                         <th width="15%">Estatus</th>
-                        <th width="15%">Action</th>
+                        <th width="15%">Acción</th>
                     </tr>
                     @foreach ($users as $user)
                     <tr>
@@ -73,6 +72,7 @@
                     </tr>
                     @endforeach
                 </table>
+                </div>
                 {!! $users->links() !!}
             </div>
         </div>

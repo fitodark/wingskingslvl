@@ -1,19 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container example-container">
+    <div class="wk-encabezado">
+        <p class="h2 text-black">Editar Cliente</p>
+        <div class="wk-encabezado-acciones">
+            <a class="btn btn-outline-secondary custom" href="{{ route('clientes') }}" role="button">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Regresar</span>
+            </a>
+        </div>
+    </div>
     <div class="row justify-content-center">
-        <div class="col-md-16">
+        <div class="col-12">
             <div class="card">
-                <div class="card-header">Editar Cliente Nuevo
-                  <div class="float-right">
-                      <a class="btn btn-primary" href="{{ route('clientes') }}">Regresar</a>
-                  </div>
-                </div>
 
                   @if ($errors->any())
                       <div class="alert alert-danger">
-                          <strong>Whoops!</strong> There were some problems with your input.<br><br>
+                          <strong>Revisa los datos capturados:</strong>
                           <ul>
                               @foreach ($errors->all() as $error)
                                   <li>{{ $error }}</li>
@@ -41,5 +45,4 @@
             </div>
         </div>
     </div>
-</div>
 @endsection

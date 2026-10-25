@@ -3,16 +3,14 @@
 @section('content')
 <div class="container example-container">
 	
-	<div class="row">
-		<div class="col-md-10">
-			<p class="h3 text-black">Movimientos del Corte de Caja al dia: @dateformat($corteCajaCurrent->fechaApertura)</p>
-		</div>
-		<div class="col-md-2">
-            <a href="{{ route('cortecajamovimientos.create') }}" class="btn btn-outline-success btn-add-new" role="button">
-                <i class="fa-sharp fa-solid fa-plus"></i>
-				<span>Agregar</span>
-            </a>
-		</div>
+	<div class="wk-encabezado">
+	    <p class="h3 text-black">Movimientos del Corte de Caja al dia: @dateformat($corteCajaCurrent->fechaApertura)</p>
+	    <div class="wk-encabezado-acciones">
+	        <a href="{{ route('cortecajamovimientos.create') }}" class="btn btn-outline-success btn-add-new" role="button">
+	        <i class="fa-sharp fa-solid fa-plus"></i>
+	        <span>Agregar</span>
+	        </a>
+	    </div>
 	</div>
 
     @if ($errors->any())
@@ -37,6 +35,7 @@
     <div class="row">
 		<div class="col-md-12">
             
+            <div class="table-responsive">
             <table class="table table-striped table-sm">
                 <tr>
                     <th width="5%">#</th>
@@ -77,6 +76,7 @@
                 </tr>
                 @endforeach
             </table>
+            </div>
             {!! $cortecajamovimientos->links() !!}
         </div>
     </div>
