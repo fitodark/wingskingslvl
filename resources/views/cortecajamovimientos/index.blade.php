@@ -7,7 +7,7 @@
 	    <p class="h3 text-black">Movimientos del Corte de Caja al dia: @dateformat($corteCajaCurrent->fechaApertura)</p>
 	    <div class="wk-encabezado-acciones">
 	        <a href="{{ route('cortecajamovimientos.create') }}" class="btn btn-outline-success btn-add-new" role="button">
-	        <i class="fa-sharp fa-solid fa-plus"></i>
+	        <i class="fa-solid fa-plus"></i>
 	        <span>Agregar</span>
 	        </a>
 	    </div>

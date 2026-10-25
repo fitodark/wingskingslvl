@@ -7,7 +7,7 @@
 	    <p class="h2 text-black">Catálogo de Productos</p>
 	    <div class="wk-encabezado-acciones">
 	        <a href="{{ route('catalogos.create') }}" class="btn btn-outline-success btn-add-new" role="button">
-	        <i class="fa-sharp fa-solid fa-plus"></i>
+	        <i class="fa-solid fa-plus"></i>
 	        <span>Agregar</span>
 	        </a>
 	    </div>

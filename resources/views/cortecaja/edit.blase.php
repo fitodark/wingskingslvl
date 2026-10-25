@@ -9,7 +9,7 @@
         </div>
 		<div class="col-md-2 ">
             <a class="btn btn-outline-secondary custom" href="{{ route('cortecaja') }}" role="button">
-				<i class="fa-sharp fa-solid fa-plus"></i>
+				<i class="fa-solid fa-plus"></i>
 				<span>Regresar</span>
 			</a>
 		</div>

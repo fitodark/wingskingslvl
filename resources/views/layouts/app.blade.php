@@ -9,8 +9,9 @@
 
     <title>{{ config('app.name', 'WKings PV') }}</title>
 
-    <!-- Íconos (Font Awesome) -->
-    <script src="https://kit.fontawesome.com/e862dac06d.js" crossorigin="anonymous"></script>
+    <!-- Íconos: Font Awesome Free 6.5.2 (solo estilo sólido), local en public/vendor -->
+    <link href="{{ asset('vendor/fontawesome/css/fontawesome.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('vendor/fontawesome/css/solid.min.css') }}" rel="stylesheet">
 
     <!-- Estilos: Bootstrap 4.3.1 con el tema de Laravel (app.css) y los del punto de venta -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">

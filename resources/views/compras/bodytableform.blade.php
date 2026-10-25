@@ -5,7 +5,7 @@
     <div class="col-md-2">
         @if ($compra->status == false)
             <a href="{{ route('compras.addProducts', [$compra->idCompra]) }}" class="btn btn-outline-success btn-add-new" role="button">
-                <i class="fa-sharp fa-solid fa-plus"></i>
+                <i class="fa-solid fa-plus"></i>
                 <span>Agregar</span>
             </a>
         @endif
