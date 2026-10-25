@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Services\PinAuthService;
 
 class UsersController extends Controller
 {
@@ -70,7 +71,7 @@ class UsersController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'pin' => ['required', 'string', 'min:4', 'confirmed'],
+            'pin' => ['required', 'string', 'min:4', 'confirmed', $this->reglaPinUnico()],
             'idrol' => ['required'],
         ]);
 
@@ -133,23 +134,20 @@ class UsersController extends Controller
      */
     public function update(Request $request, String $id)
     {
+        // Antes: si no se cambiaba contraseña ni PIN, $validator no existía y la edición tronaba;
+        // y si se cambiaban ambos, la contraseña no se validaba.
+        $reglas = [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $id],
+            'idrol' => ['required'],
+        ];
         if (!empty($request->get('change-password')) && $request->get('change-password') == 'on') {
-            $validator = \Validator::make($request->all(), [
-                'password' => ['required', 'string', 'min:8', 'confirmed']
-            ]);
-        } 
+            $reglas['password'] = ['required', 'string', 'min:8', 'confirmed'];
+        }
         if (!empty($request->get('change-pin')) && $request->get('change-pin') == 'on') {
-            $validator = \Validator::make($request->all(), [
-                'pin' => ['required', 'string', 'min:4', 'confirmed']
-            ]);
+            $reglas['pin'] = ['required', 'string', 'min:4', 'confirmed', $this->reglaPinUnico($id)];
         }
-        if (!$validator->fails()) {
-            $validator = \Validator::make($request->all(), [
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255'],
-                'idrol' => ['required']
-            ]);
-        }
+        $validator = \Validator::make($request->all(), $reglas);
 
         if ($validator->fails()) {
             return redirect()->route('usuarios.edit', ['id' => $id])
@@ -190,5 +188,17 @@ class UsersController extends Controller
 
         return redirect()->route('usuarios')
                         ->with('success','Usuario eliminado correctamente');
+    }
+
+    /**
+     * El PIN identifica a quien autoriza una eliminación, por eso no puede repetirse.
+     */
+    private function reglaPinUnico($exceptoUserId = null)
+    {
+        return function ($attribute, $value, $fail) use ($exceptoUserId) {
+            if (app(PinAuthService::class)->pinEnUso($value, $exceptoUserId)) {
+                $fail('Ese PIN ya lo usa otro usuario. Elige uno distinto.');
+            }
+        };
     }
 }

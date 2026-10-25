@@ -34,4 +34,9 @@ return [
         'secret' => env('SPARKPOST_SECRET'),
     ],
 
+    // Agente de WhatsApp: token que manda en el encabezado X-Agente-Token.
+    'agente' => [
+        'token' => env('AGENTE_TOKEN'),
+    ],
+
 ];

@@ -7,7 +7,7 @@ use Closure;
 class CheckUserActive
 {
     /**
-     * Handle an incoming request.
+     * Cierra la sesión de un usuario desactivado y lo regresa al login.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
@@ -15,8 +15,12 @@ class CheckUserActive
      */
     public function handle($request, Closure $next)
     {
-        if (!auth()->user() || !auth()->user()->status) {
-            abort(403, 'Usuario inactivo');
+        if ($request->user() && !$request->user()->status) {
+            auth()->logout();
+            $request->session()->invalidate();
+
+            return redirect()->route('login')
+                ->withErrors(['email' => 'Tu usuario está inactivo. Contacta al administrador.']);
         }
         return $next($request);
     }

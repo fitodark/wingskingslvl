@@ -33,6 +33,16 @@
                     </div>
                 @endif
             </form>
+            {{-- Forms de borrado fuera del form principal; los botones de la tabla los envían con form="..." --}}
+            @if ($compra->status == false)
+                @foreach ($compra->comprasproductos as $producto)
+                    <form id="borrarCompraProducto{{ $producto->idCompraProducto }}" method="POST"
+                        action="{{ route('comprasproductos.delete', $producto->idCompraProducto) }}">
+                        @csrf
+                        @method('DELETE')
+                    </form>
+                @endforeach
+            @endif
         </div>
     </div>
 </div>
