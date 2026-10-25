@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row justify-content-center align-items-center">
         <div class="mx-auto">
-            <img src="img/wings_back_unathorized_aut.png" alt="Wings Kings">
+            <img src="{{ asset('img/wings_back_unathorized_aut.png') }}" alt="Wings Kings">
         </div>
     </div>
 </div>

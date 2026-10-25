@@ -83,3 +83,7 @@
 </div>
 @include('cortecaja.cerrarcortecaja')
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/cortecaja.js') }}"></script>
+@endpush

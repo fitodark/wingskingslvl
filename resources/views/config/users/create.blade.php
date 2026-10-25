@@ -32,3 +32,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/usuarios.js') }}"></script>
+@endpush

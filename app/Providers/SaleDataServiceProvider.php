@@ -26,8 +26,7 @@ class SaleDataServiceProvider extends ServiceProvider
     {
         // View::share('arrayBebidas', []);
 
-        View::composer(['puntoventa.comandas.tableSelection',
-            'puntoventa.comandas.clientSelection',
+        View::composer(['puntoventa.comandas.clientSelection',
             'puntoventa.comandas.drinksTab',
             'puntoventa.comandas.foodsTab'],
             'App\Http\ViewComposers\SaleDataComposer');

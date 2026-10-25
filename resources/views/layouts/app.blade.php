@@ -9,22 +9,18 @@
 
     <title>{{ config('app.name', 'WKings PV') }}</title>
 
-    <!-- Fonts -->
-    <!--<link rel="dns-prefetch" href="//fonts.gstatic.com">-->
-    <!--<link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">-->
+    <!-- Íconos (Font Awesome) -->
     <script src="https://kit.fontawesome.com/e862dac06d.js" crossorigin="anonymous"></script>
 
-    <!-- Styles -->
+    <!-- Estilos: Bootstrap 4.3.1 con el tema de Laravel (app.css) y los del punto de venta -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/mystyle.css') }}" rel="stylesheet">
-    <!-- <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/custom.min.css') }}" rel="stylesheet"> -->
-    
 
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-lg navbar-light header-bg">
+        {{-- navbar-expand: el menú es un solo dropdown, siempre visible (con -lg desaparecía en tablet vertical) --}}
+        <nav class="navbar navbar-expand navbar-light header-bg">
             @guest
                 <div class="container">
                     <a class="navbar-brand" href="{{ url('/') }}">
@@ -40,14 +36,20 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{{ url('/home') }}">Home</a>
+                        {{-- Las opciones se muestran según el rol; las rutas también lo validan (routes/web.php). --}}
+                        @anyrole('admin', 'encargado', 'mesero')
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ url('/comandas') }}">Comandas</a>
-                        <!-- <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="{{ route('summary.index') }}">Resumen de Ventas</a> -->
+                        @endanyrole
+                        @role('admin')
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ url('/catalogos') }}">Productos</a>
+                        @endrole
+                        @anyrole('admin', 'encargado', 'mesero')
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('clientes') }}">Clientes</a>
+                        @endanyrole
+                        @anyrole('admin', 'encargado')
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('cortecaja') }}">Cortes de Caja</a>
                         <div class="dropdown-divider"></div>
@@ -56,15 +58,18 @@
                         <a class="dropdown-item" href="{{ route('inventarioproductos') }}">Inventario</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('compras') }}">Compras</a>
+                        @endanyrole
+                        @role('admin')
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('usuarios') }}">Usuarios</a>
+                        @endrole
                     </div>
                     </li>
                 </ul>
                 </div>
             @endguest
             <!-- Right Side Of Navbar -->
-            <ul class="navbar-nav ml-auto my-2 my-lg-0">
+            <ul class="navbar-nav ml-auto">
                 <!-- Authentication Links -->
                 @guest
                     <li class="nav-item mr-sm-2">
@@ -80,7 +85,7 @@
                     @endif -->
                 @else
                     <li class="nav-item dropdown">
-                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {{ Auth::user()->name }} 
                             <i class="fa-solid fa-user"></i>
                             <span class="caret"></span>
@@ -107,580 +112,24 @@
         </main>
 
     </div>
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}"></script>
-    <script src="{{ asset('js/bootstrap3-typeahead.js') }}"></script>
-
-    <!-- Datepicker Files -->
-    <link rel="stylesheet" href="{{asset('js/datePicker/css/bootstrap-datepicker3.css')}}">
-    <link rel="stylesheet" href="{{asset('js/datePicker/css/bootstrap-datepicker3.standalone.css')}}">
-    <script src="{{asset('js/datePicker/js/bootstrap-datepicker.js')}}"></script>
-    <!-- Languaje -->
-    <script src="{{asset('js/datePicker/locales/bootstrap-datepicker.es.min.js')}}"></script>
-
+    {{-- Scripts sin compilación: librerías fijas en public/vendor y un archivo por módulo en public/js.
+         Cada vista agrega el JS de su módulo con @push('scripts'). --}}
     <script>
-    var path = "{{ route('getQueryClient') }}";
-    $('input.typeahead').typeahead({
-        source:  function (query, process) {
-            return $.get(path, { query: query }, function (data) {
-                return process(data);
-            });
-        },
-        displayText: function (item) {
-            return '[' + item.phone + '] ' + item.name + ' - ' + item.address;
-        },
-        afterSelect: function (item) {
-            $('#client').val(item);
-            $('#clientId').val(item.id);
-            $('#clientName').val(item.name);
-            $('#clientPhone').val(item.phone);
-            $('#clientAddress').val(item.address);
-            $('#clientReference').val(item.reference);
-
-            var _token = $('input[name="_token"]').val();
-            $.ajax({
-                url : "{{ route('getClient') }}",
-                method : "GET",
-                data : {
-                    id : item.id,
-                    _token : _token
-                },
-                success : function (data) {
-                    console.log("getClientById");
-                    //console.log(data);
-                    if (data && data.length) {
-                        $var = data[0];
-                        console.log(data[0]);
-                        $('#promotion').val($var.discountPercentage + " %");
-                        $('#discountPercentage').val($var.discountPercentage);
-                    } else {
-                        $('#promotion').val("0 %");
-                        $('#discountPercentage').val(0);
-                    }
-                }
-            });
-        }
-    });
-    $('#dialogDetails').on('show.bs.modal', function (event) {
-        console.log("show simple modal...");
-        var button = $(event.relatedTarget);
-        var id = button.data('productid');
-        var venta = button.data('ventaid');
-        var tab = button.data('tab');
-        var price = button.data('price');
-        var productName = button.data('productname');
-
-        var modal = $(this)
-        $('#productName').html(productName);
-        modal.find('.modal-body #idProduct').val(id);
-        modal.find('.modal-body #ventaId').val(venta);
-        modal.find('.modal-body #tab').val(tab);
-        modal.find('.modal-body #price').val(price);
-    })
-    $('#dialogFoodDetails').on('show.bs.modal', function (event) {
-        console.log("show modal...");
-        var button = $(event.relatedTarget);
-        var id = button.data('productid');
-        var venta = button.data('ventaid');
-        var tab = button.data('tab');
-        var price = button.data('price');
-        var foodname = button.data('foodname');
-
-        var modal = $(this)
-        $('#flavors').val('');
-        $('#pieces').val('');
-        $('#foodName').html(foodname);
-        modal.find('.modal-body #idProduct').val(id);
-        modal.find('.modal-body #ventaId').val(venta);
-        modal.find('.modal-body #tab').val(tab);
-        modal.find('.modal-body #price').val(price);
-
-        document.getElementById('tableBody').innerHTML = "";
-
-        $('#addFoodRow').prop('disabled', true);
-    })
-    $('#finalizarVentaModal').on('show.bs.modal', function (event) {
-        console.log("show modal finalizarVentaModal...");
-        var button = $(event.relatedTarget);
-        var location = button.data('location');
-        var total = button.data('total');
-        var ventaId = button.data('ventaid');
-        var montoTotalDescuento = button.data('montototaldescuento');
-        var discountPercentage = button.data('discountpercentage');
-        var applyDiscount = button.data('applydiscount');
-        console.log(button);
-        var modal = $(this);
-        modal.find('.modal-body #location').val(location);
-        modal.find('.modal-body #total').val(total);
-        modal.find('.modal-body #folio').val(ventaId);
-        modal.find('.modal-body #quantity').val('');
-        modal.find('.modal-body #montototaldescuento').val(montoTotalDescuento);
-        modal.find('.modal-body #discountpercentage').val(discountPercentage);
-        modal.find('.modal-body #applydiscount').val(applyDiscount);
-        if (applyDiscount == 1) {
-            $('#rowdiscount').show();
-        } else {
-            $('#rowdiscount').hide();
-        }
-    })
-    $('#addClientModal').on('show.bs.modal', function (event) {
-        console.log("addClientModal ...");
-        var button = $(event.relatedTarget);
-        // var productname = button.data('productname');
-        var ventaid = button.data('ventaid');
-
-        var modal = $(this);
-        modal.find('.modal-body #type').val(2);
-        modal.find('.modal-body #ventaid').val(ventaid);
-        modal.find('.modal-body #clientName').val('');
-        modal.find('.modal-body #clientPhone').val('');
-        modal.find('.modal-body #clientAddress').val('');
-        modal.find('.modal-body #clientReference').val('');
-        
-    });
-    $('#editClientModal').on('show.bs.modal', function (event) {
-        console.log("editClientModal ...");
-        var button = $(event.relatedTarget);
-        console.log("editClientModal:" + document.getElementById("clientName").value);
-        console.log("editClientModal:" + document.getElementById("clientId").value);
-
-        var modal = $(this);
-        if (document.getElementById("clientId").value !== '') {
-            console.log("editClientModal: show modal");
-            var ventaid = button.data('ventaid');
-
-            modal.find('.modal-body #type').val(2);
-            modal.find('.modal-body #ventaid').val(ventaid);
-            modal.find('.modal-body #clientId').val(
-                document.getElementById("clientId").value);
-            modal.find('.modal-body #modalClientName').val(
-                document.getElementById("clientName").value);
-            modal.find('.modal-body #modalClientPhone').val(
-                document.getElementById("clientPhone").value);
-            modal.find('.modal-body #modalClientAddress').val(
-                document.getElementById("clientAddress").value);
-            modal.find('.modal-body #modalClientReference').val(
-                document.getElementById("clientReference").value);
-            modal.find('.modal-body #disabled').val(false);
-        } else {
-            console.log("editClientModal: hide modal");
-            $('#editClientModal').modal('hide');
-        }
-    });
-
-    $('#clientSalesDetailsModalResume').on('show.bs.modal', function (event) {
-        console.log("#clientSalesDetailsModalResume");
-        var button = $(event.relatedTarget);
-        var clientId = button.data('clientid');
-        var _token = $('input[name="_token"]').val();
-        console.log(clientId);
-
-        if (clientId !== undefined && clientId != '') {
-            $.ajax({
-                url : "{{ route('getClientDetails') }}",
-                method : "GET",
-                data : {
-                    id : clientId,
-                    _token : _token
-                },
-                success : function (data) {
-                    if (data && data.length) {
-                        console.log('success: ', data);
-                        document.getElementById('salesTableBody').innerHTML = "";
-
-                        $.each(data, function(i, elem){
-                            console.log('each', elem['ventaId']);
-                            var cols = "";
-                            var newRow = $("<tr>");
-
-                            cols += '<td>' + elem['ventaId'] + '</td>';
-                            cols += '<td>' + '$ ' + elem['montoTotal'] + '</td>';
-                            cols += '<td>' + elem['date'] + '</td>';
-
-                            newRow.append(cols);
-                            $("table.sales-list").append(newRow);
-                        });
-                    } else {
-                        console.log('no hay datos');
-                    }
-                }
-            });
-        }
-    });
-    $('#clientSalesDetailsModal').on('show.bs.modal', function (event) {
-        console.log("#clientSalesDetailsModal");
-        console.log(document.getElementById("clientId"));
-        var modal = $(this)
-        var button = $(event.relatedTarget);
-        var clientId = document.getElementById("clientId").value;
-        var _token = $('input[name="_token"]').val();
-
-        if (clientId !== undefined) {
-            $.ajax({
-                url : "{{ route('getClientDetails') }}",
-                method : "GET",
-                data : {
-                    id : clientId,
-                    _token : _token
-                },
-                success : function (data) {
-                    if (data && data.length) {
-                        console.log('success: ', data);
-                        document.getElementById('salesTableBody').innerHTML = "";
-
-                        $.each(data, function(i, elem){
-                            console.log('each', elem['ventaId']);
-                            var cols = "";
-                            var newRow = $("<tr>");
-
-                            cols += '<td>' + elem['ventaId'] + '</td>';
-                            cols += '<td>' + '$ ' + elem['montoTotal'] + '</td>';
-                            cols += '<td>' + elem['date'] + '</td>';
-
-                            newRow.append(cols);
-                            $("table.sales-list").append(newRow);
-                        });
-                    } else {
-                        console.log('no hay datos');
-                    }
-                }
-            });
-        }
-    });
-    $("#cleanClient").on("click", function(event) {
-        console.log("cleanClientInfo ...");
-        $('#clientId').val('');
-        $('#clientName').val('');
-        $('#clientPhone').val('');
-        $('#clientAddress').val('');
-        $('#clientReference').val('');
-        $('#modalClientName').val('');
-        $('#modalClientPhone').val('');
-        $('#modalClientAddress').val('');
-        $('#modalClientReference').val('');
-        $('#type').val(1);
-        $('#table').val('');
-        $('#findClient').val('');
-        $('#collapseOne').collapse('show');
-        $('#promotion').val("0 %");
-        $('#discountPercentage').val(0);
-        document.getElementById("customRadio1").checked = true;
-    });
-    $('#exampleModal').on('show.bs.modal', function (event) {
-        console.log("show exampleModal modal...");
-    })
-    $('#carouselExampleIndicators').on('slide.bs.carousel', function () {
-        console.log("carousel events...");
-    })
-    $('#collapseOne').on('shown.bs.collapse', function (event) {
-        console.log('shown collapseOne');
-        console.log(event);
-        $('#type').val(1);
-        $('#table').val('');
-    })
-    $('#collapseOne').on('hidden.bs.collapse', function (event) {
-        console.log('hidden collapseOne');
-        console.log(event);
-        $('#type').val(1);
-        $('#table').val('');
-    })
-    $('#customRadio2').click(function (event) {
-        //$('#collapseOne').collapse('hide');
-        console.log('click customRadio2');
-        $('#type').val(2);
-        $('#table').val('');
-    })
-    $('#customRadio3').click(function (event) {
-        //$('#collapseOne').collapse('hide');
-        console.log('click customRadio3');
-        $('#type').val(3);
-        $('#table').val('');
-    })
-    $('#change-password').click(function (event) {
-        document.getElementById('password').disabled = !event.currentTarget.checked;
-        document.getElementById('password-confirm').disabled = !event.currentTarget.checked;
-    })
-    $('#change-pin').click(function (event) {
-        document.getElementById('pin').disabled = !event.currentTarget.checked;
-        document.getElementById('pin-confirm').disabled = !event.currentTarget.checked;
-    })
-    $("#addrow").on("click", function () {
-        var newRow = $("<tr>");
-        var cols = "";
-        var labelPieces = $("select[name='piecesnumber'] option:selected").text();
-        var valuePieces = $("select[name='piecesnumber'] option:selected").val();
-
-        var labelFlavors = $("select[name='flavors'] option:selected").text();
-        var valueFlavors = $("select[name='flavors'] option:selected").val();
-
-        if (valuePieces !== undefined && valueFlavors != undefined) {
-          cols += '<td id="' + valuePieces + '">' + labelPieces + '</td>';
-          cols += '<td id="' + valueFlavors + '">' + labelFlavors + '</td>';
-
-          cols += '<td><button type="button" class="ibtnDel btn btn-outline-danger btn-sm">Eliminar</button></td>';
-          newRow.append(cols);
-          $("table.order-list").append(newRow);
-          var $dataElements = $('#myTable').find('tr');
-          data = [];
-
-          $.each($dataElements, function(i, elem){
-            var childrens = [];
-            if (i >= 0) {
-              childrens = $(elem).children();
-              if (childrens) {
-                data.push(
-                  [{'key' : childrens[0].id, 'value' : childrens[0].innerHTML},
-                  {'key' : childrens[1].id, 'value' : childrens[1].innerHTML}]
-                );
-              }
+        window.WK = {
+            csrf: "{{ csrf_token() }}",
+            rutas: {
+                buscarCliente: "{{ route('getQueryClient') }}",
+                cliente: "{{ route('getClient') }}",
+                historialCliente: "{{ route('getClientDetails') }}",
+                cerrarVenta: "{{ route('cerrarVenta') }}",
+                eliminarProducto: "{{ route('eliminarProducto') }}",
+                cerrarCorteCaja: "{{ route('cerrarcortecaja') }}"
             }
-          });
-          $('#addFoodRow').prop('disabled', false);
-          $('#description').val(JSON.stringify(data));
-        } else {
-          alert('Seleccionar los productos...');
-        }
-    });
-    $("table.order-list").on("click", ".ibtnDel", function (event) {
-        $(this).closest("tr").remove();
-        var length = $('#myTable').find('tr').length;
-        if (length == 1) {
-            $('#addFoodRow').prop('disabled', true);
-        }
-    });
-    $("#client").keyup(function(){
-        var query = $(this).val();
-        if (query != '' && query.length > 3){
-            var _token = $('input[name="_token"]').val();
-            $.ajax({
-                url : "{{ route('getQueryClient') }}",
-                method : "POST",
-                data : {
-                    query : query,
-                    _token : _token
-                },
-                success : function (data) {
-                    $('#clientList').fadeIn();
-                    $('#clientList').html(data);
-                }
-            });
-        }
-    });
-    $("#finalizarVenta").click(function(event) {
-        event.preventDefault();
-        var quantity = $('#quantity').val();
-        var ventaid = $('#folio').val();
-        var discountpercentage = $('#discountpercentage').val();
-        var paymenttype = $('#paymenttype').val();
-
-        var _token = $('input[name="_token"]').val();
-        $.ajax({
-            url : "{{ route('cerrarVenta') }}",
-            method : "POST",
-            data : {
-                quantity : quantity,
-                ventaid : ventaid,
-                discountpercentage: discountpercentage,
-                paymenttype: paymenttype,
-                _token : _token
-            },
-            success : function (data) {
-                console.log(data);
-                if(data.errors) {
-                    $('.alert-danger').html('');
-                    $.each(data.errors, function(key, value){
-                  			$('.alert-danger').show();
-                  			$('.alert-danger').append('<li>'+value+'</li>');
-                		});
-                } else {
-                    $('.alert-danger').hide();
-                    $('#finalizarVentaModal').modal('hide');
-                    window.location = data.url
-                }
-            }
-        });
-
-    });
-    $('.datepicker').datepicker({
-        format: "dd/mm/yyyy",
-        language: "es",
-        autoclose: true
-    });
-    $('.datepickercorteformat').datepicker({
-        format: "yyyy-mm-dd",
-        language: "es",
-        autoclose: true
-    });
-    $("#btnAddClient").click(function(event) {
-        event.preventDefault();
-        var ventaid = $('#ventaid').val();
-        var type = $('#type').val();
-        var clientName = $('#modalClientName').val();
-        var clientPhone = $('#modalClientPhone').val();
-        var clientAddress = $('#modalClientAddress').val();
-        var clientReference = $('#modalClientReference').val();
-
-        var _token = $('input[name="_token"]').val();
-        $.ajax({
-            url : "{{ route('addClient') }}",
-            method : "POST",
-            data : {
-                ventaid : ventaid,
-                type : type,
-                name : clientName,
-                phone : clientPhone,
-                address : clientAddress,
-                reference : clientReference,
-                _token : _token
-            },
-            success : function (data) {
-                console.log(data);
-                if(data.errors) {
-                    $('.alert-danger').html('');
-                    $.each(data.errors, function(key, value){
-                        if (key == 0) {
-                            $('#clientNameError').show();
-                            $('#clientNameError').append('<li>'+value+'</li>');
-                        }
-                        if (key == 1) {
-                            $('#clientAddressError').show();
-                            $('#clientAddressError').append('<li>'+value+'</li>');
-                        }
-                        if (key == 2) {
-                            $('#clientPhoneError').show();
-                            $('#clientPhoneError').append('<li>'+value+'</li>');
-                        }
-                        if (key == 3) {
-                            $('#clientReferenceError').show();
-                            $('#clientReferenceError').append('<li>'+value+'</li>');
-                        }
-                    });
-                } else {
-                    $('.alert-danger').hide();
-                    $('#addClientModal').modal('hide');
-                    window.location = data.url
-                }
-            }
-        });
-
-    });
-    (function () {
-        'use strict'
-
-        // Fetch all the forms we want to apply custom Bootstrap validation styles to
-        var forms = document.querySelectorAll('.needs-validation')
-
-        // Loop over them and prevent submission
-        Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-            form.addEventListener('submit', function (event) {
-                if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-                }
-
-                form.classList.add('was-validated')
-            }, false)
-            })
-    })();
-    $('#cerrarcortecajamodal').on('show.bs.modal', function (event) {
-        console.log("show modal cerrarcortecaja...");
-        var button = $(event.relatedTarget);
-        var idcorte = button.data('idcorte');
-        var fechaapertura = button.data('fechaapertura');
-        console.log(button);
-        var modal = $(this);
-        modal.find('.modal-body #idcorte').val(idcorte);
-        modal.find('.modal-body #fechaapertura').val(fechaapertura);
-    })
-    $("#cerrarcortecaja").click(function(event) {
-        console.log("cerrarcortecaja");
-        event.preventDefault();
-        var idcorte = $('#idcorte').val();
-        console.log(idcorte);
-
-        var _token = $('input[name="_token"]').val();
-        $.ajax({
-            url : "{{ route('cerrarcortecaja') }}",
-            method : "POST",
-            data : {
-                idcorte : idcorte,
-                _token : _token
-            },
-            success : function (data) {
-                console.log(data);
-                if(data.errors) {
-                    $('.alert-danger').html('');
-                    $.each(data.errors, function(key, value){
-                  			$('.alert-danger').show();
-                  			$('.alert-danger').append('<li>'+value+'</li>');
-                		});
-                } else {
-                    $('.alert-danger').hide();
-                    $('#cerrarcortecajamodal').modal('hide');
-                    window.location = data.url
-                }
-            }
-        });
-
-    });
-    $('#eliminarProductoModal').on('show.bs.modal', function (event) {
-        console.log("show modal eliminarProductoModal...");
-        var button = $(event.relatedTarget);
-        var productoid = button.data('productoid');
-        var tab = button.data('tab');
-
-        console.log("productoid: ", productoid);
-        console.log("tab: ", tab);
-
-        var modal = $(this);
-        modal.find('#productoid').val(productoid);
-        modal.find('.modal-body #modaltab').val(tab);
-
-        let inputPin = $('#pin');
-        inputPin.val('');      // limpiar campo
-        inputPin.focus();
-        $('.alert-danger').html('');
-        $('.alert-danger').hide();
-    })
-    $("#eliminarProducto").click(function(event) {
-        event.preventDefault();
-        var productoid = $('#productoid').val();
-        var pin = $('#pin').val();
-        var tab = $('#modaltab').val();
-
-        console.log("productoid: ", productoid);
-        console.log("tab: ", tab);
-
-        var _token = $('input[name="_token"]').val();
-        $.ajax({
-            url : "{{ route('eliminarProducto') }}",
-            method : "POST",
-            data : {
-                productoid: productoid,
-                pin: pin,
-                tab: tab,
-                _token : _token
-            },
-            success : function (data) {
-                console.log(data);
-                if(data.errors) {
-                    $('.alert-danger').html('');
-                    $.each(data.errors, function(key, value){
-                  			$('.alert-danger').show();
-                  			$('.alert-danger').append('<li>'+value+'</li>');
-                		});
-                } else {
-                    $('.alert-danger').html('');
-                    $('.alert-danger').hide();
-                    $('#eliminarProductoModal').modal('hide');
-                    window.location = data.url
-                }
-            }
-        });
-
-    });
+        };
     </script>
-
+    <script src="{{ asset('vendor/jquery/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ asset('vendor/bootstrap/bootstrap-4.3.1.bundle.min.js') }}"></script>
+    <script src="{{ asset('js/wk-common.js') }}"></script>
+    @stack('scripts')
 </body>
 </html>

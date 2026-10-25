@@ -1,49 +1,44 @@
-<div class="modal" id="dialogDetails" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document" style="z-index: 999999999;">
+<div class="modal fade" id="dialogDetails" tabindex="-1" role="dialog" aria-labelledby="dialogDetailsTitulo" aria-hidden="true">
+  <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Agregar</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <h5 class="modal-title" id="dialogDetailsTitulo">Agregar</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <form id="formQuantity" method="POST" action="{{ route('addProductVenta') }}">
+      <form method="POST" action="{{ route('addProductVenta') }}">
           @csrf
           <div class="modal-body">
-              <input type="text" hidden name="idProduct" id="idProduct">
-              <input type="text" hidden name="ventaId" id="ventaId">
-              <input type="text" hidden name="tab" id="tab">
-              <input type="text" hidden name="price" id="price">
-              <input type="text" hidden name="description" id="description">
-              <div class="container">
-              <div class="row">
-                  <div class="col-md-12">
-                      <h5 class="modal-title">
-                          <label id='productName'></label>
-                      </h5>
-                  </div>
-              </div>
-              <div class="row">
-                  <div class="col-md-12">
-                      <div class="form-group">
-                          <label for="quantity" class="col-form-label">Cantidad:</label>
-                          <input name="cantidad" type="text" class="form-control" id="quantity">
+              <input type="hidden" name="idProduct">
+              <input type="hidden" name="ventaId">
+              <input type="hidden" name="tab">
+              <input type="hidden" name="price">
+              <p class="h5" id="productName"></p>
+              <div class="form-group">
+                  <label for="quantity" class="col-form-label">Cantidad:</label>
+                  {{-- Botones - / + para no depender del teclado en tablet --}}
+                  <div class="input-group wk-cantidad">
+                      <div class="input-group-prepend">
+                          <button type="button" class="btn btn-outline-secondary" data-cantidad-paso="-1" data-target-input="#quantity" aria-label="Menos">&minus;</button>
                       </div>
-                      <div class="form-group">
-                          <label for="description" class="col-form-label">Descripcion:</label>
-                          <input name="description" type="text" class="form-control" id="description">
+                      <input name="cantidad" type="number" class="form-control text-center" id="quantity"
+                          min="1" step="1" value="1" inputmode="numeric" required>
+                      <div class="input-group-append">
+                          <button type="button" class="btn btn-outline-secondary" data-cantidad-paso="1" data-target-input="#quantity" aria-label="Más">+</button>
                       </div>
                   </div>
               </div>
+              <div class="form-group">
+                  <label for="productDescription" class="col-form-label">Descripción (opcional):</label>
+                  <input name="description" type="text" class="form-control" id="productDescription" autocomplete="off">
               </div>
-
           </div>
           <div class="modal-footer">
-              <button type="button" class="btn-outline-secondary custom" data-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-primary custom">Agregar</button>
+              <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Agregar</button>
           </div>
       </form>
     </div>
   </div>
-</div>
 </div>

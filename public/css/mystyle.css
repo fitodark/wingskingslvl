@@ -2,7 +2,7 @@ html, body {
     background-color:#F8FAFC !important;
     color: #636b6f !important;
     font-family: 'Nunito', sans-serif !important;
-    font-weight: 200 !important;
+    font-weight: 400 !important; /* 200 se leía muy tenue en tablet */
     height: 100vh !important;
     margin: 0 !important;
 }
@@ -117,8 +117,21 @@ html, body {
     padding: 5px 5px 10px 40px;
 }
 
+/* Íconos usados como botón dentro de un form (acciones por POST) */
+.btn-ico {
+    border: 0;
+    background-color: transparent;
+    cursor: pointer;
+    width: 40px;
+    height: 34px;
+    padding: 0;
+    vertical-align: middle;
+}
+
+/* Antes width: 1024px fijo, que en tablet vertical obligaba a desplazar de lado */
 .example-container {
-    width: 1024px;
+    width: 100%;
+    max-width: 1024px;
 }
 
 .custom-control-input:checked ~ .custom-control-label::before {
@@ -154,4 +167,133 @@ html, body {
     color: #6c757d;
     background-color: #ffffff;
     border-color: #6c757d;
+}
+
+/* ---------- Punto de venta en tablet (horizontal y vertical) ---------- */
+
+.wk-container {
+    width: 100%;
+    max-width: 1140px;
+}
+
+/* Botón marcado mientras se envía su formulario (public/js/wk-common.js) */
+.wk-enviando {
+    pointer-events: none;
+    opacity: .65;
+}
+
+/* Navegación del wizard: Anterior / Regresar / Siguiente */
+.wk-wizard-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.wk-wizard-nav .btn,
+.wk-wizard-nav .custom.btn-primary,
+.wk-wizard-nav .custom.btn-outline-secondary {
+    width: auto;
+    min-width: 150px;
+    margin: .25rem .5rem;
+}
+.custom.btn-outline-primary {
+    font-weight: 450;
+    background-color: #ffffff;
+}
+
+/* Bandeja de comandas: acciones con ícono y texto */
+.wk-bandeja td {
+    vertical-align: middle;
+}
+.wk-col-acciones {
+    min-width: 210px;
+}
+.wk-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+.wk-acciones form {
+    margin: 0;
+}
+.wk-acciones .btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    min-height: 54px;
+    margin: 2px;
+    padding: 4px 2px;
+    font-size: .75rem;
+    line-height: 1.1;
+}
+.wk-acciones .btn i {
+    font-size: 1.15rem;
+    margin-bottom: 3px;
+}
+
+/* Listas de cantidad y sabor del modal de alitas */
+.wk-lista option {
+    padding: .4rem .5rem;
+}
+
+.wk-cantidad .btn {
+    min-width: 52px;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Solo en pantallas táctiles: controles de al menos ~44px para el dedo. En PC con mouse no cambia. */
+@media (pointer: coarse) {
+    .btn {
+        min-height: 44px;
+        padding: .5rem 1rem;
+    }
+    .btn-sm {
+        min-height: 40px;
+        padding: .4rem .8rem;
+        font-size: .95rem;
+    }
+    .form-control,
+    .custom-select:not([size]) {
+        min-height: 44px;
+        font-size: 1rem;
+    }
+    .dropdown-item {
+        padding: .75rem 1.5rem;
+    }
+    .page-link {
+        padding: .65rem 1rem;
+    }
+    .table-sm th,
+    .table-sm td {
+        padding: .5rem;
+    }
+    .modal-header .close {
+        padding: 1rem 1.25rem;
+        margin: -1rem -1rem -1rem auto;
+        font-size: 2rem;
+    }
+    .custom-control {
+        min-height: 2rem;
+        padding-left: 2.25rem;
+    }
+    .custom-control-label {
+        padding-top: .2rem;
+        font-size: 1.1rem;
+    }
+    .custom-control-label::before,
+    .custom-control-label::after {
+        top: .25rem;
+        left: -2.25rem;
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+    .list-group-item {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    .wk-lista option {
+        padding: .6rem .5rem;
+    }
 }

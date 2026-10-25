@@ -37,3 +37,5 @@
     </div>
 </div>
 @endsection
+
+@include('partials.datepicker')
