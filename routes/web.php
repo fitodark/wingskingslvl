@@ -39,6 +39,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/drinksTab/{venta}/{client?}', 'Puntoventa\NavVentasController@drinksTab')->name('drinksTab');
         Route::get('/foodsTab/{venta}/{client?}', 'Puntoventa\NavVentasController@foodsTab')->name('foodsTab');
         Route::get('/resumeTab/{venta}/{clientId?}/{enableFooter?}', 'Puntoventa\NavVentasController@resumeTab')->name('resumeTab');
+        // Detalle desde la bandeja: solo consulta (sin Finalizar ni Regresar que descarte la ronda).
+        Route::get('/detalleComanda/{venta}', 'Puntoventa\NavVentasController@detalle')->name('detalleComanda');
         Route::post('/addProductVenta', 'Puntoventa\VentasProductosController@store')->name('addProductVenta');
         Route::post('/cancelarVenta/{venta?}', 'Puntoventa\NavVentasController@cancelarVenta')->name('cancelarVenta');
         Route::post('/eliminarProducto', 'Puntoventa\VentasProductosController@destroy')->name('eliminarProducto');

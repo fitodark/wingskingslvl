@@ -75,6 +75,14 @@ class VentasProductos extends Model
        return !$this->delete_flag;
     }
 
+    /**
+     * Agregado en la ronda actual de la venta y todavía sin mandar a cocina (se marca en verde).
+     */
+    public function esPendienteDeRonda($venta)
+    {
+       return $this->order == $venta->order && $this->estaActivo() && !$this->estaComandado();
+    }
+
     public function scopeActivos($query)
     {
        return $query->where($this->getTable() . '.estatus', self::ESTATUS_ACTIVO);

@@ -82,7 +82,7 @@
                     </button>
                 @endif
 
-                <a class="btn btn-outline-info" href="{{ route('resumeTab', [$venta->ventaId, $venta->client_id]) }}" title="Ver detalle">
+                <a class="btn btn-outline-info" href="{{ route('detalleComanda', $venta->ventaId) }}" title="Ver detalle">
                     <i class="fa-solid fa-list"></i><span>Detalle</span>
                 </a>
             </div>

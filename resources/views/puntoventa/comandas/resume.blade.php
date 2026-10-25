@@ -27,7 +27,12 @@
                         {{-- Manda la orden a cocina/barra --}}
                         <button type="submit" class="btn btn-primary custom" name="next">Finalizar</button>
                     @else
-                        <button type="submit" form="cancelarVentaForm" class="btn btn-outline-secondary custom">Regresar</button>
+                        {{-- Consulta desde la bandeja: no imprime ni descarta nada --}}
+                        <a class="btn btn-outline-secondary custom" href="{{ route('comandas') }}" role="button">Volver a la bandeja</a>
+                        @if ($venta->estaAbierta() && $venta->tiene_ronda_pendiente)
+                            {{-- Ronda capturada que no se mandó a cocina: se retoma en el wizard --}}
+                            <a class="btn btn-primary custom" href="{{ route('drinksTab', ['venta' => $venta['ventaId'], 'client' => optional($client)->id]) }}" role="button">Continuar ronda</a>
+                        @endif
                     @endif
                     </div>
                 </div>

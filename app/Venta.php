@@ -157,6 +157,18 @@ class Venta extends Model
    }
 
    /**
+    * La ronda actual tiene productos que todavía no se mandan a cocina/barra.
+    */
+   public function getTieneRondaPendienteAttribute()
+   {
+      return $this->ventasProductos()
+         ->where('order', $this->order)
+         ->where('delete_flag', true)
+         ->activos()
+         ->exists();
+   }
+
+   /**
     * Lo que se cobra: con descuento si se aplicó.
     */
    public function getMontoACobrarAttribute()

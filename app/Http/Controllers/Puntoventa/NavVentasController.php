@@ -100,6 +100,13 @@ class NavVentasController extends Controller
     }
 
     /**
+     * Detalle desde la bandeja: el mismo resumen, en modo consulta.
+     */
+    public function detalle(Venta $venta) {
+        return $this->resumeTab($venta, null, FALSE);
+    }
+
+    /**
      * "Regresar" en el wizard: descarta lo no comandado de la orden actual.
      */
     public function cancelarVenta(Request $request, VentaService $ventas, Venta $venta) {

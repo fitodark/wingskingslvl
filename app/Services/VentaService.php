@@ -124,15 +124,33 @@ class VentaService
     }
 
     /**
-     * Manda la orden actual a cocina y barra (si la impresión está activa) y deja la venta
-     * en la bandeja con los productos marcados como comandados.
+     * Productos de la ronda actual que todavía no se mandan a cocina/barra (delete_flag = 1).
+     * Lo ya comandado no se vuelve a imprimir aunque se dé Finalizar otra vez.
+     *
+     * @return array [$arrayBebidas, $arrayComidas]
+     */
+    public function productosPorComandar(Venta $venta)
+    {
+        list($arrayBebidas, $arrayComidas) = $this->getProductosOrden($venta);
+        $pendiente = function ($vp) {
+            return $vp->estaActivo() && !$vp->estaComandado();
+        };
+
+        return [$arrayBebidas->filter($pendiente)->values(), $arrayComidas->filter($pendiente)->values()];
+    }
+
+    /**
+     * Manda a cocina y barra (si la impresión está activa) lo pendiente de la ronda actual y deja
+     * la venta en la bandeja con los productos marcados como comandados.
      */
     public function comandar(Venta $venta, $clientId, $aplicarDescuento)
     {
         $this->asegurarAbierta($venta);
 
-        if ($this->impresionActiva()) {
-            list($arrayBebidas, $arrayComidas) = $this->getProductosOrden($venta);
+        list($arrayBebidas, $arrayComidas) = $this->productosPorComandar($venta);
+        $hayPendientes = !$arrayBebidas->isEmpty() || !$arrayComidas->isEmpty();
+
+        if ($hayPendientes && $this->impresionActiva()) {
             try {
                 $this->printProducts($venta, $arrayBebidas, $arrayComidas);
             } catch (\Exception $e) {

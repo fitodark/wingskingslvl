@@ -177,6 +177,40 @@ class VentaServiceTest extends TestCase
         $this->assertEquals(1, $venta->fresh()->activo);
     }
 
+    public function test_finalizar_otra_vez_no_reimprime_la_ronda_ya_comandada()
+    {
+        $venta = $this->ventaAbierta($this->mesero);
+        $agua = $this->producto();
+        $alitas = $this->alitas(10);
+        $this->catalogoSabores();
+
+        // Ronda 1: bebida y comida
+        $this->ventas->agregarProducto($venta, $agua, 2, null, $this->mesero->id);
+        $this->ventas->agregarProducto($venta->fresh(), $alitas, 1,
+            $this->sabores([['Todas', 'Habanero']]), $this->mesero->id);
+        list($bebidas, $comidas) = $this->ventas->productosPorComandar($venta->fresh());
+        $this->assertSame([1, 1], [$bebidas->count(), $comidas->count()]);
+        $this->ventas->comandar($venta->fresh(), null, 0);
+
+        // Ronda 2: solo una bebida nueva
+        $this->ventas->nuevaOrden($venta->fresh());
+        $this->assertFalse($venta->fresh()->tiene_ronda_pendiente, 'ronda recién abierta, sin productos');
+        $nueva = $this->ventas->agregarProducto($venta->fresh(), $agua, 1, null, $this->mesero->id);
+        $this->assertTrue($venta->fresh()->tiene_ronda_pendiente);
+        $this->assertTrue($nueva->fresh()->esPendienteDeRonda($venta->fresh()));
+        list($bebidas, $comidas) = $this->ventas->productosPorComandar($venta->fresh());
+        $this->assertSame([$nueva->ventasProductosId], $bebidas->pluck('ventasProductosId')->all());
+        $this->assertTrue($comidas->isEmpty(), 'la comida de la ronda 1 no se vuelve a mandar');
+
+        $this->ventas->comandar($venta->fresh(), null, 0);
+
+        // Detalle -> Finalizar otra vez: ya no hay nada que imprimir ni que pintar en verde.
+        list($bebidas, $comidas) = $this->ventas->productosPorComandar($venta->fresh());
+        $this->assertTrue($bebidas->isEmpty() && $comidas->isEmpty());
+        $this->assertFalse($venta->fresh()->tiene_ronda_pendiente);
+        $this->assertFalse($nueva->fresh()->esPendienteDeRonda($venta->fresh()));
+    }
+
     // ---------- Cobrar ----------
 
     public function test_cobrar_cierra_registra_en_corte_y_descuenta_inventario_una_vez()

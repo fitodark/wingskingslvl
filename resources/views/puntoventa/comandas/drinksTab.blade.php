@@ -55,7 +55,7 @@
                                     <th>Acción</th>
                                 </tr>
                                 @forelse ( $arrayBebidas as $record)
-                                @if ($venta->order == $record->order)
+                                @if ($record->esPendienteDeRonda($venta))
                                     <tr class="table-success">
                                 @else
                                     @if (!$record->estaActivo())

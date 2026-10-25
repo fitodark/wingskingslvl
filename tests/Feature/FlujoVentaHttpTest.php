@@ -146,6 +146,37 @@ class FlujoVentaHttpTest extends TestCase
             ->assertJson(['errors' => ['Esta venta ya fue cerrada.']]);
     }
 
+    public function test_detalle_desde_la_bandeja_es_solo_consulta()
+    {
+        $this->corteAbierto($this->usuario('admin'));
+        $ventas = app(VentaService::class);
+        $venta = $this->ventaAbierta($this->mesero, ['activo' => 1]);
+        $ventas->agregarProducto($venta, $this->producto(), 1, null, $this->mesero->id);
+        $ventas->comandar($venta->fresh(), null, 0);
+
+        $this->actingAs($this->mesero)->get('/comandas')
+            ->assertSee(route('detalleComanda', $venta->ventaId));
+
+        // Ronda ya comandada: nada en verde, sin Finalizar, sin Regresar que descarte, sin Continuar.
+        $html = $this->actingAs($this->mesero)->get(route('detalleComanda', $venta->ventaId))
+            ->assertOk()
+            ->assertSee('Volver a la bandeja')
+            ->assertDontSee('Continuar ronda')
+            ->getContent();
+        $this->assertStringNotContainsString('>Finalizar</button>', $html);
+        $this->assertStringNotContainsString('form="cancelarVentaForm"', $html);
+        $this->assertStringNotContainsString('table-success', $html);
+
+        // Ronda capturada sin mandar a cocina: se puede retomar.
+        $ventas->nuevaOrden($venta->fresh());
+        $ventas->agregarProducto($venta->fresh(), $this->producto(['name' => 'Refresco']), 1, null, $this->mesero->id);
+        $html = $this->actingAs($this->mesero)->get(route('detalleComanda', $venta->ventaId))
+            ->assertSee('Continuar ronda')
+            ->getContent();
+        $this->assertSame(1, substr_count($html, 'table-success'));
+        $this->assertStringNotContainsString('>Finalizar</button>', $html);
+    }
+
     public function test_bandeja_muestra_tipo_y_pago_con_su_nombre()
     {
         $this->corteAbierto($this->usuario('admin'));
