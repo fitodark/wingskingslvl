@@ -20,7 +20,7 @@
             <input id="modalClientAddress" type="text" name="address" class="form-control" placeholder="Dirección" value="{{ $cliente->address }}" required>
         @endif
         <div class="invalid-feedback">
-            El Telefono del cliente es obligatorio.
+            La dirección del cliente es obligatoria.
         </div>
     </div>
 </div>
@@ -33,7 +33,7 @@
             <input id="modalClientPhone" type="text" name="phone" class="form-control" placeholder="Teléfono" value="{{ $cliente->phone }}" required>
         @endif
         <div class="invalid-feedback">
-            La dirección del cliente es obligatoria.
+            El teléfono del cliente es obligatorio.
         </div>
     </div>
 

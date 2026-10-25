@@ -1,6 +1,6 @@
 /*
  * Comandas: bandeja, wizard de venta (cliente/ubicación, bebidas, comida, resumen) y sus modales.
- * Requiere wk-common.js. En la pantalla de cliente también bootstrap3-typeahead.
+ * Requiere wk-common.js.
  */
 (function ($, WK) {
     'use strict';
@@ -12,77 +12,190 @@
         return isNaN(n) ? '' : '$ ' + n.toFixed(2);
     }
 
-    /* ---------- Paso 1: cliente y ubicación ---------- */
+    /* ---------- Paso 1: para dónde es (mesa, domicilio, para llevar) ---------- */
 
-    // 1 = Local, 2 = Domicilio, 3 = Para llevar.
-    // La mesa solo aplica en Local; el nombre de la cuenta en Local y Para llevar.
-    function setTipoVenta(tipo) {
-        $('#type').val(tipo);
-        if (tipo == 1) {
-            $('#collapseOne').collapse('show');
-        } else {
-            $('#collapseOne').collapse('hide');
-            $('#table').val('');
-        }
-        if (tipo == 2) {
-            $('#cuentaGroup').hide();
-            $('#nombre_cuenta').val('');
-        } else {
-            $('#cuentaGroup').show();
-        }
-    }
-    $('#customRadio1').on('change', function () { setTipoVenta(1); });
-    $('#customRadio2').on('change', function () { setTipoVenta(2); });
-    $('#customRadio3').on('change', function () { setTipoVenta(3); });
+    // 1 = Mesa (local), 2 = Domicilio, 3 = Para llevar. Sin tipo preseleccionado.
+    // Las reglas son las mismas que valida el servidor (VentasController@update):
+    // mesa o nombre de cuenta; domicilio con cliente; para llevar con nombre o cliente.
+    // Cada registro de cliente es una dirección: un teléfono puede tener varios.
+    var $paso1 = $('#tableSelectForm.wk-paso1-form');
+    var paso1 = { cliente: null, buscarEnLlevar: false, busqueda: 0, temporizador: null };
 
     function ponerPromocion(porcentaje) {
-        $('#promotion').val(porcentaje + ' %');
         $('[name=discountPercentage]').val(porcentaje);
     }
 
-    if ($.fn.typeahead) {
-        $('input.typeahead').typeahead({
-            source: function (query, process) {
-                return $.get(WK.rutas.buscarCliente, { query: query }, function (data) {
-                    return process(data);
-                });
-            },
-            displayText: function (item) {
-                return '[' + item.phone + '] ' + item.name + ' - ' + item.address;
-            },
-            afterSelect: function (item) {
-                $('#client').val(item);
-                $('#clientId').val(item.id);
-                $('#clientName').val(item.name);
-                $('#clientPhone').val(item.phone);
-                $('#clientAddress').val(item.address);
-                $('#clientReference').val(item.reference);
+    function tipoElegido() {
+        return parseInt($paso1.find('input[name=type]:checked').val(), 10) || 0;
+    }
 
-                $.get(WK.rutas.cliente, { id: item.id }, function (data) {
-                    ponerPromocion(data && data.length ? data[0].discountPercentage : 0);
-                });
-            }
+    function textoCuentas(n) {
+        return n + (n === 1 ? ' cuenta abierta' : ' cuentas abiertas');
+    }
+
+    function filaCliente(c, textoBoton) {
+        var $fila = $('<button type="button" class="list-group-item list-group-item-action">');
+        $fila.append($('<span>')
+            .append($('<strong>').text(c.name))
+            .append($('<small>').text(c.address + (c.reference ? ' · ' + c.reference : ''))));
+        $fila.append($('<span class="text-nowrap">').text(textoBoton || c.phone));
+        $fila.data('cliente', c);
+        return $fila;
+    }
+
+    function pintarPaso1() {
+        var tipo = tipoElegido();
+        var cliente = paso1.cliente;
+        var verCliente = tipo === 2 || (tipo === 3 && (paso1.buscarEnLlevar || !!cliente));
+
+        $('#wkSinTipo').prop('hidden', tipo !== 0);
+        $('#panelMesa').prop('hidden', tipo !== 1);
+        $('#panelLlevar').prop('hidden', tipo !== 3);
+        $('#panelCliente').prop('hidden', !verCliente);
+        // Solo se envía el nombre de cuenta del panel visible (los dos se llaman nombre_cuenta).
+        $('#cuentaMesa').prop('disabled', tipo !== 1);
+        $('#cuentaLlevar').prop('disabled', tipo !== 3);
+        $('#abrirBuscarCliente').prop('hidden', verCliente);
+        $('#tituloCliente').text(tipo === 2 ? 'Cliente' : 'Cliente registrado (opcional)');
+
+        $('#ventaClientId').val(cliente && tipo !== 1 ? cliente.id : '');
+        $('#buscador').prop('hidden', !!cliente);
+        $('#fichaCliente').prop('hidden', !cliente);
+        if (!cliente) { $('#otrasDirecciones').prop('hidden', true); }
+        if (cliente) {
+            $('#fichaNombre').text(cliente.name);
+            $('#fichaTelefono').text(cliente.phone);
+            $('#fichaDireccion').text(cliente.address);
+            $('#fichaReferencia').text(cliente.reference || '—');
+        }
+
+        // Mesa con cuentas abiertas: esta comanda es una cuenta separada.
+        var $mesa = $paso1.find('input[name=table]:checked');
+        var cuentas = $mesa.length ? ($mesa.data('cuentas') || []) : [];
+        if (tipo === 1 && cuentas.length) {
+            $('#avisoMesa').prop('hidden', false).text($mesa.data('nombre') + ' ya tiene ' + textoCuentas(cuentas.length)
+                + ': ' + cuentas.join(', ') + '. Esta comanda será una cuenta separada; ponle nombre para distinguirla.');
+        } else {
+            $('#avisoMesa').prop('hidden', true).text('');
+        }
+
+        var nombreMesa = $mesa.length ? $mesa.data('nombre') : '';
+        var cuenta = $.trim(tipo === 3 ? $('#cuentaLlevar').val() : $('#cuentaMesa').val());
+        var listo = false, resumen = 'Sin elegir', ayuda = 'Elige Mesa, Domicilio o Para llevar';
+        if (tipo === 1) {
+            listo = ($mesa.length && $mesa.val() !== '') || cuenta !== '';
+            resumen = [nombreMesa || null, cuenta || null].filter(Boolean).join(' · ') || 'Mesa';
+            ayuda = listo ? 'Listo para capturar bebidas' : 'Elige una mesa o escribe el nombre de la cuenta';
+        } else if (tipo === 2) {
+            listo = !!cliente;
+            resumen = 'Domicilio' + (cliente ? ' · ' + cliente.name : '');
+            ayuda = cliente ? cliente.address : 'Busca o registra al cliente';
+        } else if (tipo === 3) {
+            listo = cuenta !== '' || !!cliente;
+            resumen = 'Para llevar' + (cuenta ? ' · ' + cuenta : '') + (cliente ? ' · ' + cliente.name : '');
+            ayuda = listo ? 'Listo para capturar bebidas' : 'Escribe quién recoge o elige un cliente';
+        }
+        $('#resumenPaso1').text(resumen);
+        $('#ayudaPaso1').text(ayuda);
+        $('#btnSiguiente').prop('disabled', !listo);
+    }
+
+    function cargarOtrasDirecciones() {
+        var cliente = paso1.cliente;
+        var $lista = $('#listaDirecciones').empty();
+        $('#otrasDirecciones').prop('hidden', true);
+        if (!cliente || !cliente.phone) { return; }
+        $.get(WK.rutas.direccionesCliente, { phone: cliente.phone }, function (data) {
+            if (!paso1.cliente || paso1.cliente.id !== cliente.id) { return; }
+            var otras = $.grep(data || [], function (c) { return c.id !== cliente.id; });
+            $.each(otras, function (i, c) { $lista.append(filaCliente(c, 'Enviar aquí')); });
+            $('#otrasDirecciones').prop('hidden', otras.length === 0);
         });
     }
 
-    $('#cleanClient').on('click', function () {
-        $('#clientId, #clientName, #clientPhone, #clientAddress, #clientReference, #findClient').val('');
-        ponerPromocion(0);
-        $('#customRadio1').prop('checked', true);
-        setTipoVenta(1);
-    });
+    function elegirCliente(c) {
+        paso1.cliente = c;
+        $('#buscarCliente').val('');
+        $('#resultadosCliente').empty();
+        $.get(WK.rutas.cliente, { id: c.id }, function (data) {
+            ponerPromocion(data && data.length ? data[0].discountPercentage : 0);
+        });
+        cargarOtrasDirecciones();
+        pintarPaso1();
+    }
+
+    function buscarClientes() {
+        var texto = $.trim($('#buscarCliente').val());
+        var $resultados = $('#resultadosCliente').empty();
+        var numero = ++paso1.busqueda;
+        if (texto.length < 2) {
+            $('#buscarAyuda').text('Escribe al menos 2 letras o números.');
+            return;
+        }
+        $('#buscarAyuda').text('Buscando...');
+        $.get(WK.rutas.buscarCliente, { query: texto })
+            .done(function (data) {
+                if (numero !== paso1.busqueda) { return; } // llegó una búsqueda más nueva
+                $.each(data || [], function (i, c) { $resultados.append(filaCliente(c)); });
+                $('#buscarAyuda').text(data && data.length
+                    ? (data.length >= 20 ? 'Se muestran los primeros 20; escribe más para afinar.' : 'Elige la dirección a la que se envía.')
+                    : 'Sin resultados. Usa "Cliente nuevo" para registrarlo.');
+            })
+            .fail(function (xhr) {
+                if (numero === paso1.busqueda) { $('#buscarAyuda').text(WK.errorDeConexion(xhr)); }
+            });
+    }
+
+    if ($paso1.length) {
+        paso1.cliente = $('#panelCliente').data('cliente') || null;
+        if (paso1.cliente) { cargarOtrasDirecciones(); }
+
+        $paso1.on('change', 'input[name=type], input[name=table]', pintarPaso1);
+        $paso1.on('input', '#cuentaMesa, #cuentaLlevar', pintarPaso1);
+        $('#abrirBuscarCliente').on('click', function () {
+            paso1.buscarEnLlevar = true;
+            pintarPaso1();
+            $('#buscarCliente').trigger('focus');
+        });
+        $('#buscarCliente').on('input', function () {
+            clearTimeout(paso1.temporizador);
+            paso1.temporizador = setTimeout(buscarClientes, 250);
+        });
+        $('#resultadosCliente, #listaDirecciones').on('click', '.list-group-item', function () {
+            elegirCliente($(this).data('cliente'));
+        });
+        $('#cambiarCliente').on('click', function () {
+            paso1.cliente = null;
+            ponerPromocion(0);
+            pintarPaso1();
+            $('#buscarCliente').trigger('focus');
+        });
+        // Enter en un campo de texto no debe mandar el formulario a medias.
+        $paso1.on('keydown', 'input[type=text], input[type=search]', function (e) {
+            if (e.which === 13) { e.preventDefault(); }
+        });
+        pintarPaso1();
+    }
 
     // Los dos modales de cliente usan el mismo formulario parcial, así que se llenan por "name" dentro de cada modal.
+    // Llevan el tipo elegido para que al recargar el paso 1 no se pierda.
     $('#addClientModal').on('show.bs.modal', function (event) {
         var $modal = $(this);
+        var $boton = $(event.relatedTarget);
         $modal.find('form').removeClass('was-validated');
-        $modal.find('[name=ventaid]').val($(event.relatedTarget).data('ventaid'));
+        $modal.find('[name=ventaid]').val($boton.data('ventaid'));
+        $modal.find('[name=type]').val(tipoElegido() || '');
         $modal.find('[name=clientId], [name=name], [name=phone], [name=address], [name=reference]').val('');
+        if ($boton.data('mismo-telefono') && paso1.cliente) {
+            // Nueva dirección para el mismo cliente/teléfono.
+            $modal.find('[name=name]').val(paso1.cliente.name);
+            $modal.find('[name=phone]').val(paso1.cliente.phone);
+        }
     });
 
     $('#editClientModal').on('show.bs.modal', function (event) {
-        var clientId = $('#clientId').val();
-        if (!clientId) {
+        var cliente = paso1.cliente;
+        if (!cliente) {
             // Sin cliente seleccionado no hay nada que editar.
             event.preventDefault();
             return;
@@ -90,14 +203,15 @@
         var $modal = $(this);
         $modal.find('form').removeClass('was-validated');
         $modal.find('[name=ventaid]').val($(event.relatedTarget).data('ventaid'));
-        $modal.find('[name=clientId]').val(clientId);
-        $modal.find('[name=name]').val($('#clientName').val());
-        $modal.find('[name=phone]').val($('#clientPhone').val());
-        $modal.find('[name=address]').val($('#clientAddress').val());
-        $modal.find('[name=reference]').val($('#clientReference').val());
+        $modal.find('[name=type]').val(tipoElegido() || '');
+        $modal.find('[name=clientId]').val(cliente.id);
+        $modal.find('[name=name]').val(cliente.name);
+        $modal.find('[name=phone]').val(cliente.phone);
+        $modal.find('[name=address]').val(cliente.address);
+        $modal.find('[name=reference]').val(cliente.reference);
     });
 
-    // Historial de compras del cliente. En el paso 1 el cliente sale de #clientId (puede cambiar con el buscador);
+    // Historial de compras del cliente. En el paso 1 el cliente sale de #ventaClientId (cambia al elegir otro);
     // en el resumen viene en el botón.
     function cargarHistorial($modal, clientId) {
         var $cuerpo = $modal.find('tbody').empty();
@@ -129,7 +243,7 @@
             });
     }
     $('#clientSalesDetailsModal').on('show.bs.modal', function () {
-        cargarHistorial($(this), $('#clientId').val());
+        cargarHistorial($(this), $('#ventaClientId').val());
     });
     $('#clientSalesDetailsModalResume').on('show.bs.modal', function (event) {
         cargarHistorial($(this), $(event.relatedTarget).data('clientid'));

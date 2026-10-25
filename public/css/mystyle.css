@@ -328,3 +328,226 @@ html, body {
         padding: .6rem .5rem;
     }
 }
+
+/* ---------- Paso 1 de la comanda: para dónde es ---------- */
+.wk-paso1 .wk-encabezado .h2 small {
+    font-weight: 400;
+}
+.wk-pasos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .375rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: .875rem;
+}
+.wk-pasos li {
+    padding: .375rem .75rem;
+    border-radius: 999px;
+    background: #e9ecef;
+    color: #495057;
+}
+.wk-pasos li.activo {
+    background: #3b2208;
+    color: #fff;
+}
+/* Radios ocultos pero enfocables; el label hace de botón grande. */
+.wk-opcion-input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+.wk-opcion-input:focus-visible + label {
+    outline: 3px solid #3b2208;
+    outline-offset: 2px;
+}
+.wk-opcion-input:checked + .wk-tipo,
+.wk-opcion-input:checked + .wk-mesa {
+    border: 3px solid #e08a34;
+    background: #fff4e8;
+    color: #3b2208;
+}
+.wk-tipos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .875rem;
+}
+.wk-tipo {
+    display: flex;
+    align-items: center;
+    gap: .875rem;
+    min-height: 92px;
+    margin: 0;
+    padding: .875rem 1.125rem;
+    border: 1px solid #ced4da;
+    border-radius: 12px;
+    background: #fff;
+    color: #343a40;
+    cursor: pointer;
+}
+.wk-tipo i {
+    font-size: 1.75rem;
+    width: 2.25rem;
+    text-align: center;
+}
+.wk-tipo strong {
+    display: block;
+    font-size: 1.25rem;
+}
+.wk-tipo small {
+    display: block;
+    font-size: .875rem;
+    color: #5c636a;
+}
+.wk-vacio {
+    border: 1px dashed #ced4da;
+    border-radius: 10px;
+    padding: 1.75rem;
+    text-align: center;
+    color: #5c636a;
+}
+.wk-panel {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 1rem;
+    min-width: 0;
+}
+.wk-mesa-layout {
+    display: flex;
+    gap: 1.125rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+.wk-mesa-layout[hidden],
+.wk-panel[hidden] {
+    display: none;
+}
+.wk-mesa-layout > :first-child {
+    flex: 2 1 0;
+}
+.wk-mesa-layout > :last-child {
+    flex: 1 1 0;
+}
+.wk-mesas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: .5rem;
+}
+.wk-mesa {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 64px;
+    margin: 0;
+    padding: .25rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    background: #fff;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+}
+.wk-mesa small {
+    font-weight: 400;
+    font-size: .75rem;
+    color: #8a4a0d;
+}
+.wk-buscar {
+    position: relative;
+}
+.wk-buscar i {
+    position: absolute;
+    left: .875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #5c636a;
+}
+.wk-buscar input {
+    padding-left: 2.75rem;
+    border: 2px solid #e08a34;
+}
+.wk-resultados .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .75rem;
+    min-height: 56px;
+    text-align: left;
+}
+.wk-resultados .list-group-item small {
+    display: block;
+    color: #5c636a;
+}
+.wk-ficha {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .875rem;
+    border: 2px solid #e08a34;
+    background: #fff7ee;
+    border-radius: 8px;
+    padding: .875rem;
+}
+.wk-ficha[hidden] {
+    display: none;
+}
+.wk-ficha-datos {
+    min-width: 0;
+}
+.wk-ficha-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: flex-start;
+}
+/* Barra inferior fija: Siguiente siempre visible sin hacer scroll. */
+.wk-paso1-barra {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: .75rem 1rem;
+    background: #fff;
+    border-top: 1px solid #dee2e6;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, .06);
+}
+.wk-paso1-barra .wk-resumen {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.wk-paso1-barra .wk-resumen strong {
+    display: block;
+    font-size: 1.125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.wk-paso1-barra .wk-resumen small {
+    display: block;
+}
+@media (max-width: 991.98px) {
+    .wk-mesa-layout {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+/* Mismo naranja que el Siguiente de los demás pasos del wizard (.custom.btn-primary). */
+.wk-paso1-barra .btn-primary,
+.wk-paso1-barra .btn-primary:hover,
+.wk-paso1-barra .btn-primary:focus,
+.wk-paso1-barra .btn-primary:disabled {
+    background-color: #DF8B33;
+    border-color: #DF8B33;
+    color: #fff;
+    font-weight: 600;
+}
+.wk-paso1-barra .btn-primary:disabled {
+    opacity: .45;
+}

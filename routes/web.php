@@ -50,6 +50,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/clientes', 'Puntoventa\ClientController@index')->name('clientes');
         Route::post('/updateClient', 'Puntoventa\ClientController@updateClient')->name('updateClient');
         Route::get('/getClient/{clientId?}', 'Puntoventa\ClientController@getClient')->name('getClient');
+        Route::get('/direccionesCliente', 'Puntoventa\ClientController@getClientAddresses')->name('direccionesCliente');
         Route::get('/getClientDetails/{clientId?}', 'Puntoventa\ClientController@getClientDetails')->name('getClientDetails');
         Route::get('/getByClientAndDate/{clientId?}', 'Puntoventa\ClientController@getByClientAndDate')->name('getByClientAndDate');
 

@@ -120,7 +120,7 @@
             csrf: "{{ csrf_token() }}",
             rutas: {
                 buscarCliente: "{{ route('getQueryClient') }}",
-                cliente: "{{ route('getClient') }}",
+                cliente: "{{ route('getClient') }}", direccionesCliente: "{{ route('direccionesCliente') }}",
                 historialCliente: "{{ route('getClientDetails') }}",
                 cerrarVenta: "{{ route('cerrarVenta') }}",
                 eliminarProducto: "{{ route('eliminarProducto') }}",

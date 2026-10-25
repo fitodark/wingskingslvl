@@ -9,6 +9,7 @@
             </div>
             <form class="needs-validation" method="POST" action="{{ route('updateClient') }}" novalidate>
                 @csrf
+                <input type="hidden" name="type" value="">
                 <div class="modal-body">
                     @include('puntoventa.clientes.clientBodyForm', array('disabled'=>'false'))
                 </div>

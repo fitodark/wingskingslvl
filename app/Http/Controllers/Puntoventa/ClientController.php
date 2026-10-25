@@ -148,15 +148,52 @@ class ClientController extends Controller
                         ->with('success','Producto Eliminado Satisfactoriamente');
     }
 
+    /**
+     * Búsqueda del paso 1: por teléfono (empieza con) o nombre (contiene), solo activos.
+     * Cada registro es una dirección del cliente; un mismo teléfono puede tener varios.
+     */
     public function getQueryClient (Request $request) {
-        if ($request->get('query')) {
-            $query = $request->get('query');
-            $data = Client::where('name', 'like', '%'.$query.'%')->orWhere('phone', 'like', $query.'%')->get();
-            return response()->json($data);
-        } else {
-            return [];
+        $query = trim((string) $request->get('query'));
+        if (mb_strlen($query) < 2) {
+            return response()->json([]);
         }
+        $telefono = preg_replace('/\D+/', '', $query);
+        $data = Client::where('active', 1)
+            ->where(function ($q) use ($query, $telefono) {
+                $q->where('name', 'like', '%' . $query . '%');
+                if ($telefono !== '') {
+                    $q->orWhere('phone', 'like', $telefono . '%');
+                }
+            })
+            ->orderBy('phone')->orderBy('name')
+            ->limit(20)
+            ->get(['id', 'name', 'phone', 'address', 'reference']);
+        return response()->json($data);
+    }
 
+    /**
+     * Direcciones registradas (registros activos) con el mismo teléfono.
+     */
+    public function getClientAddresses (Request $request) {
+        $telefono = trim((string) $request->get('phone'));
+        if ($telefono === '') {
+            return response()->json([]);
+        }
+        $data = Client::where('active', 1)->where('phone', $telefono)
+            ->orderBy('id', 'desc')
+            ->limit(30)
+            ->get(['id', 'name', 'phone', 'address', 'reference']);
+        return response()->json($data);
+    }
+
+    /**
+     * Mantiene el tipo elegido en el paso 1 al recargar tras agregar o editar un cliente.
+     */
+    private function guardarTipoDeVenta($venta, Request $request) {
+        $tipo = (int) $request->get('type');
+        if ($venta && $venta->estaAbierta() && array_key_exists($tipo, Venta::TIPOS) && $tipo != Venta::TIPO_LOCAL) {
+            $venta->type = $tipo;
+        }
     }
 
     public function addClient (Request $request) {
@@ -203,11 +240,9 @@ class ClientController extends Controller
         $clientDB = Client::find($client->id);
         if ($venta) {
             $venta->client_id = $clientDB->id;
-            //$venta->type = $request->get('type');
+            $this->guardarTipoDeVenta($venta, $request);
             $venta->save();
         }
-        Log::info('venta: '.$venta->ventaId);
-        Log::info('cliente: '.$client->id);
 
         return redirect()->route('create', [$venta, $clientDB]);
     }
@@ -236,6 +271,11 @@ class ClientController extends Controller
             'reference' => $request->get('reference'),
             'active' => 1
         ]);
+        if ($venta) {
+            $venta->client_id = $dbClient->id;
+            $this->guardarTipoDeVenta($venta, $request);
+            $venta->save();
+        }
         return redirect()->route('create', [$venta, $dbClient]);
     }
 

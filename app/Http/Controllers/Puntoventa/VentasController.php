@@ -86,8 +86,29 @@ class VentasController extends Controller
             }
         }
 
-        return view('puntoventa.comandas.clientSelection', 
-            compact('action', 'venta', 'type', 'table', 'client', 'discountPercentage'));
+        // Sin tipo preseleccionado: una venta recién creada guarda type = Local por defecto,
+        // pero hasta que se guarda el paso 1 (o se le asigna cliente) no se muestra elegido.
+        $tipoElegido = null;
+        if ($venta->activo || $venta->client_id || $venta->dinerstable_id || $venta->nombre_cuenta !== null) {
+            $tipoElegido = (int) $venta->type;
+        }
+
+        // Cuentas abiertas por mesa (otras ventas ya comandadas), para separar cuentas en la misma mesa.
+        $cuentasPorMesa = Venta::where('estatus', Venta::ESTATUS_ABIERTA)
+            ->where('activo', 1)
+            ->where('type', Venta::TIPO_LOCAL)
+            ->whereNotNull('dinerstable_id')
+            ->where('ventaId', '!=', $venta->ventaId)
+            ->get(['ventaId', 'dinerstable_id', 'nombre_cuenta'])
+            ->groupBy('dinerstable_id')
+            ->map(function ($ventas) {
+                return $ventas->map(function ($v) {
+                    return $v->nombre_cuenta ?: 'Cuenta sin nombre (folio ' . $v->ventaId . ')';
+                })->values()->all();
+            })->all();
+
+        return view('puntoventa.comandas.clientSelection',
+            compact('action', 'venta', 'type', 'table', 'client', 'discountPercentage', 'tipoElegido', 'cuentasPorMesa'));
     }
 
     /**
@@ -147,7 +168,7 @@ class VentasController extends Controller
      */
     public function update(Request $request, Venta $venta, Client $client = null) {
         if ($venta != null) {
-            $tipo = (int) $request->get('type', Venta::TIPO_LOCAL);
+            $tipo = (int) $request->get('type');
             $mesa = ($tipo == Venta::TIPO_LOCAL && $request->filled('table')) ? $request->get('table') : null;
             $nombreCuenta = trim((string) $request->get('nombre_cuenta'));
             if ($tipo == Venta::TIPO_DOMICILIO || $nombreCuenta === '') {
@@ -157,8 +178,12 @@ class VentasController extends Controller
             $validator = \Validator::make($request->all(), [
                 'table' => 'nullable|exists:dinerstables,id',
                 'nombre_cuenta' => 'nullable|string|max:60',
-                'type' => 'nullable|in:' . implode(',', array_keys(Venta::TIPOS)),
+                'type' => 'required|in:' . implode(',', array_keys(Venta::TIPOS)),
+                'clientId' => 'nullable|exists:clients,id',
             ], [
+                'type.required' => 'Elige para dónde es la comanda: Mesa, Domicilio o Para llevar.',
+                'type.in' => 'Elige para dónde es la comanda: Mesa, Domicilio o Para llevar.',
+                'clientId.exists' => 'El cliente seleccionado ya no existe.',
                 'nombre_cuenta.max' => 'El nombre de la cuenta no debe pasar de 60 caracteres.',
             ]);
             // En local basta con mesa o nombre de cuenta; en para llevar, cliente o nombre de cuenta.
@@ -180,7 +205,9 @@ class VentasController extends Controller
             $venta->type = $tipo;
             $venta->dinerstable_id = $mesa;
             $venta->nombre_cuenta = $nombreCuenta;
-            $venta->client_id = $request->get('clientId');
+            // En mesa no se pide cliente; en domicilio y para llevar es el registro (dirección) elegido.
+            // ventas.direccion_envio (la que captura el agente) no se toca aquí.
+            $venta->client_id = $tipo == Venta::TIPO_LOCAL ? null : ($request->get('clientId') ?: null);
             // Solo se guardan los campos de este paso; antes se hacía update($request->all())
             // y el formulario podía sobrescribir montos o estatus.
             $venta->save();
