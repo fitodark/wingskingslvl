@@ -8,7 +8,7 @@
         <th>Estatus</th>
         <th>Total</th>
         @if (Route::currentRouteName() == 'comandas')
-            <th class="wk-col-acciones">Acciones</th>
+            <th width="28%" class="wk-col-acciones">Acciones</th>
         @endif
     </tr>
     </thead>
