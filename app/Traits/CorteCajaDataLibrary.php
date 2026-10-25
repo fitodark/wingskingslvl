@@ -22,7 +22,7 @@ trait CorteCajaDataLibrary {
     public function getUpdateMontoTotalCorte($idCorte) {
         DB::connection()->enableQueryLog();
 
-        $results = DB::select( DB::raw("
+        $results = DB::update("
             update corte_caja cc
             join ( 
                 select idCorte, sum(montoVentas) - sum(montoCompras) as montoTotal 
@@ -34,7 +34,7 @@ trait CorteCajaDataLibrary {
                     left join corte_caja_movimientos ccm on ccm.idCorte = cc.idCorte
                 ) as ccm group by ccm.idCorte
             ) mov on mov.idCorte = cc.idCorte set cc.montoCierre = cc.montoApertura + mov.montoTotal
-            where cc.idCorte = :idCorte "), array('idCorte' => $idCorte));
+            where cc.idCorte = :idCorte ", array('idCorte' => $idCorte));
         $queries = DB::getQueryLog();
         return $results;
     }

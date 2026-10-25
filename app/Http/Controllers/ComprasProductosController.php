@@ -76,8 +76,16 @@ class ComprasProductosController extends Controller
     public function delete(string $idCompraProducto = null)
     {
         if ($idCompraProducto != null) {
-            $comprasproductos = ComprasProductos::find($idCompraProducto);
+            $comprasproductos = ComprasProductos::findOrFail($idCompraProducto);
             $idCompra = $comprasproductos->idCompra;
+
+            // Una compra finalizada ya sumó sus productos al inventario; borrar uno lo dejaría descuadrado.
+            $compra = \App\Compras::find($idCompra);
+            if ($compra != null && $compra->status == true) {
+                return redirect()->route('compras.create', [$idCompra])
+                    ->withErrors(['compra' => 'La compra ya está finalizada; no se pueden eliminar productos.']);
+            }
+
             $comprasproductos->delete();
 
             return redirect()->route('compras.create', [$idCompra])
