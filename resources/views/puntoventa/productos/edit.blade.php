@@ -45,19 +45,27 @@
 
                           <div class="form-group col-md-6">
                                   <strong>Categoria:</strong>
-                                  <select class="custom-select" name="type" value="{{ $catalogo->type }}">
+                                  {{-- Antes ninguna opción quedaba marcada y al guardar el producto pasaba a "Barra". --}}
+                                  <select class="custom-select" name="type">
                                     @foreach ($productsType as $key => $value)
-                                    <option value="{{ $key }}" {{ ($key == 0) ? 'selected' : '' }}>{{$value}}</option>
+                                    <option value="{{ $key }}" {{ ($key == old('type', $catalogo->type)) ? 'selected' : '' }}>{{$value}}</option>
                                     @endforeach
                                   </select>
                           </div>
                         <div class="form-group col-md-6">
                             <strong>Venta en:</strong>
-                            <select class="custom-select" name="promotionType" value="{{ $catalogo->promotion_type }}">
+                            <select class="custom-select" name="promotionType">
                                 @foreach ($productsPromotionType as $key => $value)
-                                <option value="{{ $key }}" {{ ($key == 0) ? 'selected' : '' }}>{{$value}}</option>
+                                <option value="{{ $key }}" {{ ($key == old('promotionType', $catalogo->promotion_type)) ? 'selected' : '' }}>{{$value}}</option>
                                 @endforeach
                             </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <strong>Piezas por orden:</strong>
+                            <input type="number" name="piezas" class="form-control" min="1" max="500" step="1"
+                                placeholder="Solo Cocina (Alitas), ej. 10"
+                                value="{{ old('piezas', $catalogo->piezas) }}">
+                            <small class="form-text text-muted">Sirve para validar que los sabores sumen la orden. Vacío = no se valida.</small>
                         </div>
                           <div class="col-xs-12 col-sm-12 col-md-12 text-center">
                             <button type="submit" class="btn btn-primary">Actualizar</button>

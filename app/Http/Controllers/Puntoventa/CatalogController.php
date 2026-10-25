@@ -54,9 +54,12 @@ class CatalogController extends Controller
             'name' => 'required',
             'detail' => 'required',
             'price' => 'required',
-            'type' => 'required'
+            'type' => 'required',
+            'piezas' => 'nullable|integer|min:1|max:500',
             //'product_image'     =>  'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
+        // El form manda "promotionType" y la columna es promotion_type (con el form actual no se guardaba).
+        $attributes['promotion_type'] = $request->get('promotionType', 1);
 
         // if ($request->has('product_image')) {
         //     // Get image file
@@ -115,8 +118,13 @@ class CatalogController extends Controller
             'name' => 'required',
             'detail' => 'required',
             'price' => 'required',
-            'type' => 'required'
+            'type' => 'required',
+            'piezas' => 'nullable|integer|min:1|max:500',
         ]);
+        // El form manda "promotionType" y la columna es promotion_type (con el form actual no se guardaba).
+        if ($request->has('promotionType')) {
+            $attributes['promotion_type'] = $request->get('promotionType');
+        }
 
         // if ($request->has('product_image')) {
         //     // Get image file
