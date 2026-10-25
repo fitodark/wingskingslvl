@@ -268,10 +268,16 @@ html, body {
     padding: .4rem .5rem;
 }
 
+/* Sin padding vertical ni line-height extra: el input-group estira los botones
+   a la altura exacta del input de cantidad. */
 .wk-cantidad .btn {
     min-width: 52px;
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
     font-size: 1.25rem;
     font-weight: 600;
+    line-height: 1;
 }
 
 /* Solo en pantallas táctiles: controles de al menos ~44px para el dedo. En PC con mouse no cambia. */
