@@ -50,3 +50,17 @@
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="form-group col-md-6">
+        <strong>Colonia:</strong>
+        {{-- Opcional. Se elige del catálogo de envío para que el agente sepa la tarifa sin preguntarla. --}}
+        <input type="text" name="colonia" class="form-control" maxlength="150" autocomplete="off"
+            list="{{ $listaColoniasId }}" placeholder="Escribe para buscar"
+            value="{{ old('colonia', empty($cliente) ? '' : $cliente->colonia) }}">
+        <datalist id="{{ $listaColoniasId }}">
+            @foreach ($coloniasEnvio as $colonia)
+                <option value="{{ $colonia }}">
+            @endforeach
+        </datalist>
+    </div>
+</div>

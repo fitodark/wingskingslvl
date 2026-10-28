@@ -9,7 +9,7 @@
     $sinMesaMarcada = old('table') !== null ? old('table') === '' : ($tipoElegido == 1 && !$venta->dinerstable_id);
     $cuenta = old('nombre_cuenta', $venta->nombre_cuenta);
     // El cliente (registro = dirección) solo aplica en domicilio y para llevar.
-    $clienteActual = ($tipo != 1 && !empty($client)) ? $client->only(['id', 'name', 'phone', 'address', 'reference']) : null;
+    $clienteActual = ($tipo != 1 && !empty($client)) ? $client->only(['id', 'name', 'phone', 'address', 'colonia', 'reference']) : null;
     $tipos = [
         1 => ['icono' => 'fa-utensils', 'nombre' => 'Mesa', 'detalle' => 'Consumen en el local'],
         2 => ['icono' => 'fa-motorcycle', 'nombre' => 'Domicilio', 'detalle' => 'Se envía al cliente'],
@@ -141,6 +141,11 @@
                 @if (!empty($venta->direccion_envio))
                     <span class="d-block mt-2"><i class="fa-solid fa-comment" aria-hidden="true"></i>
                         Dirección de envío capturada por WhatsApp: <strong>{{ $venta->direccion_envio }}</strong></span>
+                @endif
+                @if ($venta->etiqueta_envio)
+                    <span class="d-block mt-1">
+                        <span class="badge {{ $venta->esEnvioExpress() ? 'badge-warning' : 'badge-success' }}">{{ $venta->etiqueta_envio }}</span>
+                    </span>
                 @endif
             </div>
             <div class="wk-ficha-acciones">

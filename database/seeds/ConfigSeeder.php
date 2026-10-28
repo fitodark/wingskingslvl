@@ -295,5 +295,13 @@ class ConfigSeeder extends Seeder
           'order' => '2'
         ]);
 
+        // Tiempo estimado del envío express (minutos). Es clave de un solo valor: se busca
+        // solo por key para que cambiar el valor no duplique la fila. En producción la
+        // crea la migración 2026_10_27_000006.
+        Config::updateOrCreate(
+          ['key' => 'express_delivery_time'],
+          ['value' => '30', 'order' => '1']
+        );
+
 }
 }

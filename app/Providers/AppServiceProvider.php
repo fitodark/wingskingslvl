@@ -133,6 +133,19 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('role', function ($role) {
             return auth()->check() && auth()->user()->hasRole($role);
         });
+
+        // Formulario de cliente: lista de colonias del catálogo de envío para el campo colonia.
+        // El paso 1 incluye el formulario dos veces (alta y edición), por eso cada lista lleva su
+        // propio id y la consulta se hace una sola vez por petición.
+        $colonias = null;
+        $n = 0;
+        View::composer('puntoventa.clientes.clientBodyForm', function ($view) use (&$colonias, &$n) {
+            if ($colonias === null) {
+                $colonias = \App\TarifaEnvio::activas()->orderBy('colonia')->pluck('colonia');
+            }
+            $n++;
+            $view->with('coloniasEnvio', $colonias)->with('listaColoniasId', 'coloniasEnvio' . $n);
+        });
     }
 }
 

@@ -28,6 +28,10 @@ class Venta extends Model
         self::ESTATUS_CANCELADA => 'Cancelado',
     ];
 
+    // ventas.tipo_envio (lo llena el agente; null = no es a domicilio o venta del POS)
+    const ENVIO_GRATUITO = 1;
+    const ENVIO_EXPRESS = 2;
+
     // ventas.payment_type (null mientras la venta está abierta)
     const PAGO_EFECTIVO = 1;
     const PAGO_TRANSFERENCIA = 2;
@@ -73,7 +77,10 @@ class Venta extends Model
       'payment_type',
       'id_user_close',
       'direccion_envio',
-      'venta_agente'
+      'venta_agente',
+      'tipo_envio',
+      'monto_envio_express',
+      'colonia_envio'
     ];
 
     public function ventasProductos()
@@ -144,6 +151,38 @@ class Venta extends Model
    public function esParaLlevar()
    {
       return $this->type == self::TIPO_PARA_LLEVAR;
+   }
+
+   public function esEnvioExpress()
+   {
+      return $this->tipo_envio == self::ENVIO_EXPRESS;
+   }
+
+   public function esEnvioGratuito()
+   {
+      return $this->tipo_envio == self::ENVIO_GRATUITO;
+   }
+
+   /**
+    * Etiqueta para la bandeja y el paso 1, ej. "Envío express · $ 45.00 · Acatlima".
+    * Solo pantalla: el monto express no entra a montoTotal ni a ningún ticket.
+    */
+   public function getEtiquetaEnvioAttribute()
+   {
+      if ($this->esEnvioExpress()) {
+         $partes = ['Envío express'];
+         if ($this->monto_envio_express !== null) {
+            $partes[] = '$ ' . number_format($this->monto_envio_express, 2);
+         }
+         if (!empty($this->colonia_envio)) {
+            $partes[] = $this->colonia_envio;
+         }
+         return implode(' · ', $partes);
+      }
+      if ($this->esEnvioGratuito()) {
+         return 'Envío gratuito';
+      }
+      return null;
    }
 
    public function estaAbierta()

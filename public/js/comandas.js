@@ -65,7 +65,7 @@
         if (cliente) {
             $('#fichaNombre').text(cliente.name);
             $('#fichaTelefono').text(cliente.phone);
-            $('#fichaDireccion').text(cliente.address);
+            $('#fichaDireccion').text(cliente.address + (cliente.colonia ? ', Col. ' + cliente.colonia : ''));
             $('#fichaReferencia').text(cliente.reference || '—');
         }
 
@@ -185,7 +185,7 @@
         $modal.find('form').removeClass('was-validated');
         $modal.find('[name=ventaid]').val($boton.data('ventaid'));
         $modal.find('[name=type]').val(tipoElegido() || '');
-        $modal.find('[name=clientId], [name=name], [name=phone], [name=address], [name=reference]').val('');
+        $modal.find('[name=clientId], [name=name], [name=phone], [name=address], [name=colonia], [name=reference]').val('');
         if ($boton.data('mismo-telefono') && paso1.cliente) {
             // Nueva dirección para el mismo cliente/teléfono.
             $modal.find('[name=name]').val(paso1.cliente.name);
@@ -208,6 +208,7 @@
         $modal.find('[name=name]').val(cliente.name);
         $modal.find('[name=phone]').val(cliente.phone);
         $modal.find('[name=address]').val(cliente.address);
+        $modal.find('[name=colonia]').val(cliente.colonia || '');
         $modal.find('[name=reference]').val(cliente.reference);
     });
 

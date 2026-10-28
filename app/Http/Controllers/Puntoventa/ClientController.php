@@ -62,7 +62,8 @@ class ClientController extends Controller
           'name' => 'required',
           'address' => 'required',
           'phone' => 'required',
-          'reference' => 'required'
+          'reference' => 'required',
+          'colonia' => 'nullable|string|max:150'
         ]);
 
         if ($validator->fails()) {
@@ -126,7 +127,8 @@ class ClientController extends Controller
             'name' => 'required',
             'address' => 'required',
             'phone' => 'required',
-            'reference' => 'required'
+            'reference' => 'required',
+            'colonia' => 'nullable|string|max:150'
         ]);
         $cliente->update($attributes);
         return redirect()->route('clientes')
@@ -167,7 +169,7 @@ class ClientController extends Controller
             })
             ->orderBy('phone')->orderBy('name')
             ->limit(20)
-            ->get(['id', 'name', 'phone', 'address', 'reference']);
+            ->get(['id', 'name', 'phone', 'address', 'colonia', 'reference']);
         return response()->json($data);
     }
 
@@ -182,7 +184,7 @@ class ClientController extends Controller
         $data = Client::where('active', 1)->where('phone', $telefono)
             ->orderBy('id', 'desc')
             ->limit(30)
-            ->get(['id', 'name', 'phone', 'address', 'reference']);
+            ->get(['id', 'name', 'phone', 'address', 'colonia', 'reference']);
         return response()->json($data);
     }
 
@@ -232,6 +234,7 @@ class ClientController extends Controller
             'name' => $request->get('name'),
             'phone' => $request->get('phone'),
             'address' => $request->get('address'),
+            'colonia' => $request->get('colonia'),
             'reference' => $request->get('reference'),
             'active' => 1
         ]);
@@ -268,6 +271,7 @@ class ClientController extends Controller
             'name' => $request->get('name'),
             'phone' => $request->get('phone'),
             'address' => $request->get('address'),
+            'colonia' => $request->get('colonia'),
             'reference' => $request->get('reference'),
             'active' => 1
         ]);

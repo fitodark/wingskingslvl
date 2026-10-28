@@ -45,6 +45,8 @@
                         @role('admin')
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ url('/catalogos') }}">Productos</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ route('tarifasenvio.index') }}">Tarifas de envío</a>
                         @endrole
                         @anyrole('admin', 'encargado', 'mesero')
                         <div class="dropdown-divider"></div>

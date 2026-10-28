@@ -101,6 +101,12 @@ Route::middleware(['auth', 'active'])->group(function () {
             'usuarios' => 'Users\UsersController',
         ]);
 
+        // Colonias y tarifas de envío que consulta el agente. No se borran: se desactivan.
+        Route::resource('tarifasenvio', 'Puntoventa\TarifaEnvioController')
+            ->except(['show', 'destroy'])
+            ->parameters(['tarifasenvio' => 'tarifa']);
+        Route::post('/tarifasenvio/{tarifa}/activo', 'Puntoventa\TarifaEnvioController@cambiarActivo')->name('tarifasenvio.activo');
+
         Route::get('/usuarios', 'Users\UsersController@index')->name('usuarios');
         Route::delete('/usuarios/{id}', 'Users\UsersController@destroy')->name('usuarios.destroy');
         Route::get('/usuarios/{id}/edit', 'Users\UsersController@edit')->name('usuarios.edit');
