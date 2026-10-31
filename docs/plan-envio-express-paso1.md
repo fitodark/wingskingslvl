@@ -42,7 +42,7 @@ de ese registro (cada registro de cliente es una dirección):
 `app/Services/EnvioService.php`:
 - `buscarTarifa(?string $colonia): ?TarifaEnvio` — `TarifaEnvio::activas()->where('colonia', trim($colonia))->first()`.
   La collation `utf8mb4_unicode_ci` ya ignora mayúsculas y acentos ("acatlima" = "Acatlima").
-- `opciones(TarifaEnvio $t): array` — `['colonia', 'envio_gratuito', 'express_disponible' => monto !== null, 'monto_express']`.
+- `opciones(TarifaEnvio $t): array` — `['colonia', 'envio_gratuito', 'express_disponible' => envio_gratuito || monto !== null, 'monto_express']`.
 
 ### 1.2 Endpoint para el paso 1
 - `GET /tarifaEnvio/{clientId}` → `ClientController@tarifaEnvio` (grupo `role:admin,encargado,mesero`).
@@ -65,7 +65,8 @@ Dentro de la validación `after()`, solo si `type == TIPO_DOMICILIO`:
 2. Si no, se busca la tarifa con `EnvioService` usando la colonia del cliente elegido:
    - Sin tarifa → error "La dirección del cliente no tiene una colonia del catálogo de envío."
    - Solo express y `acepta_express != 1` → error "El cliente debe aceptar el envío express para continuar."
-   - `envio = express` y sin `monto_express` → error "Esta colonia no tiene tarifa express."
+   - Solo express y sin `monto_express` → error "Esta colonia no tiene tarifa express." (error del catálogo).
+   - Gratuita y `envio = express` sin `monto_express` → el monto acordado por teléfono es obligatorio (ver "Cambio: express a petición del cliente" al final).
 
 Al guardar:
 - Domicilio: `tipo_envio` = 1 o 2, `colonia_envio` = nombre del catálogo, `monto_envio_express`
@@ -133,3 +134,19 @@ Manual (tablet):
 2. **Gratuito con tarifa express**: gratuito marcado por defecto; el usuario cambia a express si el cliente lo pide.
 3. **Sin tiempo de entrega en el paso 1** en esta entrega. Queda como mejora futura (requiere portar a
    PHP el cálculo de `delivery_time_windows` y `express_delivery_time` que hoy vive en el agente).
+
+## Cambio: express a petición del cliente en colonia gratuita (opción C, 2026-10-31)
+Negocio pidió que un cliente de colonia gratuita pueda pedir express para que su pedido llegue más rápido.
+- En colonias gratuitas el paso 1 siempre ofrece "Envío gratuito (por defecto) / Envío express".
+- Si la colonia no tiene `monto_express` (hoy ninguna gratuita lo tiene), al marcar express aparece el campo
+  "Monto acordado con el cliente" (`monto_envio_express`, obligatorio, mayor a 0 y hasta 9,999.99). Se guarda
+  `tipo_envio = 2`, ese monto y `colonia_envio` = colonia real del cliente. No entra al total ni al ticket.
+- Si la colonia sí tiene `monto_express` (opción A a futuro), manda el catálogo y el campo no aparece;
+  el servidor ignora cualquier monto que mande el formulario.
+- Identificar en reportes: express en colonia gratuita = `tipo_envio = 2` y `colonia_envio` con `envio_gratuito = 1`
+  en `tarifas_envio`. Las ventas guardadas antes de este ajuste pueden tener monto NULL ("monto por acordar").
+- El agente de WhatsApp **no** ofrece esta opción por ahora (pendiente de retro de negocio).
+- Sin columnas nuevas en `ventas`.
+- Lista de clientes (Domicilio/Para llevar): al elegir un registro se ocultan las demás coincidencias y ya no se
+  muestra "Otras direcciones de este teléfono". "Cambiar" vuelve a la última búsqueda o, si no la hubo, busca por
+  el teléfono del cliente.

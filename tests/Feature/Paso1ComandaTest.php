@@ -111,8 +111,33 @@ class Paso1ComandaTest extends TestCase
     {
         $venta = $this->ventaAbierta($this->mesero);
         $this->actualizar($venta, ['type' => Venta::TIPO_PARA_LLEVAR])->assertSessionHasErrors('ubicacion');
-        $this->actualizar($venta, ['type' => Venta::TIPO_PARA_LLEVAR, 'nombre_cuenta' => 'Juan'])->assertSessionHasNoErrors();
-        $this->assertSame('Juan', $venta->fresh()->nombre_cuenta);
+        // Sin cliente registrado se piden nombre y teléfono de quien recoge.
+        $this->actualizar($venta, ['type' => Venta::TIPO_PARA_LLEVAR, 'nombre_cuenta' => 'Juan'])
+            ->assertSessionHasErrors('telefono_recoge');
+        $this->actualizar($venta, ['type' => Venta::TIPO_PARA_LLEVAR, 'telefono_recoge' => '5512345678'])
+            ->assertSessionHasErrors('ubicacion');
+        $this->actualizar($venta, ['type' => Venta::TIPO_PARA_LLEVAR, 'nombre_cuenta' => 'Juan', 'telefono_recoge' => '55 1234'])
+            ->assertSessionHasErrors('telefono_recoge');
+        $this->actualizar($venta, ['type' => Venta::TIPO_PARA_LLEVAR, 'nombre_cuenta' => 'Juan', 'telefono_recoge' => '55 1234-5678'])
+            ->assertSessionHasNoErrors();
+        $venta = $venta->fresh();
+        $this->assertSame('Juan', $venta->nombre_cuenta);
+        $this->assertSame('5512345678', $venta->telefono_recoge);
+        $this->assertStringContainsString('Juan (5512345678)', $venta->ubicacion);
+    }
+
+    public function test_para_llevar_con_cliente_no_exige_telefono_y_otros_tipos_lo_limpian()
+    {
+        $cliente = $this->cliente();
+        $venta = $this->ventaAbierta($this->mesero);
+        $this->actualizar($venta, ['type' => Venta::TIPO_PARA_LLEVAR, 'clientId' => $cliente->id])->assertSessionHasNoErrors();
+        $this->assertNull($venta->fresh()->telefono_recoge);
+
+        $this->actualizar($venta, ['type' => Venta::TIPO_PARA_LLEVAR, 'nombre_cuenta' => 'Juan', 'telefono_recoge' => '5512345678'])
+            ->assertSessionHasNoErrors();
+        $this->actualizar($venta, ['type' => Venta::TIPO_LOCAL, 'nombre_cuenta' => 'Juan', 'telefono_recoge' => '5512345678'])
+            ->assertSessionHasNoErrors();
+        $this->assertNull($venta->fresh()->telefono_recoge);
     }
 
     public function test_busqueda_de_clientes_limitada_y_solo_activos()

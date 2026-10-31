@@ -42,6 +42,9 @@
                 @if (!empty($venta->nombre_cuenta))
                     <b>{{ $venta->nombre_cuenta }}</b><br>
                 @endif
+                @if (!empty($venta->telefono_recoge))
+                    Tel. {{ $venta->telefono_recoge }}<br>
+                @endif
                 {{ !empty($venta->client)? $venta->client->name:'' }}
                 {{ !empty($venta->client)? '('.$venta->client->phone.')':'' }}
             @endif

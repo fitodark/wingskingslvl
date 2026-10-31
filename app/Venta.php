@@ -62,6 +62,7 @@ class Venta extends Model
       'branchofficeterminal_id',
       'dinerstable_id',
       'nombre_cuenta',
+      'telefono_recoge',
       'client_id',
       'montoTotal',
       'montoTotalDescuento',
@@ -171,9 +172,10 @@ class Venta extends Model
    {
       if ($this->esEnvioExpress()) {
          $partes = ['Envío express'];
-         if ($this->monto_envio_express !== null) {
-            $partes[] = '$ ' . number_format($this->monto_envio_express, 2);
-         }
+         // Sin monto = express pedido por el cliente en colonia gratuita; se acuerda por teléfono.
+         $partes[] = $this->monto_envio_express !== null
+            ? '$ ' . number_format($this->monto_envio_express, 2)
+            : 'monto por acordar';
          if (!empty($this->colonia_envio)) {
             $partes[] = $this->colonia_envio;
          }
@@ -224,7 +226,8 @@ class Venta extends Model
          return 'Domicilio';
       }
       if ($this->esParaLlevar()) {
-         return 'Para Llevar (Pasan a recoger)' . ($this->nombre_cuenta ? ' - ' . $this->nombre_cuenta : '');
+         return 'Para Llevar (Pasan a recoger)' . ($this->nombre_cuenta ? ' - ' . $this->nombre_cuenta : '')
+            . ($this->telefono_recoge ? ' (' . $this->telefono_recoge . ')' : '');
       }
       return $this->etiqueta_cuenta ?: 'Sin mesa';
    }

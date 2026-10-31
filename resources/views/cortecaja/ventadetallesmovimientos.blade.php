@@ -32,7 +32,7 @@
             @elseif ($venta->esParaLlevar())
                 <label>Cuenta</label>
                 <input class="form-control" type="text" placeholder=".form-control-sm" disabled
-                value="{{ $venta->nombre_cuenta }}">
+                value="{{ $venta->nombre_cuenta }}{{ $venta->telefono_recoge ? ' (' . $venta->telefono_recoge . ')' : '' }}">
             @elseif ($venta->esLocal())
                 <label>Mesa / Cuenta</label>
                 <input class="form-control" type="text" placeholder=".form-control-sm" disabled

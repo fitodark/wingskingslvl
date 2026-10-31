@@ -34,7 +34,9 @@ class EnvioService
             'encontrada' => true,
             'colonia' => $tarifa->colonia,
             'envio_gratuito' => $tarifa->envio_gratuito,
-            'express_disponible' => $tarifa->monto_express !== null,
+            // En colonia gratuita el cliente siempre puede pedir express; si no hay tarifa,
+            // el monto se acuerda por teléfono fuera del sistema (monto_express null).
+            'express_disponible' => $tarifa->envio_gratuito || $tarifa->monto_express !== null,
             'monto_express' => $tarifa->monto_express,
         ];
     }
@@ -44,12 +46,15 @@ class EnvioService
      * campos null = no tocar los de la venta.
      * - Mesa y Para llevar: los tres campos en NULL.
      * - Venta del agente que ya trae envío y conserva el cliente: se respeta lo aceptado por WhatsApp.
-     * - Domicilio: según la colonia del cliente; el monto sale del catálogo, nunca del formulario.
+     * - Domicilio: según la colonia del cliente; el monto sale del catálogo.
+     *   Única excepción: express pedido por el cliente en colonia gratuita sin tarifa; ese monto
+     *   se acuerda por teléfono y se captura en el paso 1 (obligatorio).
      *
      * @param  string|null  $envio  'gratuito' | 'express' (radio del paso 1)
      * @param  bool  $aceptaExpress  el cliente aceptó el express de una colonia que solo tiene express
+     * @param  mixed  $montoAcordado  monto capturado en el paso 1 (solo cuenta en el caso de arriba)
      */
-    public function envioDeVenta(Venta $venta, $tipo, $clientId, $envio, $aceptaExpress)
+    public function envioDeVenta(Venta $venta, $tipo, $clientId, $envio, $aceptaExpress, $montoAcordado = null)
     {
         $sinEnvio = ['tipo_envio' => null, 'monto_envio_express' => null, 'colonia_envio' => null];
         if ((int) $tipo !== Venta::TIPO_DOMICILIO) {
@@ -76,13 +81,26 @@ class EnvioService
         } else {
             $express = $envio === 'express';
         }
-        if ($express && $tarifa->monto_express === null) {
+        // Una colonia solo express sin tarifa es un error del catálogo.
+        if ($express && !$tarifa->envio_gratuito && $tarifa->monto_express === null) {
             return ['error' => 'Esta colonia no tiene tarifa express.', 'campos' => null];
+        }
+        $monto = $express ? $tarifa->monto_express : null;
+        // Colonia gratuita sin tarifa express: el monto acordado por teléfono es obligatorio.
+        if ($express && $tarifa->envio_gratuito && $tarifa->monto_express === null) {
+            $texto = trim((string) $montoAcordado);
+            if ($texto === '') {
+                return ['error' => 'Escribe el monto express acordado con el cliente.', 'campos' => null];
+            }
+            if (!is_numeric($texto) || $texto <= 0 || $texto > 9999.99) {
+                return ['error' => 'El monto express debe ser mayor a 0 y hasta $ 9,999.99.', 'campos' => null];
+            }
+            $monto = round((float) $texto, 2);
         }
 
         return ['error' => null, 'campos' => [
             'tipo_envio' => $express ? Venta::ENVIO_EXPRESS : Venta::ENVIO_GRATUITO,
-            'monto_envio_express' => $express ? $tarifa->monto_express : null,
+            'monto_envio_express' => $monto,
             'colonia_envio' => $tarifa->colonia,
         ]];
     }

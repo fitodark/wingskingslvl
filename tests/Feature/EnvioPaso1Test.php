@@ -77,13 +77,29 @@ class EnvioPaso1Test extends TestCase
         $this->assertEquals(0, $venta->montoTotal);
     }
 
-    public function test_gratuito_por_defecto_y_express_solo_si_hay_tarifa()
+    public function test_gratuito_por_defecto_y_express_a_peticion_del_cliente()
     {
         $venta = $this->ventaAbierta($this->mesero);
         $cliente = $this->cliente('Chapultepec');
 
+        // Colonia gratuita sin tarifa: el cliente puede pedir express; el monto se acuerda por
+        // teléfono y es obligatorio capturarlo.
         $this->actualizar($venta, $this->domicilio($cliente, ['envio' => 'express']))
-            ->assertSessionHasErrors(['envio' => 'Esta colonia no tiene tarifa express.']);
+            ->assertSessionHasErrors(['envio' => 'Escribe el monto express acordado con el cliente.']);
+        foreach (['abc', '0', '-5', '10000'] as $malo) {
+            $this->actualizar($venta, $this->domicilio($cliente, ['envio' => 'express', 'monto_envio_express' => $malo]))
+                ->assertSessionHasErrors(['envio' => 'El monto express debe ser mayor a 0 y hasta $ 9,999.99.']);
+        }
+        $this->assertNull($venta->fresh()->tipo_envio);
+
+        $this->actualizar($venta, $this->domicilio($cliente, ['envio' => 'express', 'monto_envio_express' => '55.5']))
+            ->assertSessionHasNoErrors();
+        $venta = $venta->fresh();
+        $this->assertSame(Venta::ENVIO_EXPRESS, (int) $venta->tipo_envio);
+        $this->assertEquals(55.5, $venta->monto_envio_express);
+        $this->assertSame('Chapultepec', $venta->colonia_envio);
+        $this->assertSame('Envío express · $ 55.50 · Chapultepec', $venta->etiqueta_envio);
+        $this->assertEquals(0, $venta->montoTotal);
 
         $this->actualizar($venta, $this->domicilio($cliente))->assertSessionHasNoErrors();
         $venta = $venta->fresh();
@@ -91,10 +107,17 @@ class EnvioPaso1Test extends TestCase
         $this->assertNull($venta->monto_envio_express);
         $this->assertSame('Chapultepec', $venta->colonia_envio);
 
-        // Gratuito con tarifa express: el usuario puede elegir express.
+        // Gratuito con tarifa express (opción A a futuro): manda el catálogo, no el formulario.
         TarifaEnvio::where('colonia', 'Chapultepec')->update(['monto_express' => 35]);
-        $this->actualizar($venta, $this->domicilio($cliente, ['envio' => 'express']))->assertSessionHasNoErrors();
+        $this->actualizar($venta, $this->domicilio($cliente, ['envio' => 'express', 'monto_envio_express' => '99']))
+            ->assertSessionHasNoErrors();
         $this->assertEquals(35, $venta->fresh()->monto_envio_express);
+
+        // Colonia solo express sin tarifa: error del catálogo, no se guarda sin monto.
+        $otro = $this->cliente('Acatlima');
+        TarifaEnvio::where('colonia', 'Acatlima')->update(['monto_express' => null]);
+        $this->actualizar($venta, $this->domicilio($otro, ['acepta_express' => '1']))
+            ->assertSessionHasErrors(['envio' => 'Esta colonia no tiene tarifa express.']);
     }
 
     public function test_sin_colonia_del_catalogo_no_pasa()
@@ -159,6 +182,12 @@ class EnvioPaso1Test extends TestCase
         $this->actingAs($this->mesero)->getJson(route('tarifaEnvio', [$this->cliente('Por ahí')->id]))
             ->assertOk()
             ->assertExactJson(['encontrada' => false, 'colonia' => 'Por ahí']);
+
+        // Gratuita sin tarifa: express disponible sin monto.
+        $this->actingAs($this->mesero)->getJson(route('tarifaEnvio', [$this->cliente('Chapultepec')->id]))
+            ->assertOk()
+            ->assertExactJson(['encontrada' => true, 'colonia' => 'Chapultepec', 'envio_gratuito' => true,
+                'express_disponible' => true, 'monto_express' => null]);
     }
 
     public function test_actualizar_colonia_rechaza_fuera_del_catalogo_y_guarda_el_nombre_del_catalogo()

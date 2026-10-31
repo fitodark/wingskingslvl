@@ -19,7 +19,8 @@
     // mesa o nombre de cuenta; domicilio con cliente; para llevar con nombre o cliente.
     // Cada registro de cliente es una dirección: un teléfono puede tener varios.
     var $paso1 = $('#tableSelectForm.wk-paso1-form');
-    var paso1 = { cliente: null, buscarEnLlevar: false, busqueda: 0, temporizador: null };
+    // ultimaBusqueda: texto con que se encontró al cliente; "Cambiar" vuelve a esa lista.
+    var paso1 = { cliente: null, buscarEnLlevar: false, busqueda: 0, temporizador: null, ultimaBusqueda: '' };
     // Envío (solo Domicilio). tarifa = respuesta de WK.rutas.tarifaEnvio; elegido = 'gratuito' | 'express';
     // acepta = null (sin respuesta) | true | false, solo para colonias que solo tienen express.
     // inicial = envío que ya traía la venta (agente o comanda reabierta).
@@ -41,6 +42,7 @@
         e.error = null;
         $('#envioColoniaInput').val('');
         $('#envioColoniaError').text('');
+        $('#montoAcordadoInput').val('');
     }
 
     // Valores con que arranca el panel al recibir la tarifa.
@@ -51,6 +53,8 @@
         e.elegido = tarifa.envio_gratuito && !(reabierta && ini.tipo_envio === 2) ? 'gratuito' : 'express';
         // Una comanda reabierta que ya era express en colonia solo express: ya se había aceptado.
         e.acepta = (!tarifa.envio_gratuito && reabierta && ini.tipo_envio === 2) ? true : null;
+        // Comanda reabierta con express acordado en colonia gratuita: conserva el monto capturado.
+        $('#montoAcordadoInput').val(reabierta && ini.tipo_envio === 2 && ini.monto !== null ? ini.monto : '');
     }
 
     function consultarEnvio() {
@@ -81,22 +85,42 @@
         return t.envio_gratuito ? paso1.envio.elegido === 'express' : paso1.envio.acepta === true;
     }
 
+    // Express pedido por el cliente en colonia gratuita sin tarifa: el monto se acuerda por teléfono y se captura.
+    function pideMontoAcordado() {
+        var t = paso1.envio.tarifa;
+        return esExpress() && t.envio_gratuito && (t.monto_express === null || t.monto_express === undefined);
+    }
+
+    // Monto capturado si es válido (mayor a 0 y hasta 9,999.99); null si no.
+    function montoAcordado() {
+        var texto = $.trim($('#montoAcordadoInput').val());
+        var n = parseFloat(texto);
+        return texto !== '' && !isNaN(n) && n > 0 && n <= 9999.99 ? n : null;
+    }
+
     function envioListo() {
         var e = paso1.envio, t = e.tarifa;
         if (envioAcordado()) { return true; }
         if (!t || !t.encontrada) { return false; }
         if (!t.envio_gratuito && e.acepta !== true) { return false; }
-        return !(esExpress() && !t.express_disponible);
+        if (esExpress() && !t.express_disponible) { return false; }
+        return !(pideMontoAcordado() && montoAcordado() === null);
+    }
+
+    // Monto express para mostrar; sin monto (ventas viejas) se acordó por teléfono.
+    function montoExpress(monto) {
+        return dinero(monto) || 'monto por acordar';
     }
 
     // Texto para la barra inferior: "· Gratuito" o "· Express $ 45.00".
     function resumenEnvio() {
         var ini = paso1.envio.inicial, t = paso1.envio.tarifa;
         if (envioAcordado()) {
-            return ini.tipo_envio === 2 ? ' · Express ' + dinero(ini.monto) : ' · Gratuito';
+            return ini.tipo_envio === 2 ? ' · Express ' + montoExpress(ini.monto) : ' · Gratuito';
         }
         if (!envioListo()) { return ''; }
-        return esExpress() ? ' · Express ' + dinero(t.monto_express) : ' · Gratuito';
+        if (!esExpress()) { return ' · Gratuito'; }
+        return ' · Express ' + montoExpress(pideMontoAcordado() ? montoAcordado() : t.monto_express);
     }
 
     function ayudaEnvio() {
@@ -106,6 +130,11 @@
         if (!t) { return ''; }
         if (!t.encontrada) { return 'Elige la colonia del cliente'; }
         if (e.acepta === false) { return 'Cambia a Para llevar o cancela la comanda'; }
+        if (pideMontoAcordado()) {
+            return $.trim($('#montoAcordadoInput').val()) === ''
+                ? 'Escribe el monto express acordado con el cliente'
+                : 'El monto debe ser mayor a 0 y hasta $ 9,999.99';
+        }
         return 'Confirma con el cliente el envío express';
     }
 
@@ -136,7 +165,8 @@
             mensajeEnvio('alert-success', ['Envío gratuito a ' + t.colonia + '.'
                 + (t.express_disponible ? ' Si el cliente lo pide, puede ser express.' : '')]);
             opciones = t.express_disponible;
-            $('#envioExpressTexto').text('Envío express · ' + dinero(t.monto_express));
+            $('#envioExpressTexto').text('Envío express · ' + (t.monto_express !== null && t.monto_express !== undefined
+                ? dinero(t.monto_express) : 'monto acordado con el cliente por teléfono'));
             $('#envioGratuito').prop('checked', e.elegido !== 'express');
             $('#envioExpress').prop('checked', e.elegido === 'express');
         } else if (visible && t && e.acepta === false) {
@@ -150,6 +180,10 @@
         }
 
         $('#envioOpciones').prop('hidden', !opciones).find('input').prop('disabled', !opciones);
+        // El monto solo se envía cuando aplica; si no, el servidor lo toma del catálogo.
+        var monto = opciones && pideMontoAcordado();
+        $('#envioMontoAcordado').prop('hidden', !monto);
+        $('#montoAcordadoInput').prop('disabled', !monto);
         $('#envioRespuesta').prop('hidden', !respuesta);
         $('#aceptaExpress').toggleClass('btn-success', e.acepta === true).toggleClass('btn-outline-success', e.acepta !== true)
             .attr('aria-pressed', e.acepta === true ? 'true' : 'false');
@@ -193,13 +227,13 @@
         // Solo se envía el nombre de cuenta del panel visible (los dos se llaman nombre_cuenta).
         $('#cuentaMesa').prop('disabled', tipo !== 1);
         $('#cuentaLlevar').prop('disabled', tipo !== 3);
+        $('#telefonoRecoge').prop('disabled', tipo !== 3);
         $('#abrirBuscarCliente').prop('hidden', verCliente);
         $('#tituloCliente').text(tipo === 2 ? 'Cliente' : 'Cliente registrado (opcional)');
 
         $('#ventaClientId').val(cliente && tipo !== 1 ? cliente.id : '');
         $('#buscador').prop('hidden', !!cliente);
         $('#fichaCliente').prop('hidden', !cliente);
-        if (!cliente) { $('#otrasDirecciones').prop('hidden', true); }
         if (cliente) {
             $('#fichaNombre').text(cliente.name);
             $('#fichaTelefono').text(cliente.phone);
@@ -229,9 +263,15 @@
             resumen = 'Domicilio' + (cliente ? ' · ' + cliente.name + resumenEnvio() : '');
             ayuda = !cliente ? 'Busca o registra al cliente' : (listo ? cliente.address : ayudaEnvio());
         } else if (tipo === 3) {
-            listo = cuenta !== '' || !!cliente;
-            resumen = 'Para llevar' + (cuenta ? ' · ' + cuenta : '') + (cliente ? ' · ' + cliente.name : '');
-            ayuda = listo ? 'Listo para capturar bebidas' : 'Escribe quién recoge o elige un cliente';
+            // Sin cliente registrado se piden nombre y teléfono (10 dígitos) de quien recoge.
+            var telefono = $('#telefonoRecoge').val().replace(/\D/g, '');
+            var telefonoOk = telefono === '' ? !!cliente : telefono.length === 10;
+            listo = (cuenta !== '' || !!cliente) && telefonoOk;
+            resumen = 'Para llevar' + (cuenta ? ' · ' + cuenta : '') + (telefono ? ' · ' + telefono : '')
+                + (cliente ? ' · ' + cliente.name : '');
+            ayuda = listo ? 'Listo para capturar bebidas'
+                : (cuenta === '' && !cliente ? 'Escribe quién recoge o elige un cliente'
+                    : (telefono === '' ? 'Escribe el teléfono de quien recoge' : 'El teléfono debe tener 10 dígitos'));
         }
         pintarEnvio(tipo);
         $('#resumenPaso1').text(resumen);
@@ -239,27 +279,17 @@
         $('#btnSiguiente').prop('disabled', !listo);
     }
 
-    function cargarOtrasDirecciones() {
-        var cliente = paso1.cliente;
-        var $lista = $('#listaDirecciones').empty();
-        $('#otrasDirecciones').prop('hidden', true);
-        if (!cliente || !cliente.phone) { return; }
-        $.get(WK.rutas.direccionesCliente, { phone: cliente.phone }, function (data) {
-            if (!paso1.cliente || paso1.cliente.id !== cliente.id) { return; }
-            var otras = $.grep(data || [], function (c) { return c.id !== cliente.id; });
-            $.each(otras, function (i, c) { $lista.append(filaCliente(c, 'Enviar aquí')); });
-            $('#otrasDirecciones').prop('hidden', otras.length === 0);
-        });
-    }
-
+    // Al elegir un registro se quitan las demás coincidencias; "Cambiar" las vuelve a mostrar.
     function elegirCliente(c) {
         paso1.cliente = c;
+        paso1.ultimaBusqueda = $.trim($('#buscarCliente').val());
+        paso1.busqueda++; // una búsqueda pendiente ya no debe pintar resultados
+        clearTimeout(paso1.temporizador);
         $('#buscarCliente').val('');
         $('#resultadosCliente').empty();
         $.get(WK.rutas.cliente, { id: c.id }, function (data) {
             ponerPromocion(data && data.length ? data[0].discountPercentage : 0);
         });
-        cargarOtrasDirecciones();
         reiniciarEnvio();
         consultarEnvio();
         pintarPaso1();
@@ -312,7 +342,6 @@
     if ($paso1.length) {
         paso1.cliente = $('#panelCliente').data('cliente') || null;
         paso1.envio.inicial = $('#panelEnvio').data('envio') || null;
-        if (paso1.cliente) { cargarOtrasDirecciones(); }
         consultarEnvio();
 
         // Cambiar de tipo reinicia el envío (y lo consulta si queda en Domicilio).
@@ -341,7 +370,7 @@
         $('#envioColoniaInput').on('keydown', function (ev) {
             if (ev.which === 13) { ev.preventDefault(); guardarColonia(); }
         });
-        $paso1.on('input', '#cuentaMesa, #cuentaLlevar', pintarPaso1);
+        $paso1.on('input', '#cuentaMesa, #cuentaLlevar, #telefonoRecoge, #montoAcordadoInput', pintarPaso1);
         $('#abrirBuscarCliente').on('click', function () {
             paso1.buscarEnLlevar = true;
             pintarPaso1();
@@ -351,18 +380,22 @@
             clearTimeout(paso1.temporizador);
             paso1.temporizador = setTimeout(buscarClientes, 250);
         });
-        $('#resultadosCliente, #listaDirecciones').on('click', '.list-group-item', function () {
+        $('#resultadosCliente').on('click', '.list-group-item', function () {
             elegirCliente($(this).data('cliente'));
         });
+        // Vuelve a la lista de la última búsqueda; si no la hubo (comanda reabierta o cliente
+        // recién registrado), busca por el teléfono para mostrar todas sus direcciones.
         $('#cambiarCliente').on('click', function () {
+            var texto = paso1.ultimaBusqueda || (paso1.cliente && paso1.cliente.phone) || '';
             paso1.cliente = null;
             ponerPromocion(0);
             reiniciarEnvio();
             pintarPaso1();
-            $('#buscarCliente').trigger('focus');
+            $('#buscarCliente').val(texto).trigger('focus');
+            buscarClientes();
         });
         // Enter en un campo de texto no debe mandar el formulario a medias.
-        $paso1.on('keydown', 'input[type=text], input[type=search]', function (e) {
+        $paso1.on('keydown', 'input[type=text], input[type=search], input[type=number]', function (e) {
             if (e.which === 13) { e.preventDefault(); }
         });
         pintarPaso1();

@@ -175,6 +175,11 @@ class VentasController extends Controller
             if ($tipo == Venta::TIPO_DOMICILIO || $nombreCuenta === '') {
                 $nombreCuenta = null;
             }
+            // Teléfono de quien recoge: solo Para llevar; se guardan solo los dígitos.
+            $telefonoRecoge = preg_replace('/\D/', '', (string) $request->get('telefono_recoge'));
+            if ($tipo != Venta::TIPO_PARA_LLEVAR || $telefonoRecoge === '') {
+                $telefonoRecoge = null;
+            }
 
             $validator = \Validator::make($request->all(), [
                 'table' => 'nullable|exists:dinerstables,id',
@@ -189,9 +194,9 @@ class VentasController extends Controller
             ]);
             // Envío (solo Domicilio): colonia del catálogo y, si solo hay express, que el cliente lo acepte.
             $envio = app(EnvioService::class)->envioDeVenta($venta, $tipo, $request->get('clientId'),
-                $request->get('envio'), $request->get('acepta_express') == '1');
+                $request->get('envio'), $request->get('acepta_express') == '1', $request->get('monto_envio_express'));
             // En local basta con mesa o nombre de cuenta; en para llevar, cliente o nombre de cuenta.
-            $validator->after(function ($validator) use ($tipo, $mesa, $nombreCuenta, $request, $envio) {
+            $validator->after(function ($validator) use ($tipo, $mesa, $nombreCuenta, $telefonoRecoge, $request, $envio) {
                 if ($envio['error'] !== null && $request->filled('clientId')) {
                     $validator->errors()->add('envio', $envio['error']);
                 }
@@ -201,8 +206,17 @@ class VentasController extends Controller
                 if ($tipo == Venta::TIPO_DOMICILIO && !$request->filled('clientId')) {
                     $validator->errors()->add('ubicacion', 'Domicilio requiere seleccionar un cliente.');
                 }
-                if ($tipo == Venta::TIPO_PARA_LLEVAR && $nombreCuenta === null && !$request->filled('clientId')) {
-                    $validator->errors()->add('ubicacion', 'Para llevar requiere un cliente o el nombre de la cuenta.');
+                if ($tipo == Venta::TIPO_PARA_LLEVAR && !$request->filled('clientId')) {
+                    // Sin cliente registrado se piden nombre y teléfono de quien recoge.
+                    if ($nombreCuenta === null) {
+                        $validator->errors()->add('ubicacion', 'Para llevar requiere el nombre de quien recoge o un cliente registrado.');
+                    }
+                    if ($telefonoRecoge === null) {
+                        $validator->errors()->add('telefono_recoge', 'Escribe el teléfono de quien recoge.');
+                    }
+                }
+                if ($telefonoRecoge !== null && strlen($telefonoRecoge) != 10) {
+                    $validator->errors()->add('telefono_recoge', 'El teléfono de quien recoge debe tener 10 dígitos.');
                 }
             });
             if ($validator->fails()) {
@@ -212,6 +226,7 @@ class VentasController extends Controller
             $venta->type = $tipo;
             $venta->dinerstable_id = $mesa;
             $venta->nombre_cuenta = $nombreCuenta;
+            $venta->telefono_recoge = $telefonoRecoge;
             // En mesa no se pide cliente; en domicilio y para llevar es el registro (dirección) elegido.
             // ventas.direccion_envio (la que captura el agente) no se toca aquí.
             $venta->client_id = $tipo == Venta::TIPO_LOCAL ? null : ($request->get('clientId') ?: null);

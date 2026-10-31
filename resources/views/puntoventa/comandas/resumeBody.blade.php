@@ -12,7 +12,7 @@
                 @elseif ($venta->esParaLlevar())
                     <label for="location">Cuenta</label>
                     <input class="form-control" id="location" type="text" placeholder=".form-control-sm"
-                    value="{{ $venta->nombre_cuenta }}" readonly>
+                    value="{{ $venta->nombre_cuenta }}{{ $venta->telefono_recoge ? ' (' . $venta->telefono_recoge . ')' : '' }}" readonly>
                 @elseif ($venta->esLocal())
                     <label for="location">Mesa / Cuenta</label>
                     <input class="form-control" id="location" type="text" placeholder=".form-control-sm"

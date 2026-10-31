@@ -50,8 +50,14 @@ trait PrintSales {
             } else if ($venta->esDomicilio()) {
                 $printer->text("Cliente: " . $venta->client->name . ", (" . $venta->client->phone . ")" . "\n");
                 $printer->text("         " . ($venta->direccion_envio ?: $venta->client->address) . " - " . $venta->client->reference. "\n\n");
-            } else if ($venta->esParaLlevar() && !empty($venta->nombre_cuenta)) {
-                $printer->text("Cuenta: " . $venta->nombre_cuenta . "\n\n");
+            } else if ($venta->esParaLlevar() && (!empty($venta->nombre_cuenta) || !empty($venta->telefono_recoge))) {
+                if (!empty($venta->nombre_cuenta)) {
+                    $printer->text("Cuenta: " . $venta->nombre_cuenta . "\n");
+                }
+                if (!empty($venta->telefono_recoge)) {
+                    $printer->text("Tel. recoge: " . $venta->telefono_recoge . "\n");
+                }
+                $printer->text("\n");
             }
             # Para mostrar el total
             foreach ($venta->ventasProductos as $ventaProducto) {
@@ -169,6 +175,9 @@ trait PrintSales {
         } else {
             if ($venta->esParaLlevar() && !empty($venta->nombre_cuenta)) {
                 $printer->text("Cuenta: " . $venta->nombre_cuenta . "\n");
+            }
+            if ($venta->esParaLlevar() && !empty($venta->telefono_recoge)) {
+                $printer->text("Tel. recoge: " . $venta->telefono_recoge . "\n");
             }
             if (!empty($venta->client)) {
                 $printer->text("Cliente: " . $venta->client->name . ", (" . $venta->client->phone . ")" . "\n");

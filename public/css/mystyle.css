@@ -533,6 +533,13 @@ html, body {
     font-size: 1.1rem;
     line-height: 1.5;
 }
+/* Monto express acordado por teléfono: renglón propio debajo de las opciones. */
+#envioMontoAcordado {
+    flex-basis: 100%;
+}
+.wk-envio-monto {
+    max-width: 14rem;
+}
 /* Barra inferior fija: Siguiente siempre visible sin hacer scroll. */
 .wk-paso1-barra {
     position: sticky;

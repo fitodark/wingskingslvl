@@ -8,6 +8,7 @@
     // "Sin mesa" solo aparece marcada si así se guardó (o se envió); en una venta nueva no hay nada marcado.
     $sinMesaMarcada = old('table') !== null ? old('table') === '' : ($tipoElegido == 1 && !$venta->dinerstable_id);
     $cuenta = old('nombre_cuenta', $venta->nombre_cuenta);
+    $telefonoRecoge = old('telefono_recoge', $venta->telefono_recoge);
     // El cliente (registro = dirección) solo aplica en domicilio y para llevar.
     $clienteActual = ($tipo != 1 && !empty($client)) ? $client->only(['id', 'name', 'phone', 'address', 'colonia', 'reference']) : null;
     $tipos = [
@@ -104,10 +105,21 @@
 
     {{-- 2b. Para llevar --}}
     <div id="panelLlevar" class="wk-panel mb-3" @if ($tipo != 3) hidden @endif>
-        <label for="cuentaLlevar" class="h6 font-weight-bold">¿Quién recoge?</label>
-        <input type="text" class="form-control form-control-lg" name="nombre_cuenta" id="cuentaLlevar"
-            maxlength="60" placeholder="Nombre para llamarle al entregar" autocomplete="off"
-            value="{{ $tipo == 3 ? $cuenta : '' }}" @if ($tipo != 3) disabled @endif>
+        {{-- Nombre y teléfono en la misma fila; en pantallas chicas se apilan. --}}
+        <div class="form-row">
+            <div class="col-sm-7 mb-2 mb-sm-0">
+                <label for="cuentaLlevar" class="h6 font-weight-bold">¿Quién recoge?</label>
+                <input type="text" class="form-control form-control-lg" name="nombre_cuenta" id="cuentaLlevar"
+                    maxlength="60" placeholder="Nombre para llamarle al entregar" autocomplete="off"
+                    value="{{ $tipo == 3 ? $cuenta : '' }}" @if ($tipo != 3) disabled @endif>
+            </div>
+            <div class="col-sm-5">
+                <label for="telefonoRecoge" class="h6 font-weight-bold">Teléfono</label>
+                <input type="tel" class="form-control form-control-lg" name="telefono_recoge" id="telefonoRecoge"
+                    maxlength="14" inputmode="numeric" placeholder="10 dígitos" autocomplete="off"
+                    value="{{ $tipo == 3 ? $telefonoRecoge : '' }}" @if ($tipo != 3) disabled @endif>
+            </div>
+        </div>
         <button type="button" id="abrirBuscarCliente" class="btn btn-link px-0 mt-1">O busca un cliente registrado</button>
     </div>
 
@@ -183,6 +195,17 @@
                     <input type="radio" class="custom-control-input" name="envio" id="envioExpress" value="express">
                     <label class="custom-control-label" for="envioExpress" id="envioExpressTexto">Envío express</label>
                 </div>
+                {{-- Colonia gratuita sin tarifa express: el monto se acuerda por teléfono y se captura aquí. --}}
+                <div id="envioMontoAcordado" class="mt-2" hidden>
+                    <label for="montoAcordadoInput" class="font-weight-bold mb-1">Monto acordado con el cliente</label>
+                    <div class="input-group wk-envio-monto">
+                        <div class="input-group-prepend"><span class="input-group-text">$</span></div>
+                        <input type="number" class="form-control form-control-lg" name="monto_envio_express"
+                            id="montoAcordadoInput" min="1" max="9999.99" step="0.01" inputmode="decimal"
+                            placeholder="0.00" autocomplete="off" disabled>
+                    </div>
+                    <small class="d-block text-muted mt-1">Lo paga el cliente directo al repartidor; no se suma al total.</small>
+                </div>
             </div>
             <div id="envioRespuesta" class="wk-envio-acciones" hidden>
                 <button type="button" id="aceptaExpress" class="btn btn-outline-success" aria-pressed="false">
@@ -210,11 +233,6 @@
                 <small id="envioColoniaError" class="d-block text-danger mt-1" role="alert"></small>
             </div>
             <input type="hidden" name="acepta_express" id="aceptaExpressInput" value="">
-        </div>
-
-        <div id="otrasDirecciones" class="mt-3" hidden>
-            <p class="h6 font-weight-bold mb-2">Otras direcciones de este teléfono</p>
-            <div id="listaDirecciones" class="list-group wk-resultados"></div>
         </div>
     </div>
 
