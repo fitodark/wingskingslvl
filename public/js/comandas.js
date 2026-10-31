@@ -20,6 +20,144 @@
     // Cada registro de cliente es una dirección: un teléfono puede tener varios.
     var $paso1 = $('#tableSelectForm.wk-paso1-form');
     var paso1 = { cliente: null, buscarEnLlevar: false, busqueda: 0, temporizador: null };
+    // Envío (solo Domicilio). tarifa = respuesta de WK.rutas.tarifaEnvio; elegido = 'gratuito' | 'express';
+    // acepta = null (sin respuesta) | true | false, solo para colonias que solo tienen express.
+    // inicial = envío que ya traía la venta (agente o comanda reabierta).
+    paso1.envio = { tarifa: null, elegido: null, acepta: null, cargando: false, error: null, consulta: 0, inicial: null };
+
+    // La venta del agente ya trae el envío aceptado por WhatsApp: se respeta mientras no cambie el cliente.
+    function envioAcordado() {
+        var ini = paso1.envio.inicial;
+        return !!(ini && ini.agente && paso1.cliente && paso1.cliente.id === ini.client_id);
+    }
+
+    function reiniciarEnvio() {
+        var e = paso1.envio;
+        e.consulta++; // una respuesta pendiente ya no aplica
+        e.tarifa = null;
+        e.elegido = null;
+        e.acepta = null;
+        e.cargando = false;
+        e.error = null;
+        $('#envioColoniaInput').val('');
+        $('#envioColoniaError').text('');
+    }
+
+    // Valores con que arranca el panel al recibir la tarifa.
+    function preseleccionarEnvio(tarifa) {
+        var e = paso1.envio, ini = e.inicial;
+        var reabierta = ini && paso1.cliente && paso1.cliente.id === ini.client_id;
+        e.tarifa = tarifa;
+        e.elegido = tarifa.envio_gratuito && !(reabierta && ini.tipo_envio === 2) ? 'gratuito' : 'express';
+        // Una comanda reabierta que ya era express en colonia solo express: ya se había aceptado.
+        e.acepta = (!tarifa.envio_gratuito && reabierta && ini.tipo_envio === 2) ? true : null;
+    }
+
+    function consultarEnvio() {
+        var e = paso1.envio, cliente = paso1.cliente;
+        if (tipoElegido() !== 2 || !cliente || envioAcordado()) { return; }
+        var numero = ++e.consulta;
+        e.cargando = true;
+        e.error = null;
+        $.get(WK.rutas.tarifaEnvio + '/' + cliente.id)
+            .done(function (data) {
+                if (numero !== e.consulta) { return; }
+                e.cargando = false;
+                preseleccionarEnvio(data);
+            })
+            .fail(function (xhr) {
+                if (numero !== e.consulta) { return; }
+                e.cargando = false;
+                e.error = WK.errorDeConexion(xhr);
+            })
+            .always(function () {
+                if (numero === e.consulta) { pintarPaso1(); }
+            });
+    }
+
+    function esExpress() {
+        var t = paso1.envio.tarifa;
+        if (!t || !t.encontrada) { return false; }
+        return t.envio_gratuito ? paso1.envio.elegido === 'express' : paso1.envio.acepta === true;
+    }
+
+    function envioListo() {
+        var e = paso1.envio, t = e.tarifa;
+        if (envioAcordado()) { return true; }
+        if (!t || !t.encontrada) { return false; }
+        if (!t.envio_gratuito && e.acepta !== true) { return false; }
+        return !(esExpress() && !t.express_disponible);
+    }
+
+    // Texto para la barra inferior: "· Gratuito" o "· Express $ 45.00".
+    function resumenEnvio() {
+        var ini = paso1.envio.inicial, t = paso1.envio.tarifa;
+        if (envioAcordado()) {
+            return ini.tipo_envio === 2 ? ' · Express ' + dinero(ini.monto) : ' · Gratuito';
+        }
+        if (!envioListo()) { return ''; }
+        return esExpress() ? ' · Express ' + dinero(t.monto_express) : ' · Gratuito';
+    }
+
+    function ayudaEnvio() {
+        var e = paso1.envio, t = e.tarifa;
+        if (e.cargando) { return 'Consultando la tarifa de envío...'; }
+        if (e.error) { return e.error; }
+        if (!t) { return ''; }
+        if (!t.encontrada) { return 'Elige la colonia del cliente'; }
+        if (e.acepta === false) { return 'Cambia a Para llevar o cancela la comanda'; }
+        return 'Confirma con el cliente el envío express';
+    }
+
+    function mensajeEnvio(clase, partes) {
+        var $m = $('#envioMensaje').attr('class', 'alert mb-2 ' + clase).empty();
+        $.each(partes, function (i, p) {
+            $m.append(typeof p === 'string' ? document.createTextNode(p) : p);
+        });
+    }
+
+    function pintarEnvio(tipo) {
+        var e = paso1.envio, t = e.tarifa, cliente = paso1.cliente;
+        var visible = tipo === 2 && !!cliente;
+        var opciones = false, respuesta = false, declinado = false, colonia = false;
+        $('#panelEnvio').prop('hidden', !visible);
+
+        if (visible && envioAcordado()) {
+            mensajeEnvio('alert-info', ['Envío acordado por WhatsApp: ', $('<strong>').text(e.inicial.etiqueta || '')]);
+        } else if (visible && e.cargando) {
+            mensajeEnvio('alert-secondary', ['Consultando la tarifa de envío...']);
+        } else if (visible && e.error) {
+            mensajeEnvio('alert-danger', [e.error]);
+        } else if (visible && t && !t.encontrada) {
+            mensajeEnvio('alert-warning', ['Esta dirección no tiene una colonia del catálogo.'
+                + (t.colonia ? ' Tiene capturado: "' + t.colonia + '".' : '')]);
+            colonia = true;
+        } else if (visible && t && t.envio_gratuito) {
+            mensajeEnvio('alert-success', ['Envío gratuito a ' + t.colonia + '.'
+                + (t.express_disponible ? ' Si el cliente lo pide, puede ser express.' : '')]);
+            opciones = t.express_disponible;
+            $('#envioExpressTexto').text('Envío express · ' + dinero(t.monto_express));
+            $('#envioGratuito').prop('checked', e.elegido !== 'express');
+            $('#envioExpress').prop('checked', e.elegido === 'express');
+        } else if (visible && t && e.acepta === false) {
+            mensajeEnvio('alert-warning', ['El cliente no aceptó el envío express.']);
+            declinado = true;
+        } else if (visible && t) {
+            mensajeEnvio('alert-warning', ['Por la distancia, ' + t.colonia + ' solo tiene envío express: ',
+                $('<strong>').text(dinero(t.monto_express) + ' adicional que el cliente le paga directo al repartidor'), '.',
+                e.acepta === true ? ' El cliente aceptó.' : '']);
+            respuesta = true;
+        }
+
+        $('#envioOpciones').prop('hidden', !opciones).find('input').prop('disabled', !opciones);
+        $('#envioRespuesta').prop('hidden', !respuesta);
+        $('#aceptaExpress').toggleClass('btn-success', e.acepta === true).toggleClass('btn-outline-success', e.acepta !== true)
+            .attr('aria-pressed', e.acepta === true ? 'true' : 'false');
+        $('#envioDeclinado').prop('hidden', !declinado);
+        $('#envioColonia').prop('hidden', !colonia);
+        if (colonia && !$('#envioColoniaInput').val()) { $('#envioColoniaInput').val(t.colonia || ''); }
+        $('#aceptaExpressInput').val(visible && e.acepta === true ? '1' : '');
+    }
 
     function ponerPromocion(porcentaje) {
         $('[name=discountPercentage]').val(porcentaje);
@@ -87,14 +225,15 @@
             resumen = [nombreMesa || null, cuenta || null].filter(Boolean).join(' · ') || 'Mesa';
             ayuda = listo ? 'Listo para capturar bebidas' : 'Elige una mesa o escribe el nombre de la cuenta';
         } else if (tipo === 2) {
-            listo = !!cliente;
-            resumen = 'Domicilio' + (cliente ? ' · ' + cliente.name : '');
-            ayuda = cliente ? cliente.address : 'Busca o registra al cliente';
+            listo = !!cliente && envioListo();
+            resumen = 'Domicilio' + (cliente ? ' · ' + cliente.name + resumenEnvio() : '');
+            ayuda = !cliente ? 'Busca o registra al cliente' : (listo ? cliente.address : ayudaEnvio());
         } else if (tipo === 3) {
             listo = cuenta !== '' || !!cliente;
             resumen = 'Para llevar' + (cuenta ? ' · ' + cuenta : '') + (cliente ? ' · ' + cliente.name : '');
             ayuda = listo ? 'Listo para capturar bebidas' : 'Escribe quién recoge o elige un cliente';
         }
+        pintarEnvio(tipo);
         $('#resumenPaso1').text(resumen);
         $('#ayudaPaso1').text(ayuda);
         $('#btnSiguiente').prop('disabled', !listo);
@@ -121,7 +260,31 @@
             ponerPromocion(data && data.length ? data[0].discountPercentage : 0);
         });
         cargarOtrasDirecciones();
+        reiniciarEnvio();
+        consultarEnvio();
         pintarPaso1();
+    }
+
+    function guardarColonia() {
+        var cliente = paso1.cliente, e = paso1.envio;
+        var $boton = $('#guardarColonia'), $error = $('#envioColoniaError').text('');
+        var colonia = $.trim($('#envioColoniaInput').val());
+        if (!cliente) { return; }
+        if (colonia === '') { $error.text('Elige una colonia de la lista.'); return; }
+        $boton.prop('disabled', true);
+        $.post(WK.rutas.clienteColonia, { clientId: cliente.id, colonia: colonia })
+            .done(function (data) {
+                if (!paso1.cliente || paso1.cliente.id !== cliente.id) { return; }
+                if (data && data.errors) { $error.text(data.errors.join(' ')); return; }
+                e.consulta++;
+                e.error = null;
+                cliente.colonia = data.colonia; // queda guardada en el registro del cliente
+                $('#envioColoniaInput').val('');
+                preseleccionarEnvio(data);
+                pintarPaso1();
+            })
+            .fail(function (xhr) { $error.text(WK.errorDeConexion(xhr)); })
+            .always(function () { $boton.prop('disabled', false); });
     }
 
     function buscarClientes() {
@@ -148,9 +311,36 @@
 
     if ($paso1.length) {
         paso1.cliente = $('#panelCliente').data('cliente') || null;
+        paso1.envio.inicial = $('#panelEnvio').data('envio') || null;
         if (paso1.cliente) { cargarOtrasDirecciones(); }
+        consultarEnvio();
 
+        // Cambiar de tipo reinicia el envío (y lo consulta si queda en Domicilio).
+        $paso1.on('change', 'input[name=type]', function () {
+            reiniciarEnvio();
+            consultarEnvio();
+        });
         $paso1.on('change', 'input[name=type], input[name=table]', pintarPaso1);
+        $paso1.on('change', 'input[name=envio]', function () {
+            paso1.envio.elegido = this.value;
+            pintarPaso1();
+        });
+        $('#aceptaExpress').on('click', function () {
+            paso1.envio.acepta = true;
+            pintarPaso1();
+        });
+        $('#declinaExpress').on('click', function () {
+            paso1.envio.acepta = false;
+            pintarPaso1();
+        });
+        // Conserva el cliente: Para llevar lo muestra como cliente registrado.
+        $('#cambiarALlevar').on('click', function () {
+            $('#tipo3').prop('checked', true).trigger('change');
+        });
+        $('#guardarColonia').on('click', guardarColonia);
+        $('#envioColoniaInput').on('keydown', function (ev) {
+            if (ev.which === 13) { ev.preventDefault(); guardarColonia(); }
+        });
         $paso1.on('input', '#cuentaMesa, #cuentaLlevar', pintarPaso1);
         $('#abrirBuscarCliente').on('click', function () {
             paso1.buscarEnLlevar = true;
@@ -167,6 +357,7 @@
         $('#cambiarCliente').on('click', function () {
             paso1.cliente = null;
             ponerPromocion(0);
+            reiniciarEnvio();
             pintarPaso1();
             $('#buscarCliente').trigger('focus');
         });

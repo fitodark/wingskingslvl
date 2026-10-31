@@ -51,7 +51,10 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/updateClient', 'Puntoventa\ClientController@updateClient')->name('updateClient');
         Route::get('/getClient/{clientId?}', 'Puntoventa\ClientController@getClient')->name('getClient');
         Route::get('/direccionesCliente', 'Puntoventa\ClientController@getClientAddresses')->name('direccionesCliente');
-        Route::get('/getClientDetails/{clientId?}', 'Puntoventa\ClientController@getClientDetails')->name('getClientDetails');
+        // Paso 1, Domicilio: tarifa de envío por la colonia del cliente y captura de la colonia.
+        Route::get('/tarifaEnvio/{clientId?}', 'Puntoventa\ClientController@tarifaEnvio')->name('tarifaEnvio');
+        Route::post('/clienteColonia', 'Puntoventa\ClientController@actualizarColonia')->name('clienteColonia');
+        Route::get('/getClientDetails/{clientId?}','Puntoventa\ClientController@getClientDetails')->name('getClientDetails');
         Route::get('/getByClientAndDate/{clientId?}', 'Puntoventa\ClientController@getByClientAndDate')->name('getByClientAndDate');
 
         Route::get('/venta/print/{venta?}', 'Puntoventa\VentasController@printSale')->name('ventaprint');

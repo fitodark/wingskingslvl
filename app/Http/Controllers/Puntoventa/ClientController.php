@@ -7,6 +7,7 @@ use App\Venta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Services\EnvioService;
 
 use App\Traits\ComandasDataLibrary;
 
@@ -63,7 +64,7 @@ class ClientController extends Controller
           'address' => 'required',
           'phone' => 'required',
           'reference' => 'required',
-          'colonia' => 'nullable|string|max:150'
+          'colonia' => ['nullable', 'string', 'max:150', $this->reglaColonia()]
         ]);
 
         if ($validator->fails()) {
@@ -77,6 +78,7 @@ class ClientController extends Controller
         }
 
         $attributes = array_merge($attributes, array("active" => 1));
+        $attributes['colonia'] = $this->coloniaDelCatalogo($request->get('colonia'));
         $client = Client::create($attributes);
 
         if ($request->get('ventaid') && $request->get('type')) {
@@ -128,8 +130,11 @@ class ClientController extends Controller
             'address' => 'required',
             'phone' => 'required',
             'reference' => 'required',
-            'colonia' => 'nullable|string|max:150'
+            'colonia' => ['nullable', 'string', 'max:150', $this->reglaColonia()]
+        ], [
+            'colonia.*' => 'Elige una colonia de la lista.',
         ]);
+        $attributes['colonia'] = $this->coloniaDelCatalogo($request->get('colonia'));
         $cliente->update($attributes);
         return redirect()->route('clientes')
                         ->with('success','Cliente Actualizado Satisfactoriamente');
@@ -234,7 +239,9 @@ class ClientController extends Controller
             'name' => $request->get('name'),
             'phone' => $request->get('phone'),
             'address' => $request->get('address'),
-            'colonia' => $request->get('colonia'),
+            // Desde los modales del paso 1 no se pierde lo capturado: una colonia fuera
+            // del catálogo se guarda vacía y el panel de envío la pide.
+            'colonia' => $this->coloniaDelCatalogo($request->get('colonia')),
             'reference' => $request->get('reference'),
             'active' => 1
         ]);
@@ -271,7 +278,9 @@ class ClientController extends Controller
             'name' => $request->get('name'),
             'phone' => $request->get('phone'),
             'address' => $request->get('address'),
-            'colonia' => $request->get('colonia'),
+            // Desde los modales del paso 1 no se pierde lo capturado: una colonia fuera
+            // del catálogo se guarda vacía y el panel de envío la pide.
+            'colonia' => $this->coloniaDelCatalogo($request->get('colonia')),
             'reference' => $request->get('reference'),
             'active' => 1
         ]);
@@ -281,6 +290,54 @@ class ClientController extends Controller
             $venta->save();
         }
         return redirect()->route('create', [$venta, $dbClient]);
+    }
+
+    /**
+     * Paso 1, Domicilio: tarifa de envío según la colonia del registro (dirección) elegido.
+     */
+    public function tarifaEnvio (EnvioService $envio, $clientId = null) {
+        $cliente = Client::find($clientId);
+        if ($cliente === null) {
+            return response()->json(['errors' => ['El cliente seleccionado ya no existe.']], 404);
+        }
+        return response()->json($envio->respuesta($cliente->colonia));
+    }
+
+    /**
+     * Paso 1: guarda en el cliente una colonia del catálogo (con el nombre del catálogo,
+     * no el texto escrito) y responde la tarifa igual que tarifaEnvio.
+     */
+    public function actualizarColonia (Request $request, EnvioService $envio) {
+        $cliente = Client::find($request->get('clientId'));
+        if ($cliente === null) {
+            return response()->json(['errors' => ['El cliente seleccionado ya no existe.']]);
+        }
+        $tarifa = $envio->buscarTarifa($request->get('colonia'));
+        if ($tarifa === null) {
+            return response()->json(['errors' => ['Elige una colonia de la lista.']]);
+        }
+        $cliente->colonia = $tarifa->colonia;
+        $cliente->save();
+        return response()->json($envio->opciones($tarifa));
+    }
+
+    /**
+     * Regla de validación: la colonia debe existir (activa) en el catálogo de envío.
+     */
+    private function reglaColonia () {
+        return function ($attribute, $value, $fail) {
+            if (app(EnvioService::class)->buscarTarifa($value) === null) {
+                $fail('Elige una colonia de la lista.');
+            }
+        };
+    }
+
+    /**
+     * Nombre de la colonia como está en el catálogo, o null si no está.
+     */
+    private function coloniaDelCatalogo ($texto) {
+        $tarifa = app(EnvioService::class)->buscarTarifa($texto);
+        return $tarifa === null ? null : $tarifa->colonia;
     }
 
     public function getClient (Request $request) {

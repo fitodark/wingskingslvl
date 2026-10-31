@@ -36,12 +36,6 @@
             @if ($venta->esDomicilio())
                 {{ $venta->client->name }} ( {{ $venta->client->phone }} )<br>
                 {{ $venta->direccion_envio ?: $venta->client->address }}
-                {{-- Solo pantalla: express = hay que pedir el servicio externo. No va al ticket. --}}
-                @if ($venta->esEnvioExpress())
-                    <br><span class="badge badge-warning" title="Pedir el servicio externo de envío; el monto no se suma al total">{{ $venta->etiqueta_envio }}</span>
-                @elseif ($venta->esEnvioGratuito())
-                    <br><span class="badge badge-success">{{ $venta->etiqueta_envio }}</span>
-                @endif
             @endif
             @if ($venta->esParaLlevar())
                 Para Llevar (Pasan a recoger)<br>
@@ -52,7 +46,17 @@
                 {{ !empty($venta->client)? '('.$venta->client->phone.')':'' }}
             @endif
         </td>
-        <td>@ventaType($venta->type)</td>
+        <td>
+            @ventaType($venta->type)
+            {{-- Solo pantalla: express = hay que pedir el servicio externo. No va al ticket. --}}
+            @if ($venta->esDomicilio())
+                @if ($venta->esEnvioExpress())
+                    <br><span class="badge badge-warning" title="Pedir el servicio externo de envío; el monto no se suma al total">{{ $venta->etiqueta_envio }}</span>
+                @elseif ($venta->esEnvioGratuito())
+                    <br><span class="badge badge-success">{{ $venta->etiqueta_envio }}</span>
+                @endif
+            @endif
+        </td>
         <td>@ventaEstatus($venta->estatus)</td>
         <td class="text-nowrap">@money($venta->montoTotal)<br>
             @discountApply($venta->apply_discount)

@@ -162,6 +162,56 @@
             </div>
         </div>
 
+        {{-- Envío (solo Domicilio): según la colonia del registro elegido. Lo pinta public/js/comandas.js.
+             data-envio = envío que ya trae la venta (agente o comanda reabierta) para pintarlo sin consultar. --}}
+        <div id="panelEnvio" class="wk-envio mt-3" hidden
+            data-envio="{{ json_encode($venta->tipo_envio === null ? null : [
+                'tipo_envio' => (int) $venta->tipo_envio,
+                'monto' => $venta->monto_envio_express,
+                'colonia' => $venta->colonia_envio,
+                'client_id' => (int) $venta->client_id,
+                'agente' => (bool) $venta->venta_agente,
+                'etiqueta' => $venta->etiqueta_envio,
+            ]) }}">
+            <div id="envioMensaje" class="alert mb-2" role="status"></div>
+            <div id="envioOpciones" class="wk-envio-opciones" hidden>
+                <div class="custom-control custom-radio">
+                    <input type="radio" class="custom-control-input" name="envio" id="envioGratuito" value="gratuito">
+                    <label class="custom-control-label" for="envioGratuito">Envío gratuito</label>
+                </div>
+                <div class="custom-control custom-radio">
+                    <input type="radio" class="custom-control-input" name="envio" id="envioExpress" value="express">
+                    <label class="custom-control-label" for="envioExpress" id="envioExpressTexto">Envío express</label>
+                </div>
+            </div>
+            <div id="envioRespuesta" class="wk-envio-acciones" hidden>
+                <button type="button" id="aceptaExpress" class="btn btn-outline-success" aria-pressed="false">
+                    <i class="fa-solid fa-check" aria-hidden="true"></i> Cliente acepta</button>
+                <button type="button" id="declinaExpress" class="btn btn-outline-danger">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i> Cliente declina</button>
+            </div>
+            <div id="envioDeclinado" class="wk-envio-acciones" hidden>
+                <button type="button" id="cambiarALlevar" class="btn btn-outline-primary">
+                    <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i> Cambiar a Para llevar</button>
+                <button type="submit" form="cancelarVentaForm" class="btn btn-outline-secondary">Cancelar comanda</button>
+            </div>
+            <div id="envioColonia" hidden>
+                <label for="envioColoniaInput" class="font-weight-bold mb-1">Colonia</label>
+                <div class="wk-envio-acciones">
+                    <input type="text" id="envioColoniaInput" class="form-control form-control-lg" list="coloniasPaso1"
+                        maxlength="150" autocomplete="off" placeholder="Escribe para buscar">
+                    <datalist id="coloniasPaso1">
+                        @foreach ($coloniasEnvio as $colonia)
+                            <option value="{{ $colonia }}">
+                        @endforeach
+                    </datalist>
+                    <button type="button" id="guardarColonia" class="btn btn-primary btn-lg">Guardar colonia</button>
+                </div>
+                <small id="envioColoniaError" class="d-block text-danger mt-1" role="alert"></small>
+            </div>
+            <input type="hidden" name="acepta_express" id="aceptaExpressInput" value="">
+        </div>
+
         <div id="otrasDirecciones" class="mt-3" hidden>
             <p class="h6 font-weight-bold mb-2">Otras direcciones de este teléfono</p>
             <div id="listaDirecciones" class="list-group wk-resultados"></div>

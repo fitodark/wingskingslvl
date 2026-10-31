@@ -6,6 +6,7 @@ use App\Client;
 use App\Venta;
 use App\Dinerstable;
 use App\Exceptions\VentaException;
+use App\Services\EnvioService;
 use App\Services\VentaService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -186,8 +187,14 @@ class VentasController extends Controller
                 'clientId.exists' => 'El cliente seleccionado ya no existe.',
                 'nombre_cuenta.max' => 'El nombre de la cuenta no debe pasar de 60 caracteres.',
             ]);
+            // Envío (solo Domicilio): colonia del catálogo y, si solo hay express, que el cliente lo acepte.
+            $envio = app(EnvioService::class)->envioDeVenta($venta, $tipo, $request->get('clientId'),
+                $request->get('envio'), $request->get('acepta_express') == '1');
             // En local basta con mesa o nombre de cuenta; en para llevar, cliente o nombre de cuenta.
-            $validator->after(function ($validator) use ($tipo, $mesa, $nombreCuenta, $request) {
+            $validator->after(function ($validator) use ($tipo, $mesa, $nombreCuenta, $request, $envio) {
+                if ($envio['error'] !== null && $request->filled('clientId')) {
+                    $validator->errors()->add('envio', $envio['error']);
+                }
                 if ($tipo == Venta::TIPO_LOCAL && $mesa === null && $nombreCuenta === null) {
                     $validator->errors()->add('ubicacion', 'Selecciona una mesa o escribe el nombre de la cuenta.');
                 }
@@ -208,6 +215,10 @@ class VentasController extends Controller
             // En mesa no se pide cliente; en domicilio y para llevar es el registro (dirección) elegido.
             // ventas.direccion_envio (la que captura el agente) no se toca aquí.
             $venta->client_id = $tipo == Venta::TIPO_LOCAL ? null : ($request->get('clientId') ?: null);
+            // El monto express es informativo: no entra a montoTotal ni al ticket.
+            if ($envio['campos'] !== null) {
+                $venta->fill($envio['campos']);
+            }
             // Solo se guardan los campos de este paso; antes se hacía update($request->all())
             // y el formulario podía sobrescribir montos o estatus.
             $venta->save();

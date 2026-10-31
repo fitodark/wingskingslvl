@@ -510,6 +510,29 @@ html, body {
     gap: .5rem;
     align-items: flex-start;
 }
+/* Panel de envío del paso 1 (Domicilio): botones grandes para responder lo que dice el cliente. */
+.wk-envio-acciones,
+.wk-envio-opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.5rem;
+    align-items: center;
+}
+.wk-envio-acciones[hidden],
+.wk-envio-opciones[hidden] {
+    display: none;
+}
+.wk-envio-acciones .btn {
+    min-height: 44px;
+}
+.wk-envio-acciones .form-control {
+    flex: 1 1 16rem;
+    width: auto;
+}
+.wk-envio-opciones .custom-control-label {
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
 /* Barra inferior fija: Siguiente siempre visible sin hacer scroll. */
 .wk-paso1-barra {
     position: sticky;

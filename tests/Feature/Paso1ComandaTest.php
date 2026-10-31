@@ -92,7 +92,9 @@ class Paso1ComandaTest extends TestCase
     public function test_domicilio_guarda_la_direccion_elegida_sin_tocar_la_del_agente()
     {
         $casa = $this->cliente(['address' => 'Calle Uno 1']);
-        $oficina = $this->cliente(['address' => 'Av. Trabajo 99', 'reference' => 'Edificio azul']);
+        // Domicilio exige una colonia del catálogo de envío (ver EnvioPaso1Test).
+        $oficina = $this->cliente(['address' => 'Av. Trabajo 99', 'reference' => 'Edificio azul', 'colonia' => 'Centro']);
+        \App\TarifaEnvio::create(['colonia' => 'Centro', 'tipo' => 'colonia', 'envio_gratuito' => true]);
         $venta = $this->ventaAbierta($this->mesero, ['direccion_envio' => 'Dirección dictada por WhatsApp']);
 
         $this->actualizar($venta, ['type' => Venta::TIPO_DOMICILIO])->assertSessionHasErrors('ubicacion');

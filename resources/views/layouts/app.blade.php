@@ -124,6 +124,7 @@
                 buscarCliente: "{{ route('getQueryClient') }}",
                 cliente: "{{ route('getClient') }}", direccionesCliente: "{{ route('direccionesCliente') }}",
                 historialCliente: "{{ route('getClientDetails') }}",
+                tarifaEnvio: "{{ route('tarifaEnvio') }}", clienteColonia: "{{ route('clienteColonia') }}",
                 cerrarVenta: "{{ route('cerrarVenta') }}",
                 eliminarProducto: "{{ route('eliminarProducto') }}",
                 cerrarCorteCaja: "{{ route('cerrarcortecaja') }}"
