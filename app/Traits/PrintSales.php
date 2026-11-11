@@ -183,6 +183,14 @@ trait PrintSales {
                 $printer->text("Cliente: " . $venta->client->name . ", (" . $venta->client->phone . ")" . "\n");
                 $printer->text("         " . ($venta->direccion_envio ?: $venta->client->address) . "\n");
             }
+            // Cocina y barra priorizan los pedidos express (plan-envio-express.md §7.1). Sin montos.
+            if ($venta->esEnvioExpress()) {
+                $printer->setJustification(Printer::JUSTIFY_CENTER);
+                $printer->setEmphasis(true);
+                $printer->text("SERVICIO EXPRESS\n");
+                $printer->setEmphasis(false);
+                $printer->setJustification(Printer::JUSTIFY_LEFT);
+            }
             $printer->text("\n");
         }
 

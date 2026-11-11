@@ -383,8 +383,41 @@ El equipo tiene que saber que un pedido va por express para pedir el servicio ex
 ## 7. Lo que NO cambia
 
 - `app/Traits/PrintSales.php` (tickets de venta, cocina y barra): **no** imprimir `monto_envio_express`
-  ni `tipo_envio`. Verificar que nada de lo nuevo entre a totales impresos.
+  ni ningún dato nuevo en los totales. Única excepción: la leyenda **SERVICIO EXPRESS** en los tickets
+  de cocina y barra (ver §7.1). Verificar que nada de lo nuevo entre a totales impresos.
 - `montoTotal`, `cantidadRecibida` y cortes de caja no incluyen el monto express.
+
+## 7.1 Leyenda "SERVICIO EXPRESS" en tickets de cocina y barra (2026-11-10)
+
+Cocina y barra tienen que saber, desde el ticket, que el pedido va por express para priorizarlo.
+
+- Dónde: `app/Traits/PrintSales.php::getPrinterBody()` — lo usan los dos tickets (cocina y barra),
+  así que el cambio aplica a ambos; el de barra solo sale si la orden tiene bebidas.
+- Cuándo: `$venta->esEnvioExpress()` (`tipo_envio == 2`). Aplica igual a ventas del agente y a
+  comandas manuales (incluido el express a petición del cliente en colonia gratuita).
+- Posición: en el renglón siguiente a los datos del cliente (después de la línea de dirección) y
+  antes del detalle del pedido. Si la venta no trae `client`, va después de "Folio".
+- Formato: texto `SERVICIO EXPRESS`, centrado y en negritas; después regresar a izquierda y quitar
+  negritas para no afectar el detalle.
+
+```php
+if (!empty($venta->client)) {
+    $printer->text("Cliente: " . $venta->client->name . ", (" . $venta->client->phone . ")" . "\n");
+    $printer->text("         " . ($venta->direccion_envio ?: $venta->client->address) . "\n");
+}
+if ($venta->esEnvioExpress()) {
+    $printer->setJustification(Printer::JUSTIFY_CENTER);
+    $printer->setEmphasis(true);
+    $printer->text("SERVICIO EXPRESS\n");
+    $printer->setEmphasis(false);
+    $printer->setJustification(Printer::JUSTIFY_LEFT);
+}
+$printer->text("\n");
+```
+
+- No imprimir el monto express ni el tipo "gratuito" (sin leyenda cuando `tipo_envio` es 1 o NULL).
+- El ticket de venta al cliente (`printVenta`) no cambia.
+- Prueba: imprimir un folio express (ej. 68766) y uno gratuito; solo el primero lleva la leyenda.
 
 ## 8. Formulario de clientes (opcional, recomendado)
 
@@ -398,4 +431,5 @@ tienen colonia y el agente no tiene que preguntarla.
 - [ ] `express_delivery_time = 30` en `configs`.
 - [ ] `tarifas_envio` con 128 filas después de migrar (106 gratuito con monto NULL, 22 express con monto).
 - [ ] CRUD de tarifas accesible solo para admin.
-- [ ] Bandeja muestra el tipo de envío; tickets sin cambios.
+- [ ] Bandeja muestra el tipo de envío; tickets sin montos nuevos.
+- [ ] Tickets de cocina y barra con `SERVICIO EXPRESS` centrado y en negritas cuando `tipo_envio = 2` (§7.1).
