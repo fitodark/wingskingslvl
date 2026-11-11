@@ -134,23 +134,20 @@ class AppServiceProvider extends ServiceProvider
             return auth()->check() && auth()->user()->hasRole($role);
         });
 
-        // Formulario de cliente: lista de colonias del catálogo de envío para el campo colonia.
-        // El paso 1 incluye el formulario dos veces (alta y edición), por eso cada lista lleva su
-        // propio id y la consulta se hace una sola vez por petición.
-        // El paso 1 también la usa en el panel de envío (colonia faltante).
+        // Catálogo de colonias para el selector de colonia (puntoventa.clientes.selectorColonia):
+        // formulario de cliente (pantalla Clientes y modales del paso 1) y panel de envío del paso 1.
+        // La consulta se hace una sola vez por petición aunque el selector salga varias veces.
         $colonias = null;
-        $n = 0;
         $coloniasEnvio = function () use (&$colonias) {
             if ($colonias === null) {
-                $colonias = \App\TarifaEnvio::activas()->orderBy('colonia')->pluck('colonia');
+                $colonias = \App\TarifaEnvio::activas()->orderBy('colonia')->get(['colonia', 'envio_gratuito'])
+                    ->map(function ($tarifa) {
+                        return ['colonia' => $tarifa->colonia, 'solo_express' => !$tarifa->envio_gratuito];
+                    })->values();
             }
             return $colonias;
         };
-        View::composer('puntoventa.clientes.clientBodyForm', function ($view) use ($coloniasEnvio, &$n) {
-            $n++;
-            $view->with('coloniasEnvio', $coloniasEnvio())->with('listaColoniasId', 'coloniasEnvio' . $n);
-        });
-        View::composer('puntoventa.comandas.clientSelection', function ($view) use ($coloniasEnvio) {
+        View::composer('puntoventa.clientes.selectorColonia', function ($view) use ($coloniasEnvio) {
             $view->with('coloniasEnvio', $coloniasEnvio());
         });
     }

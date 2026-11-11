@@ -39,4 +39,14 @@ return [
         'token' => env('AGENTE_TOKEN'),
     ],
 
+    // Refresco automático de la bandeja de comandas (docs/plan-bandeja-tiempo-real.md).
+    // intervalo: segundos entre consultas mientras no haya websockets.
+    // websockets: true solo cuando laravel-websockets esté instalado y corriendo; la pantalla
+    // baja al intervalo_respaldo únicamente si el socket se conecta, si no sigue con intervalo.
+    'bandeja' => [
+        'intervalo' => (int) env('BANDEJA_INTERVALO', 5),
+        'websockets' => (bool) env('BANDEJA_WEBSOCKETS', false),
+        'intervalo_respaldo' => (int) env('BANDEJA_INTERVALO_RESPALDO', 60),
+    ],
+
 ];

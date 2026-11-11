@@ -60,6 +60,150 @@
             });
     };
 
+    /*
+     * Selector de colonia (puntoventa/clientes/selectorColonia.blade.php).
+     * Reemplaza al <datalist>, que en varias tablets no despliega nada: al tocar el campo sale la
+     * lista completa y al escribir se filtra (sin importar acentos ni mayúsculas); un toque elige.
+     * Solo acepta colonias del catálogo: otro texto deja el campo inválido ("Elige una colonia de la lista.").
+     * Al elegir dispara "change" en el input.
+     */
+    WK.normalizar = function (texto) {
+        return String(texto || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .toLowerCase().replace(/\s+/g, ' ').trim();
+    };
+
+    var colonia = {
+        catalogo: function ($c) {
+            var cat = $c.data('wkCatalogo');
+            if (!cat) {
+                cat = $.map($c.data('colonias') || [], function (o) {
+                    return { nombre: o.colonia, clave: WK.normalizar(o.colonia), soloExpress: !!o.solo_express };
+                });
+                $c.data('wkCatalogo', cat);
+            }
+            return cat;
+        },
+        buscarExacta: function ($c, texto) {
+            var clave = WK.normalizar(texto), hallada = null;
+            $.each(colonia.catalogo($c), function (i, o) {
+                if (o.clave === clave) { hallada = o; return false; }
+            });
+            return hallada;
+        },
+        // Primero las que empiezan con lo escrito, luego las que lo contienen.
+        filtrar: function ($c, texto) {
+            var clave = WK.normalizar(texto), cat = colonia.catalogo($c);
+            if (clave === '') { return cat; }
+            var inicio = [], contiene = [];
+            $.each(cat, function (i, o) {
+                var pos = o.clave.indexOf(clave);
+                if (pos === 0) { inicio.push(o); } else if (pos > 0) { contiene.push(o); }
+            });
+            return inicio.concat(contiene);
+        },
+        abrir: function ($input) {
+            var $c = $input.closest('.wk-colonia'), $lista = $c.find('.wk-colonia-lista').empty();
+            var opciones = colonia.filtrar($c, $input.val());
+            if (!opciones.length) {
+                $lista.append($('<div class="list-group-item text-muted">')
+                    .text('Sin coincidencias. Prueba con otra parte del nombre.'));
+            }
+            $.each(opciones, function (i, o) {
+                var $op = $('<button type="button" class="list-group-item list-group-item-action wk-colonia-op" role="option" tabindex="-1">')
+                    .data('valor', o.nombre)
+                    .append($('<span>').text(o.nombre));
+                if (o.soloExpress) {
+                    $op.append($('<span class="badge badge-warning">').text('Solo express'));
+                }
+                if (i === 0) { $op.addClass('active'); }
+                $lista.append($op);
+            });
+            $lista.prop('hidden', false).scrollTop(0);
+            $input.attr('aria-expanded', 'true').removeClass('is-invalid');
+        },
+        cerrar: function ($c) {
+            $c.find('.wk-colonia-lista').prop('hidden', true).empty();
+            $c.find('.wk-colonia-input').attr('aria-expanded', 'false');
+        },
+        estaAbierto: function ($input) {
+            return !$input.closest('.wk-colonia').find('.wk-colonia-lista').prop('hidden');
+        },
+        // Ajusta el texto a como está en el catálogo y marca el campo inválido si no existe.
+        validar: function ($input, marcar) {
+            var texto = $.trim($input.val());
+            var hallada = texto === '' ? null : colonia.buscarExacta($input.closest('.wk-colonia'), texto);
+            if (hallada) { $input.val(hallada.nombre); }
+            var valido = texto === '' || !!hallada;
+            $input[0].setCustomValidity(valido ? '' : 'Elige una colonia de la lista.');
+            if (marcar) { $input.toggleClass('is-invalid', !valido); }
+            return valido;
+        },
+        elegir: function ($input, valor) {
+            $input.val(valor);
+            colonia.cerrar($input.closest('.wk-colonia'));
+            colonia.validar($input, true);
+            $input.trigger('change');
+        }
+    };
+    WK.selectorColonia = colonia;
+
+    $(document)
+        .on('focus click', '.wk-colonia-input', function () {
+            var $input = $(this);
+            if (!colonia.estaAbierto($input)) { colonia.abrir($input); }
+        })
+        .on('input', '.wk-colonia-input', function () {
+            this.setCustomValidity('');
+            colonia.abrir($(this));
+        })
+        .on('keydown', '.wk-colonia-input', function (e) {
+            var $input = $(this);
+            if (!colonia.estaAbierto($input)) { return; }
+            var $lista = $input.closest('.wk-colonia').find('.wk-colonia-lista');
+            var $ops = $lista.find('.wk-colonia-op'), $activa = $ops.filter('.active');
+            if (e.which === 13) { // Enter elige la marcada
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                if ($activa.length) { colonia.elegir($input, $activa.data('valor')); }
+            } else if (e.which === 27) { // Esc
+                colonia.cerrar($input.closest('.wk-colonia'));
+            } else if (e.which === 40 || e.which === 38) { // flechas
+                e.preventDefault();
+                var i = $ops.index($activa) + (e.which === 40 ? 1 : -1);
+                i = Math.max(0, Math.min($ops.length - 1, i));
+                $ops.removeClass('active').eq(i).addClass('active');
+                var op = $ops.get(i);
+                if (op && op.scrollIntoView) { op.scrollIntoView({ block: 'nearest' }); }
+            }
+        })
+        // Que tocar la lista no le quite el foco al campo (si no, se cerraría antes del click).
+        .on('mousedown pointerdown', '.wk-colonia-lista', function (e) { e.preventDefault(); })
+        .on('click', '.wk-colonia-op', function () {
+            colonia.elegir($(this).closest('.wk-colonia').find('.wk-colonia-input'), $(this).data('valor'));
+        })
+        .on('blur', '.wk-colonia-input', function () {
+            var $input = $(this);
+            colonia.cerrar($input.closest('.wk-colonia'));
+            colonia.validar($input, true);
+        })
+        // Un modal que se vuelve a abrir no arrastra la lista ni el error de la vez anterior.
+        .on('show.bs.modal', '.modal', function () {
+            $(this).find('.wk-colonia').each(function () {
+                var $c = $(this);
+                colonia.cerrar($c);
+                $c.find('.wk-colonia-input').removeClass('is-invalid').each(function () { this.setCustomValidity(''); });
+            });
+        });
+
+    // Antes de cualquier validación de formulario: revisa las colonias (fase de captura).
+    document.addEventListener('submit', function (event) {
+        $(event.target).find('.wk-colonia-input').each(function () { colonia.validar($(this), false); });
+    }, true);
+    // Valor precargado (edición de cliente): si no es del catálogo, el formulario no se manda sin corregirlo.
+    $(function () {
+        $('.wk-colonia-input').each(function () { colonia.validar($(this), false); });
+    });
+
     // Validación de Bootstrap para formularios con class="needs-validation" (alta/edición de cliente).
     // Va antes del bloqueo de doble envío para que un formulario inválido no quede bloqueado.
     $(document).on('submit', 'form.needs-validation', function (event) {

@@ -1,3 +1,7 @@
+@php
+    // Acciones solo en comandas; el refresco automático (VentasController@bandeja) las pide explícitamente.
+    $conAcciones = $conAcciones ?? (Route::currentRouteName() == 'comandas');
+@endphp
 <div class="table-responsive">
 <table class="table table-striped table-sm wk-bandeja">
     <thead>
@@ -7,16 +11,16 @@
         <th>Tipo</th>
         <th>Estatus</th>
         <th>Total</th>
-        @if (Route::currentRouteName() == 'comandas')
+        @if ($conAcciones)
             <th width="28%" class="wk-col-acciones">Acciones</th>
         @endif
     </tr>
     </thead>
     @forelse ($ventas as $venta)
     @if ($venta->venta_agente == true)
-        <tr class="table-primary">
+        <tr class="table-primary" data-folio="{{ $venta->ventaId }}">
     @else
-        <tr>
+        <tr data-folio="{{ $venta->ventaId }}">
     @endif
         <td>
             {{ $venta->ventaId }}
@@ -65,7 +69,7 @@
             @discountApply($venta->apply_discount)
             @paymenttype($venta->payment_type)
         </td>
-        @if (Route::currentRouteName() == 'comandas')
+        @if ($conAcciones)
         <td>
             {{-- Botones con ícono y texto, de tamaño cómodo para tablet --}}
             <div class="wk-acciones">

@@ -25,6 +25,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     // ---------- Comandas y clientes: mesero, encargado y admin ----------
     Route::middleware('role:admin,encargado,mesero')->group(function () {
         Route::get('/comandas', 'Puntoventa\VentasController@index')->name('comandas');
+        // Refresco automático de la bandeja (public/js/bandeja.js).
+        Route::get('/comandas/bandeja', 'Puntoventa\VentasController@bandeja')->name('bandeja');
 
         Route::resources([
             'ventas' => 'Puntoventa\VentasController',

@@ -587,3 +587,90 @@ html, body {
 .wk-paso1-barra .btn-primary:disabled {
     opacity: .45;
 }
+
+/* Bandeja: refresco automático y avisos de pedidos nuevos (public/js/bandeja.js) */
+.wk-fila-nueva > td {
+    animation: wk-fila-nueva 6s ease-out;
+}
+@keyframes wk-fila-nueva {
+    0%, 60% { background-color: #ffe08a; }
+    100% { background-color: transparent; }
+}
+.wk-avisos {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1070; /* encima de los modales */
+    width: 340px;
+    max-width: calc(100vw - 2rem);
+}
+.wk-aviso {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: .5rem;
+    padding: .75rem 1rem;
+    border-left: 6px solid #DF8B33;
+    border-radius: .25rem;
+    background: #fff8e6;
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .2);
+    cursor: pointer;
+    animation: wk-aviso-entra .3s ease-out;
+}
+.wk-aviso-error {
+    border-left-color: #dc3545;
+    background: #fdecee;
+}
+.wk-aviso-texto {
+    flex: 1;
+}
+.wk-aviso-titulo {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.wk-aviso-cerrar {
+    margin-left: .5rem;
+}
+@keyframes wk-aviso-entra {
+    from { transform: translateX(120%); }
+    to { transform: translateX(0); }
+}
+
+/* Selector de colonia (WK.selectorColonia en wk-common.js): lista en el flujo, botones táctiles */
+.wk-colonia {
+    position: relative;
+}
+.wk-colonia-lista {
+    max-height: 280px;
+    overflow-y: auto;
+    margin-top: .25rem;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    -webkit-overflow-scrolling: touch;
+}
+.wk-colonia-lista[hidden] {
+    display: none;
+}
+.wk-colonia-lista .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 44px;
+    border-left: 0;
+    border-right: 0;
+}
+.wk-colonia-lista .wk-colonia-op.active .badge-warning {
+    background-color: #fff;
+}
+/* Si no hay un .was-validated arriba, Bootstrap no muestra el mensaje con :invalid; con .is-invalid sí. */
+.wk-colonia .is-invalid ~ .invalid-feedback {
+    display: block;
+}
+.wk-envio-colonia {
+    align-items: flex-start;
+}
+.wk-envio-colonia .wk-colonia {
+    flex: 1 1 16rem;
+}
+.wk-envio-colonia .wk-colonia .form-control {
+    width: 100%;
+}

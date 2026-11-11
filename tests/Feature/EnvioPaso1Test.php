@@ -235,7 +235,7 @@ class EnvioPaso1Test extends TestCase
         $html = $this->actingAs($this->mesero)->get(route('create', [$venta->ventaId, $cliente->id]))
             ->assertOk()
             ->assertSee('id="panelEnvio"')
-            ->assertSee('<datalist id="coloniasPaso1">')
+            ->assertSee('id="envioColoniaInput"', false)
             ->getContent();
         $this->assertStringContainsString('&quot;tipo_envio&quot;:2', $html);
         $this->assertStringContainsString('&quot;agente&quot;:true', $html);

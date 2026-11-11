@@ -6,6 +6,8 @@ use App\Client;
 use App\Venta;
 use App\Dinerstable;
 use App\Exceptions\VentaException;
+use App\Config;
+use App\Services\BandejaService;
 use App\Services\EnvioService;
 use App\Services\VentaService;
 use Illuminate\Http\Request;
@@ -49,6 +51,36 @@ class VentasController extends Controller
                         ->withInput();
         }
         return view('puntoventa.comandas.index');
+    }
+
+    /**
+     * GET /comandas/bandeja?firma=&desde=&page=
+     * Refresco automático de la bandeja. Si la firma no cambió responde 204 sin cuerpo;
+     * si cambió, manda la tabla ya pintada y las ventas nuevas del agente para avisar.
+     */
+    public function bandeja(Request $request, BandejaService $bandeja)
+    {
+        $firma = $bandeja->firma();
+        if ($request->query('firma') === $firma) {
+            return response('', 204);
+        }
+
+        // El folio máximo se toma antes de buscar las nuevas para no saltarse ninguna.
+        $maxFolio = $bandeja->maxFolio();
+        $desde = (int) $request->query('desde', $maxFolio);
+
+        $html = view('puntoventa.comandas.ventas', [
+            'ventas' => $bandeja->ventas(),
+            'discountPercentageObject' => Config::where('key', '=', 'discountPercentage')->first(),
+            'conAcciones' => true,
+        ])->render();
+
+        return response()->json([
+            'firma' => $firma,
+            'maxFolio' => $maxFolio,
+            'html' => $html,
+            'nuevas' => $bandeja->nuevasDelAgente($desde, $maxFolio),
+        ]);
     }
 
     /**

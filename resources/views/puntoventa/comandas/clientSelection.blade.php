@@ -220,14 +220,8 @@
             </div>
             <div id="envioColonia" hidden>
                 <label for="envioColoniaInput" class="font-weight-bold mb-1">Colonia</label>
-                <div class="wk-envio-acciones">
-                    <input type="text" id="envioColoniaInput" class="form-control form-control-lg" list="coloniasPaso1"
-                        maxlength="150" autocomplete="off" placeholder="Escribe para buscar">
-                    <datalist id="coloniasPaso1">
-                        @foreach ($coloniasEnvio as $colonia)
-                            <option value="{{ $colonia }}">
-                        @endforeach
-                    </datalist>
+                <div class="wk-envio-acciones wk-envio-colonia">
+                    @include('puntoventa.clientes.selectorColonia', ['idInput' => 'envioColoniaInput', 'claseInput' => 'form-control-lg'])
                     <button type="button" id="guardarColonia" class="btn btn-primary btn-lg">Guardar colonia</button>
                 </div>
                 <small id="envioColoniaError" class="d-block text-danger mt-1" role="alert"></small>

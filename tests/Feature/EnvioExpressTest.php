@@ -118,11 +118,16 @@ class EnvioExpressTest extends TestCase
         $mesero = $this->usuario('mesero');
         $venta = $this->ventaAbierta($mesero);
 
-        $this->actingAs($mesero)->get(route('create', [$venta->ventaId]))
+        // Selector de colonia propio (sin <datalist>): modales de alta y edición + panel de envío.
+        $html = $this->actingAs($mesero)->get(route('create', [$venta->ventaId]))
             ->assertOk()
-            ->assertSee('id="coloniasEnvio1"', false)
-            ->assertSee('id="coloniasEnvio2"', false)
-            ->assertSee('<option value="Acatlima">', false);
+            ->assertDontSee('<datalist', false)
+            ->assertSee('&quot;colonia&quot;:&quot;Acatlima&quot;,&quot;solo_express&quot;:true', false)
+            ->assertSee('&quot;colonia&quot;:&quot;Chapultepec&quot;,&quot;solo_express&quot;:false', false)
+            ->getContent();
+        $this->assertSame(3, substr_count($html, 'class="wk-colonia"'));
+        $this->assertSame(2, substr_count($html, 'name="colonia"'));
+        $this->assertSame(1, substr_count($html, 'id="envioColoniaInput"'));
 
         $this->actingAs($mesero)->post(route('addClient'), [
             'ventaid' => $venta->ventaId, 'type' => Venta::TIPO_DOMICILIO,

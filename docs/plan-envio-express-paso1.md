@@ -150,3 +150,20 @@ Negocio pidió que un cliente de colonia gratuita pueda pedir express para que s
 - Lista de clientes (Domicilio/Para llevar): al elegir un registro se ocultan las demás coincidencias y ya no se
   muestra "Otras direcciones de este teléfono". "Cambiar" vuelve a la última búsqueda o, si no la hubo, busca por
   el teléfono del cliente.
+
+## Selector de colonia para tablet (2026-11-10)
+
+QA reportó que en la tablet no se desplegaban las colonias. El `<datalist>` nativo no se muestra en
+varios navegadores de tablet (Firefox Android, WebView) y en otros solo sale al escribir, sin indicar
+que hay lista. Se reemplazó por un selector propio en los cuatro lugares (pantalla Clientes alta/edición,
+modales "Cliente nuevo" y "Editar" del paso 1, y panel de envío "Guardar colonia"):
+
+- Vista `puntoventa/clientes/selectorColonia.blade.php`; lógica `WK.selectorColonia` en `public/js/wk-common.js`;
+  estilos `.wk-colonia*` en `mystyle.css`. Catálogo por View composer (`AppServiceProvider`) con
+  `{colonia, solo_express}`, una consulta por petición.
+- Al tocar el campo sale la lista completa; al escribir se filtra sin acentos ni mayúsculas ("empieza con"
+  primero); un toque elige. Badge "Solo express". Teclado: flechas, Enter y Esc.
+- Solo colonias del catálogo: otro texto deja el campo inválido ("Elige una colonia de la lista.") y el
+  formulario no se envía; texto exacto se ajusta a como está en el catálogo. Vacío es válido.
+- Panel de envío: Enter con la lista abierta elige; con la lista cerrada, guarda.
+- El servidor no cambió (sigue validando contra el catálogo).

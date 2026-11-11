@@ -295,6 +295,19 @@
         pintarPaso1();
     }
 
+    // Quita el cliente elegido y deja el buscador como recién abierto.
+    function limpiarCliente() {
+        paso1.cliente = null;
+        paso1.buscarEnLlevar = false;
+        paso1.ultimaBusqueda = '';
+        paso1.busqueda++; // una búsqueda pendiente ya no debe pintar resultados
+        clearTimeout(paso1.temporizador);
+        $('#buscarCliente').val('');
+        $('#resultadosCliente').empty();
+        $('#buscarAyuda').text('Escribe al menos 2 letras o números.');
+        ponerPromocion(0);
+    }
+
     function guardarColonia() {
         var cliente = paso1.cliente, e = paso1.envio;
         var $boton = $('#guardarColonia'), $error = $('#envioColoniaError').text('');
@@ -345,7 +358,10 @@
         consultarEnvio();
 
         // Cambiar de tipo reinicia el envío (y lo consulta si queda en Domicilio).
+        // Al pasar a Para llevar no se arrastra el cliente de Domicilio: el panel queda limpio
+        // (quién recoge + teléfono, o buscar un cliente registrado).
         $paso1.on('change', 'input[name=type]', function () {
+            if (tipoElegido() === 3) { limpiarCliente(); }
             reiniciarEnvio();
             consultarEnvio();
         });
@@ -362,13 +378,14 @@
             paso1.envio.acepta = false;
             pintarPaso1();
         });
-        // Conserva el cliente: Para llevar lo muestra como cliente registrado.
+        // Igual que elegir Para llevar a mano: el cliente se limpia.
         $('#cambiarALlevar').on('click', function () {
             $('#tipo3').prop('checked', true).trigger('change');
         });
         $('#guardarColonia').on('click', guardarColonia);
+        // Enter con la lista abierta elige la colonia (wk-common.js); con la lista cerrada, guarda.
         $('#envioColoniaInput').on('keydown', function (ev) {
-            if (ev.which === 13) { ev.preventDefault(); guardarColonia(); }
+            if (ev.which === 13 && !WK.selectorColonia.estaAbierto($(this))) { ev.preventDefault(); guardarColonia(); }
         });
         $paso1.on('input', '#cuentaMesa, #cuentaLlevar, #telefonoRecoge, #montoAcordadoInput', pintarPaso1);
         $('#abrirBuscarCliente').on('click', function () {
