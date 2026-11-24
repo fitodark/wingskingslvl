@@ -19,10 +19,21 @@ class EnvioExpressTest extends TestCase
 
     public function test_la_migracion_carga_el_catalogo_y_la_clave_de_tiempo()
     {
-        $this->assertSame(128, TarifaEnvio::count());
-        $this->assertSame(22, TarifaEnvio::where('envio_gratuito', false)->whereNotNull('monto_express')->count());
-        $this->assertSame(106, TarifaEnvio::where('envio_gratuito', true)->whereNull('monto_express')->count());
+        // Carga inicial (2026_10_27_000003) + catálogo del negocio (2026_11_23_000002).
+        $this->assertSame(130, TarifaEnvio::count());
+        $this->assertSame(23, TarifaEnvio::where('envio_gratuito', false)->whereNotNull('monto_express')->count());
+        $this->assertSame(23, TarifaEnvio::where('envio_gratuito', true)->whereNotNull('monto_express')->count());
+        $this->assertSame(84, TarifaEnvio::where('envio_gratuito', true)->whereNull('monto_express')->count());
         $this->assertSame('agencia', TarifaEnvio::where('colonia', 'Agencia Municipal Rancho Solano')->value('tipo'));
+        $this->assertSame(50.0, TarifaEnvio::where('colonia', 'Acatlima')->first()->monto_express);
+        $maestro = TarifaEnvio::where('colonia', 'Del Maestro 1a Sección')->first();
+        $this->assertSame(TarifaEnvio::COBERTURA_AMBOS, $maestro->cobertura);
+        $this->assertSame(30.0, $maestro->monto_express);
+        $this->assertSame(75.0, TarifaEnvio::where('colonia', 'Huajolotitlan')->first()->monto_express);
+        $this->assertSame(TarifaEnvio::COBERTURA_AMBOS, TarifaEnvio::where('colonia', 'Guardia Nacional')->first()->cobertura);
+        // El Centro se renombró como viene en el catálogo.
+        $this->assertTrue(TarifaEnvio::where('colonia', 'Centro')->exists());
+        $this->assertFalse(TarifaEnvio::where('colonia', 'Heroica Ciudad de Huajuapan de León Centro')->exists());
         $this->assertSame('40-50', Config::where('key', 'express_delivery_time')->value('value'));
     }
 
@@ -66,7 +77,7 @@ class EnvioExpressTest extends TestCase
     public function test_gratuito_y_express_exige_tarifa_y_conserva_el_gratuito()
     {
         $admin = $this->usuario('admin');
-        $maestro = TarifaEnvio::where('colonia', 'Del Maestro 1a Sección')->first();
+        $maestro = TarifaEnvio::where('colonia', 'Chapultepec')->first();
         $this->assertSame(TarifaEnvio::COBERTURA_GRATUITO, $maestro->cobertura);
 
         $this->actingAs($admin)->put(route('tarifasenvio.update', $maestro->id), [
@@ -81,7 +92,7 @@ class EnvioExpressTest extends TestCase
         $this->assertSame(35.0, $maestro->monto_express);
         $this->assertSame(TarifaEnvio::COBERTURA_AMBOS, $maestro->cobertura);
 
-        $this->actingAs($admin)->get(route('tarifasenvio.index', ['q' => 'maestro']))
+        $this->actingAs($admin)->get(route('tarifasenvio.index', ['q' => 'pe']))
             ->assertOk()->assertSee('Gratuito y express')->assertSee('Solo gratuito');
         $this->actingAs($admin)->get(route('tarifasenvio.edit', $maestro->id))
             ->assertOk()->assertSee('<option value="ambos" selected>', false);
@@ -120,7 +131,7 @@ class EnvioExpressTest extends TestCase
 
         $this->actingAs($admin)->post(route('tarifasenvio.activo', $tarifa->id))->assertRedirect();
         $this->assertFalse($tarifa->fresh()->activo);
-        $this->assertSame(127, TarifaEnvio::activas()->count());
+        $this->assertSame(129, TarifaEnvio::activas()->count());
 
         $this->actingAs($admin)->post(route('tarifasenvio.activo', $tarifa->id));
         $this->assertTrue($tarifa->fresh()->activo);

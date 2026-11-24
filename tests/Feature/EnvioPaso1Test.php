@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 /**
  * Envío express en el paso 1 (comandas capturadas a mano, plan docs/plan-envio-express-paso1.md).
- * Colonias del catálogo cargado por la migración: Acatlima (solo express, $45),
+ * Colonias del catálogo cargado por la migración: Acatlima (solo express, $50),
  * Chapultepec (gratuito sin tarifa express).
  */
 class EnvioPaso1Test extends TestCase
@@ -72,7 +72,7 @@ class EnvioPaso1Test extends TestCase
             ->assertSessionHasNoErrors();
         $venta = $venta->fresh();
         $this->assertSame(Venta::ENVIO_EXPRESS, (int) $venta->tipo_envio);
-        $this->assertEquals(45, $venta->monto_envio_express);
+        $this->assertEquals(50, $venta->monto_envio_express);
         $this->assertSame('Acatlima', $venta->colonia_envio);
         $this->assertEquals(0, $venta->montoTotal);
     }
@@ -181,7 +181,7 @@ class EnvioPaso1Test extends TestCase
         $this->actingAs($this->mesero)->getJson(route('tarifaEnvio', [$this->cliente('acatlima')->id]))
             ->assertOk()
             ->assertExactJson(['encontrada' => true, 'colonia' => 'Acatlima', 'envio_gratuito' => false,
-                'express_disponible' => true, 'monto_express' => 45,
+                'express_disponible' => true, 'monto_express' => 50,
                 'tiempo_gratuito' => null, 'tiempo_express' => 'entre 40 minutos y 50 minutos']);
 
         $this->actingAs($this->mesero)->getJson(route('tarifaEnvio', [$this->cliente('Por ahí')->id]))
@@ -213,7 +213,7 @@ class EnvioPaso1Test extends TestCase
         $this->assertNull($cliente->fresh()->colonia);
 
         $this->actingAs($this->mesero)->postJson(route('clienteColonia'), ['clientId' => $cliente->id, 'colonia' => 'acatlima'])
-            ->assertJson(['encontrada' => true, 'colonia' => 'Acatlima', 'monto_express' => 45]);
+            ->assertJson(['encontrada' => true, 'colonia' => 'Acatlima', 'monto_express' => 50]);
         $this->assertSame('Acatlima', $cliente->fresh()->colonia);
     }
 

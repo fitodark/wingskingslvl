@@ -196,3 +196,9 @@ el monto a mano.
 - Tests: `TiempoEntregaTest` (3), `EnvioExpressTest` (+1), `EnvioPaso1Test` (endpoint con tiempos y Del Maestro);
   suite 69 OK. Agente 37 OK. Panel probado con jsdom sobre el HTML real (gratuito+express, gratuito sin
   tarifa, solo express); falta tablet.
+- **Catálogo del negocio** (migración `2026_11_23_000002`, fuente `whatsapp-agentkit/knowledge/catalogo_colonias.md`):
+  130 colonias (23 solo express, 23 gratuito y express, 84 solo gratuito). "Express + costo" → solo express;
+  "Gratuito + costo > 0" → gratuito y express; "Gratuito + 0" → solo gratuito. Nuevas: Guardia Nacional
+  (gratuito y express $50) y Huajolotitlan (solo express $75). "Heroica Ciudad de Huajuapan de León Centro"
+  pasa a "Centro" (también en `clients.colonia`). Respeta `activo` y no toca colonias fuera de la lista. El rollback
+  regresa a la carga inicial de 2026_10_27_000003.
