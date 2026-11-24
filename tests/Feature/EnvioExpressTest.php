@@ -23,7 +23,7 @@ class EnvioExpressTest extends TestCase
         $this->assertSame(22, TarifaEnvio::where('envio_gratuito', false)->whereNotNull('monto_express')->count());
         $this->assertSame(106, TarifaEnvio::where('envio_gratuito', true)->whereNull('monto_express')->count());
         $this->assertSame('agencia', TarifaEnvio::where('colonia', 'Agencia Municipal Rancho Solano')->value('tipo'));
-        $this->assertSame('30', Config::where('key', 'express_delivery_time')->value('value'));
+        $this->assertSame('40-50', Config::where('key', 'express_delivery_time')->value('value'));
     }
 
     public function test_solo_admin_entra_a_tarifas()
@@ -41,22 +41,60 @@ class EnvioExpressTest extends TestCase
         $admin = $this->usuario('admin');
 
         $this->actingAs($admin)->post(route('tarifasenvio.store'), [
-            'colonia' => 'Colonia Lejana', 'tipo' => 'colonia', 'envio_gratuito' => '0', 'monto_express' => '',
+            'colonia' => 'Colonia Lejana', 'tipo' => 'colonia', 'cobertura' => 'express', 'monto_express' => '',
         ])->assertSessionHasErrors('monto_express');
 
         $this->actingAs($admin)->post(route('tarifasenvio.store'), [
-            'colonia' => 'Colonia Lejana', 'tipo' => 'colonia', 'envio_gratuito' => '0', 'monto_express' => '55',
+            'colonia' => 'Colonia Lejana', 'tipo' => 'colonia', 'cobertura' => 'express', 'monto_express' => '55',
         ])->assertRedirect(route('tarifasenvio.index'));
 
         $this->actingAs($admin)->post(route('tarifasenvio.store'), [
-            'colonia' => 'Colonia Cercana', 'tipo' => 'colonia', 'envio_gratuito' => '1', 'monto_express' => '',
+            'colonia' => 'Colonia Cercana', 'tipo' => 'colonia', 'cobertura' => 'gratuito', 'monto_express' => '30',
         ])->assertRedirect(route('tarifasenvio.index'));
 
         $lejana = TarifaEnvio::where('colonia', 'Colonia Lejana')->first();
         $this->assertFalse($lejana->envio_gratuito);
         $this->assertSame(55.0, $lejana->monto_express);
         $this->assertTrue($lejana->activo);
-        $this->assertNull(TarifaEnvio::where('colonia', 'Colonia Cercana')->first()->monto_express);
+        // Solo gratuito ignora la tarifa aunque el formulario la mande.
+        $cercana = TarifaEnvio::where('colonia', 'Colonia Cercana')->first();
+        $this->assertNull($cercana->monto_express);
+        $this->assertSame(TarifaEnvio::COBERTURA_GRATUITO, $cercana->cobertura);
+        $this->assertSame(TarifaEnvio::COBERTURA_EXPRESS, $lejana->cobertura);
+    }
+
+    public function test_gratuito_y_express_exige_tarifa_y_conserva_el_gratuito()
+    {
+        $admin = $this->usuario('admin');
+        $maestro = TarifaEnvio::where('colonia', 'Del Maestro 1a Sección')->first();
+        $this->assertSame(TarifaEnvio::COBERTURA_GRATUITO, $maestro->cobertura);
+
+        $this->actingAs($admin)->put(route('tarifasenvio.update', $maestro->id), [
+            'colonia' => $maestro->colonia, 'tipo' => 'colonia', 'cobertura' => 'ambos', 'monto_express' => '',
+        ])->assertSessionHasErrors(['monto_express' => 'La tarifa express es obligatoria si la colonia tiene envío express.']);
+
+        $this->actingAs($admin)->put(route('tarifasenvio.update', $maestro->id), [
+            'colonia' => $maestro->colonia, 'tipo' => 'colonia', 'cobertura' => 'ambos', 'monto_express' => '35',
+        ])->assertRedirect(route('tarifasenvio.index'));
+        $maestro = $maestro->fresh();
+        $this->assertTrue($maestro->envio_gratuito);
+        $this->assertSame(35.0, $maestro->monto_express);
+        $this->assertSame(TarifaEnvio::COBERTURA_AMBOS, $maestro->cobertura);
+
+        $this->actingAs($admin)->get(route('tarifasenvio.index', ['q' => 'maestro']))
+            ->assertOk()->assertSee('Gratuito y express')->assertSee('Solo gratuito');
+        $this->actingAs($admin)->get(route('tarifasenvio.edit', $maestro->id))
+            ->assertOk()->assertSee('<option value="ambos" selected>', false);
+
+        // Volver a solo gratuito borra la tarifa.
+        $this->actingAs($admin)->put(route('tarifasenvio.update', $maestro->id), [
+            'colonia' => $maestro->colonia, 'tipo' => 'colonia', 'cobertura' => 'gratuito', 'monto_express' => '35',
+        ])->assertRedirect(route('tarifasenvio.index'));
+        $this->assertNull($maestro->fresh()->monto_express);
+
+        $this->actingAs($admin)->post(route('tarifasenvio.store'), [
+            'colonia' => 'Otra', 'tipo' => 'colonia', 'cobertura' => 'nada', 'monto_express' => '35',
+        ])->assertSessionHasErrors('cobertura');
     }
 
     public function test_no_permite_colonias_repetidas_salvo_la_misma_al_editar()
@@ -65,11 +103,11 @@ class EnvioExpressTest extends TestCase
         $acatlima = TarifaEnvio::where('colonia', 'Acatlima')->first();
 
         $this->actingAs($admin)->post(route('tarifasenvio.store'), [
-            'colonia' => 'Acatlima', 'tipo' => 'colonia', 'envio_gratuito' => '0', 'monto_express' => '45',
+            'colonia' => 'Acatlima', 'tipo' => 'colonia', 'cobertura' => 'express', 'monto_express' => '45',
         ])->assertSessionHasErrors('colonia');
 
         $this->actingAs($admin)->put(route('tarifasenvio.update', $acatlima->id), [
-            'colonia' => 'Acatlima', 'tipo' => 'colonia', 'envio_gratuito' => '0', 'monto_express' => '60',
+            'colonia' => 'Acatlima', 'tipo' => 'colonia', 'cobertura' => 'express', 'monto_express' => '60',
         ])->assertRedirect(route('tarifasenvio.index'));
 
         $this->assertSame(60.0, $acatlima->fresh()->monto_express);

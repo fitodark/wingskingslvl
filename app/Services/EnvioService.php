@@ -30,14 +30,20 @@ class EnvioService
      */
     public function opciones(TarifaEnvio $tarifa)
     {
+        // En colonia gratuita el cliente siempre puede pedir express; si no hay tarifa,
+        // el monto se acuerda por teléfono fuera del sistema (monto_express null).
+        $expressDisponible = $tarifa->envio_gratuito || $tarifa->monto_express !== null;
+        $tiempos = app(TiempoEntregaService::class);
+
         return [
             'encontrada' => true,
             'colonia' => $tarifa->colonia,
             'envio_gratuito' => $tarifa->envio_gratuito,
-            // En colonia gratuita el cliente siempre puede pedir express; si no hay tarifa,
-            // el monto se acuerda por teléfono fuera del sistema (monto_express null).
-            'express_disponible' => $tarifa->envio_gratuito || $tarifa->monto_express !== null,
+            'express_disponible' => $expressDisponible,
             'monto_express' => $tarifa->monto_express,
+            // Tiempo estimado (informativo), el mismo que da el agente por WhatsApp.
+            'tiempo_gratuito' => $tarifa->envio_gratuito ? $tiempos->gratuito()['texto'] : null,
+            'tiempo_express' => $expressDisponible ? $tiempos->express()['texto'] : null,
         ];
     }
 

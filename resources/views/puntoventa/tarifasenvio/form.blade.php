@@ -11,7 +11,7 @@
 @endif
 
 @php
-    $gratuito = (string) old('envio_gratuito', $tarifa->envio_gratuito ? '1' : '0');
+    $cobertura = (string) old('cobertura', $tarifa->cobertura);
 @endphp
 
 <div class="row">
@@ -30,16 +30,35 @@
         </select>
     </div>
     <div class="form-group col-md-6">
-        <label for="envio_gratuito"><strong>Cobertura:</strong></label>
-        <select id="envio_gratuito" name="envio_gratuito" class="custom-select">
-            <option value="1" {{ $gratuito === '1' ? 'selected' : '' }}>Con envío gratuito</option>
-            <option value="0" {{ $gratuito === '0' ? 'selected' : '' }}>Solo envío express (por distancia)</option>
+        <label for="cobertura"><strong>Cobertura:</strong></label>
+        <select id="cobertura" name="cobertura" class="custom-select">
+            @foreach (\App\TarifaEnvio::COBERTURAS as $clave => $texto)
+                <option value="{{ $clave }}" {{ $cobertura === $clave ? 'selected' : '' }}>{{ $texto }}</option>
+            @endforeach
         </select>
+        <small class="form-text text-muted">
+            Con "gratuito y express" el cliente elige; si pide express se cobra la tarifa de abajo.
+        </small>
     </div>
-    <div class="form-group col-md-6">
+    <div class="form-group col-md-6" id="grupoMontoExpress">
         <label for="monto_express"><strong>Tarifa express:</strong></label>
         <input type="number" id="monto_express" name="monto_express" class="form-control" min="0.01" max="99999" step="0.01"
             value="{{ old('monto_express', $tarifa->monto_express) }}" placeholder="Ej. 45.00">
-        <small class="form-text text-muted">Obligatoria si solo hay envío express. Vacía = sin tarifa express cargada.</small>
+        <small class="form-text text-muted">Tarifa del servicio express para esta colonia. Lo paga el cliente al repartidor.</small>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    // Solo gratuito no lleva tarifa: se oculta y no se envía; las otras dos coberturas la exigen.
+    $(function () {
+        function pintarCobertura() {
+            var conTarifa = $('#cobertura').val() !== '{{ \App\TarifaEnvio::COBERTURA_GRATUITO }}';
+            $('#grupoMontoExpress').prop('hidden', !conTarifa);
+            $('#monto_express').prop('disabled', !conTarifa).prop('required', conTarifa);
+        }
+        $('#cobertura').on('change', pintarCobertura);
+        pintarCobertura();
+    });
+</script>
+@endpush

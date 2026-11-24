@@ -167,3 +167,32 @@ modales "Cliente nuevo" y "Editar" del paso 1, y panel de envío "Guardar coloni
   formulario no se envía; texto exacto se ajusta a como está en el catálogo. Vacío es válido.
 - Panel de envío: Enter con la lista abierta elige; con la lista cerrada, guarda.
 - El servidor no cambió (sigue validando contra el catálogo).
+
+## Gratuito y express en la misma colonia + tiempo de entrega (2026-11-23)
+
+Retro de producción: hay colonias (p. ej. Del Maestro) donde se ofrecen las dos opciones y el proveedor
+express ya tiene tarifa; antes el catálogo solo distinguía "con gratuito / solo express" y el paso 1 pedía
+el monto a mano.
+
+- **Catálogo (Tarifas de envío):** campo "Cobertura" con tres opciones, guardadas en las mismas columnas
+  (sin migración de esquema, el agente no cambia):
+
+  | Cobertura | `envio_gratuito` | `monto_express` | Paso 1 | Agente |
+  |---|---|---|---|---|
+  | Solo gratuito | 1 | NULL (se borra si se manda) | Gratuito; express con monto acordado por teléfono (opción C, se mantiene) | Solo gratuito |
+  | Gratuito y express | 1 | obligatorio | Elige; express cobra la tarifa del catálogo | Ofrece ambas |
+  | Solo express | 0 | obligatorio | "Cliente acepta / declina" (Acatlima) | Solo express |
+
+  `TarifaEnvio::cobertura` (accessor) y `TarifaEnvio::COBERTURAS`. La lista muestra "Solo gratuito",
+  "Gratuito y express" o "Solo express". Las tarifas de cada colonia las carga el negocio desde esa pantalla.
+- **Tiempo de entrega en el paso 1** (antes mejora futura): `App\Services\TiempoEntregaService`, mismo cálculo
+  que el agente. Gratuito por `delivery_time_windows` según la hora (fuera de ventana 40-60); express por
+  `express_delivery_time`, que pasa de `30` a `40-50` (migración `2026_11_23_000001`; acepta también un
+  número). El endpoint `tarifaEnvio` agrega `tiempo_gratuito` y `tiempo_express`; el panel los muestra en cada
+  opción ("Envío gratuito · llega entre 40 minutos y 1 hora"). Informativo: no se guarda en la venta ni sale
+  en el ticket. Depende de `APP_TIMEZONE` correcto (ver docs/deploy-produccion.md).
+- Agente (`whatsapp-agentkit`): `obtener_tiempo_express()` lee el rango; ver el final de su
+  `docs/plan-envio-express-agente.md`.
+- Tests: `TiempoEntregaTest` (3), `EnvioExpressTest` (+1), `EnvioPaso1Test` (endpoint con tiempos y Del Maestro);
+  suite 69 OK. Agente 37 OK. Panel probado con jsdom sobre el HTML real (gratuito+express, gratuito sin
+  tarifa, solo express); falta tablet.

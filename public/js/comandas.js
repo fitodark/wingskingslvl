@@ -138,6 +138,16 @@
         return 'Confirma con el cliente el envío express';
     }
 
+    // "llega entre 40 minutos y 1 hora" / "llega en 45 minutos" (tiempo estimado que manda el servidor).
+    function llega(texto) {
+        return 'llega ' + (texto.indexOf('entre ') === 0 ? texto : 'en ' + texto);
+    }
+
+    // " · llega entre 40 minutos y 1 hora"; vacío si no viene el tiempo.
+    function tiempoEnvio(texto) {
+        return texto ? ' · ' + llega(texto) : '';
+    }
+
     function mensajeEnvio(clase, partes) {
         var $m = $('#envioMensaje').attr('class', 'alert mb-2 ' + clase).empty();
         $.each(partes, function (i, p) {
@@ -165,8 +175,9 @@
             mensajeEnvio('alert-success', ['Envío gratuito a ' + t.colonia + '.'
                 + (t.express_disponible ? ' Si el cliente lo pide, puede ser express.' : '')]);
             opciones = t.express_disponible;
+            $('#envioGratuitoTexto').text('Envío gratuito' + tiempoEnvio(t.tiempo_gratuito));
             $('#envioExpressTexto').text('Envío express · ' + (t.monto_express !== null && t.monto_express !== undefined
-                ? dinero(t.monto_express) : 'monto acordado con el cliente por teléfono'));
+                ? dinero(t.monto_express) : 'monto acordado con el cliente por teléfono') + tiempoEnvio(t.tiempo_express));
             $('#envioGratuito').prop('checked', e.elegido !== 'express');
             $('#envioExpress').prop('checked', e.elegido === 'express');
         } else if (visible && t && e.acepta === false) {
@@ -175,6 +186,7 @@
         } else if (visible && t) {
             mensajeEnvio('alert-warning', ['Por la distancia, ' + t.colonia + ' solo tiene envío express: ',
                 $('<strong>').text(dinero(t.monto_express) + ' adicional que el cliente le paga directo al repartidor'), '.',
+                t.tiempo_express ? ' El express ' + llega(t.tiempo_express) + '.' : '',
                 e.acepta === true ? ' El cliente aceptó.' : '']);
             respuesta = true;
         }

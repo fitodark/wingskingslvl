@@ -51,10 +51,12 @@
                 <td>{{ $tarifa->colonia }}</td>
                 <td>{{ \App\TarifaEnvio::TIPOS[$tarifa->tipo] ?? $tarifa->tipo }}</td>
                 <td>
-                    @if ($tarifa->envio_gratuito)
-                        <span class="badge badge-success">Gratuito</span>
-                    @else
+                    @if ($tarifa->cobertura === \App\TarifaEnvio::COBERTURA_AMBOS)
+                        <span class="badge badge-info">Gratuito y express</span>
+                    @elseif ($tarifa->cobertura === \App\TarifaEnvio::COBERTURA_EXPRESS)
                         <span class="badge badge-warning">Solo express</span>
+                    @else
+                        <span class="badge badge-success">Solo gratuito</span>
                     @endif
                 </td>
                 <td class="text-right text-nowrap">

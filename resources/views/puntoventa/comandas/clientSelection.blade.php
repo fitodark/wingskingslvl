@@ -189,7 +189,7 @@
             <div id="envioOpciones" class="wk-envio-opciones" hidden>
                 <div class="custom-control custom-radio">
                     <input type="radio" class="custom-control-input" name="envio" id="envioGratuito" value="gratuito">
-                    <label class="custom-control-label" for="envioGratuito">Envío gratuito</label>
+                    <label class="custom-control-label" for="envioGratuito" id="envioGratuitoTexto">Envío gratuito</label>
                 </div>
                 <div class="custom-control custom-radio">
                     <input type="radio" class="custom-control-input" name="envio" id="envioExpress" value="express">

@@ -67,6 +67,7 @@ Migraciones de estas ramas (las que ya estén aplicadas se saltan solas):
 | `2026_10_27_000006` | `configs.express_delivery_time = 30` si no existe | **No** correr `ConfigSeeder` en prod: duplica claves. |
 | `2026_10_30_000001` | `ventas.telefono_recoge` | |
 | `2026_11_10_000001` | Índice `ventas(estatus, activo)` | Para el refresco de la bandeja. |
+| `2026_11_23_000001` | `configs.express_delivery_time` de `30` a `40-50` | Solo si seguía en 30. Actualizar el agente después (paso 5) para que lea el rango; mientras, el agente sigue diciendo 30 min. |
 
 - [ ] `php artisan migrate:status` ya no muestra ninguna en "No".
 
@@ -85,6 +86,7 @@ php artisan view:clear
 Solo después del paso 3. Seguir `whatsapp-agentkit/docs/plan-envio-express-agente.md`.
 
 - [ ] El agente usa el mismo `AGENTE_TOKEN` que el `.env`.
+- [ ] El agente debe incluir el cambio del tiempo express como rango (2026-11-23); si no, responde "30 minutos".
 
 ## 6. Tablets y equipos
 
@@ -104,7 +106,9 @@ Solo después del paso 3. Seguir `whatsapp-agentkit/docs/plan-envio-express-agen
 | 7 | Comandar esa venta express | Ticket de cocina/barra con "SERVICIO EXPRESS" centrado y en negritas, sin montos. |
 | 8 | Dos tablets con Comandas abiertas; crear una venta en una | En la otra aparece sola en ≤ 5 s. |
 | 9 | Pedido de prueba por WhatsApp | Aparece en la bandeja en ≤ 5 s con aviso y sonido (si se tocó "Activar sonido"); se imprime. |
-| 10 | Admin → Tarifas de envío | Lista las 128 colonias. |
+| 10 | Admin → Tarifas de envío | Lista las colonias con su cobertura (Solo gratuito / Gratuito y express / Solo express). |
+| 11 | Editar Del Maestro 1a Sección → "Gratuito y express" + tarifa | Domicilio a esa colonia ofrece las dos opciones; express trae la tarifa del catálogo sin pedir monto. |
+| 12 | Panel de envío en el paso 1 | Cada opción muestra su tiempo: gratuito según la hora (40–60 / 60–80 min), express entre 40 y 50 min. Si la hora sale corrida, revisar `APP_TIMEZONE`. |
 
 ## 8. Si algo sale mal
 

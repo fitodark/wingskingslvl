@@ -107,7 +107,7 @@ class EnvioPaso1Test extends TestCase
         $this->assertNull($venta->monto_envio_express);
         $this->assertSame('Chapultepec', $venta->colonia_envio);
 
-        // Gratuito con tarifa express (opción A a futuro): manda el catálogo, no el formulario.
+        // Gratuito y express (tarifa en el catálogo): manda el catálogo, no el formulario.
         TarifaEnvio::where('colonia', 'Chapultepec')->update(['monto_express' => 35]);
         $this->actualizar($venta, $this->domicilio($cliente, ['envio' => 'express', 'monto_envio_express' => '99']))
             ->assertSessionHasNoErrors();
@@ -174,10 +174,15 @@ class EnvioPaso1Test extends TestCase
 
     public function test_endpoint_de_tarifa_por_cliente()
     {
+        // 14:30 cae en la ventana "Baja demanda [13:00 20:00] 40-60" del ConfigSeeder.
+        $this->config('delivery_time_windows', 'Baja demanda [13:00 20:00] 40-60');
+        \Carbon\Carbon::setTestNow(now()->setTime(14, 30));
+
         $this->actingAs($this->mesero)->getJson(route('tarifaEnvio', [$this->cliente('acatlima')->id]))
             ->assertOk()
             ->assertExactJson(['encontrada' => true, 'colonia' => 'Acatlima', 'envio_gratuito' => false,
-                'express_disponible' => true, 'monto_express' => 45]);
+                'express_disponible' => true, 'monto_express' => 45,
+                'tiempo_gratuito' => null, 'tiempo_express' => 'entre 40 minutos y 50 minutos']);
 
         $this->actingAs($this->mesero)->getJson(route('tarifaEnvio', [$this->cliente('Por ahí')->id]))
             ->assertOk()
@@ -187,7 +192,16 @@ class EnvioPaso1Test extends TestCase
         $this->actingAs($this->mesero)->getJson(route('tarifaEnvio', [$this->cliente('Chapultepec')->id]))
             ->assertOk()
             ->assertExactJson(['encontrada' => true, 'colonia' => 'Chapultepec', 'envio_gratuito' => true,
-                'express_disponible' => true, 'monto_express' => null]);
+                'express_disponible' => true, 'monto_express' => null,
+                'tiempo_gratuito' => 'entre 40 minutos y 1 hora', 'tiempo_express' => 'entre 40 minutos y 50 minutos']);
+
+        // Gratuito y express (Del Maestro): las dos opciones con su tiempo y la tarifa del catálogo.
+        TarifaEnvio::where('colonia', 'Del Maestro 1a Sección')->update(['monto_express' => 35]);
+        $this->actingAs($this->mesero)->getJson(route('tarifaEnvio', [$this->cliente('del maestro 1a seccion')->id]))
+            ->assertOk()
+            ->assertJson(['colonia' => 'Del Maestro 1a Sección', 'envio_gratuito' => true, 'monto_express' => 35,
+                'tiempo_gratuito' => 'entre 40 minutos y 1 hora', 'tiempo_express' => 'entre 40 minutos y 50 minutos']);
+        \Carbon\Carbon::setTestNow();
     }
 
     public function test_actualizar_colonia_rechaza_fuera_del_catalogo_y_guarda_el_nombre_del_catalogo()
